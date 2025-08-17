@@ -176,8 +176,8 @@ export const columns: ColumnDef<RiskIssue>[] = [
       const { toast } = useToast();
       const currentProduct = row.original.product;
 
-      const handleProductChange = async (newProductId: string) => {
-        const newProduct = products.find(p => p.id === newProductId);
+      const handleProductChange = async (newProductName: string) => {
+        const newProduct = products.find(p => p.name === newProductName);
         if (!newProduct) return;
         
         const fieldToUpdate = row.original.type === 'Risk' ? 'Project Code' : 'ProjectName';
@@ -192,13 +192,13 @@ export const columns: ColumnDef<RiskIssue>[] = [
       };
       
       return (
-        <Select defaultValue={currentProduct?.id} onValueChange={handleProductChange}>
+        <Select defaultValue={currentProduct?.name} onValueChange={handleProductChange}>
            <SelectTrigger className="w-[180px] h-8 text-xs truncate">
             <SelectValue placeholder="Select Product" />
           </SelectTrigger>
           <SelectContent>
             {products.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
+              <SelectItem key={p.id} value={p.name}>
                 {p.name} ({p.code})
               </SelectItem>
             ))}
@@ -242,7 +242,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
     header: "Impact",
     cell: ({ row }) => {
        if (row.original.type === 'Risk') {
-         const impactRating = row.original["Imapct Rating (0.05-0.8)"];
+         const impactRating = row.original["Impact Rating (0.05-0.8)"];
          return impactRating?.toFixed(2) ?? 'N/A';
        }
        return row.original.Impact ?? 'N/A';
