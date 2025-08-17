@@ -94,34 +94,8 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => {
-      const { toast } = useToast();
-      const currentProduct = products.find(p => p.code === row.original["Project Code"]);
-
-      const handleProductChange = async (newProductCode: string) => {
-        const result = await updateRiskIssueField(row.original.id, 'Project Code', newProductCode);
-        if (result.success) {
-          toast({ title: "Product Updated" });
-        } else {
-          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
-        }
-      };
-      
-      if (!currentProduct) return  row.original["Project Code"];
-
-      return (
-        <Select defaultValue={currentProduct.code} onValueChange={handleProductChange}>
-           <SelectTrigger className="w-[180px] h-8 text-xs truncate">
-            <SelectValue placeholder="Select Product" />
-          </SelectTrigger>
-          <SelectContent>
-            {products.map((p) => (
-              <SelectItem key={p.id} value={p.code}>
-                {p.name} ({p.code})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )
+      const product = products.find(p => p.code === row.original["Project Code"]);
+      return <div className="w-[180px] truncate">{product?.name || row.original["Project Code"]}</div>;
     },
     filterFn: (row, id, value) => {
       const product = products.find(p => p.code === row.original["Project Code"])
@@ -156,10 +130,10 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "Impact Rating (0.05-0.8)",
+    accessorKey: "Imapct Rating (0.05-0.8)",
     header: "Impact",
     cell: ({ row }) => {
-       const impact = row.getValue("Impact Rating (0.05-0.8)") as number;
+       const impact = row.getValue("Imapct Rating (0.05-0.8)") as number;
        return impact?.toFixed(2) ?? 'N/A';
     },
   },

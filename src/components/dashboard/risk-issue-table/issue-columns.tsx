@@ -134,34 +134,8 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => {
-        const { toast } = useToast();
-        const currentProduct = products.find(p => p.name === row.original.ProjectName);
-  
-        const handleProductChange = async (newProductName: string) => {
-          const result = await updateRiskIssueField(row.original.id, 'ProjectName', newProductName);
-          if (result.success) {
-            toast({ title: "Product Updated" });
-          } else {
-            toast({ variant: 'destructive', title: "Update Failed", description: result.message});
-          }
-        };
-        
-        if (!currentProduct) return  row.original.ProjectName;
-  
-        return (
-          <Select defaultValue={currentProduct.name} onValueChange={handleProductChange}>
-             <SelectTrigger className="w-[180px] h-8 text-xs truncate">
-              <SelectValue placeholder="Select Product" />
-            </SelectTrigger>
-            <SelectContent>
-              {products.map((p) => (
-                <SelectItem key={p.id} value={p.name}>
-                  {p.name} ({p.code})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )
+        const product = products.find(p => p.name === row.original.ProjectName);
+        return <div className="w-[180px] truncate">{product?.name || row.original.ProjectName}</div>;
       },
     filterFn: (row, id, value) => {
       return value.includes(row.original.ProjectName);
