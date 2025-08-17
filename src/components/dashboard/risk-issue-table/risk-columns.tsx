@@ -156,10 +156,10 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "Imapct Rating (0.05-0.8)",
+    accessorKey: "Impact Rating (0.05-0.8)",
     header: "Impact",
     cell: ({ row }) => {
-       const impact = row.getValue("Imapct Rating (0.05-0.8)") as number;
+       const impact = row.getValue("Impact Rating (0.05-0.8)") as number;
        return impact?.toFixed(2) ?? 'N/A';
     },
   },
