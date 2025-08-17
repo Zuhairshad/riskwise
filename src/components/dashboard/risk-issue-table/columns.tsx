@@ -2,6 +2,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Pen, Trash2 } from "lucide-react";
@@ -218,7 +219,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
     header: "Due Date",
     cell: ({ row }) => {
       const date = row.getValue("dueDate");
-      return date ? new Date(date as string).toLocaleDateString() : 'N/A';
+      return date ? format(new Date(date as string), "MM/dd/yyyy") : 'N/A';
     },
   },
   {
