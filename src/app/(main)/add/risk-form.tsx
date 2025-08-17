@@ -365,9 +365,12 @@ export function RiskForm({ products }: RiskFormProps) {
                                 !field.value && "text-muted-foreground"
                               )}
                             >
-                              {field.value
-                                ? products.find((p) => p.code === field.value)?.code
-                                : "Select project code"}
+                              <span className="truncate">
+                                {field.value
+                                  ? products.find((p) => p.code === field.value)
+                                      ?.code
+                                  : "Select project code"}
+                              </span>
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </FormControl>
@@ -394,7 +397,7 @@ export function RiskForm({ products }: RiskFormProps) {
                                           : "opacity-0"
                                       )}
                                     />
-                                    {product.code} - {product.name}
+                                    <span className="truncate">{product.code} - {product.name}</span>
                                   </CommandItem>
                                 ))}
                               </CommandGroup>

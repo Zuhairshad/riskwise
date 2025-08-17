@@ -278,9 +278,11 @@ export function IssueForm({ products }: IssueFormProps) {
                                             !field.value && "text-muted-foreground"
                                         )}
                                         >
+                                        <span className="truncate">
                                         {field.value
                                             ? products.find((p) => p.name === field.value)?.name
                                             : "Select project"}
+                                        </span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </FormControl>
@@ -307,7 +309,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                                     : "opacity-0"
                                                 )}
                                                 />
-                                                {product.name}
+                                                <span className="truncate">{product.name}</span>
                                             </CommandItem>
                                             ))}
                                         </CommandGroup>
