@@ -13,9 +13,11 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import type { RiskIssue } from '@/lib/types';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
+  existingRisks: z.array(z.any()).describe('A list of existing risks from the database.'),
 });
 export type SuggestSimilarRisksInput = z.infer<typeof SuggestSimilarRisksInputSchema>;
 
@@ -35,56 +37,35 @@ const SuggestSimilarRisksOutputSchema = z.object({
 });
 export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutputSchema>;
 
-// Function to find similar risk in Firestore
-const findSimilarRisk = async (description: string) => {
-    if (!description || description.length < 20) return null;
-    
-    const risksRef = collection(db, 'risks');
-    // Basic substring search. A more advanced implementation might use a dedicated search service.
-    const q = query(risksRef, where('Description', '>=', description.substring(0, 50)), where('Description', '<=', description.substring(0, 50) + '\uf8ff'), limit(1));
-    
-    const snapshot = await getDocs(q);
 
-    if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        const data = doc.data();
-        return {
-            id: doc.id,
-            title: data.Title,
-            description: data.Description,
-            mitigationPlan: data.MitigationPlan,
-            contingencyPlan: data.ContingencyPlan,
-            probability: data.Probability,
-            impactRating: data['Imapct Rating (0.05-0.8)'],
-        }
-    }
-    return null;
-}
+export async function suggestSimilarRisks(input: {description: string}): Promise<SuggestSimilarRisksOutput> {
+  const risksRef = collection(db, 'risks');
+  const snapshot = await getDocs(risksRef);
+  const existingRisks = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
 
-
-export async function suggestSimilarRisks(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
-  // First, check for existing similar risks in our database
-  const matchedRisk = await findSimilarRisk(input.description);
-
-  if (matchedRisk) {
-    return { matchedRisk };
-  }
-
-  // If no match is found, use AI to rephrase the description
-  return suggestSimilarRisksFlow(input);
+  // Now, call the flow with the existing risks
+  return suggestSimilarRisksFlow({ description: input.description, existingRisks: existingRisks });
 }
 
 const prompt = ai.definePrompt({
-  name: 'rephraseRiskDescriptionPrompt',
+  name: 'suggestOrRephraseRiskPrompt',
   input: {schema: SuggestSimilarRisksInputSchema},
   output: {schema: SuggestSimilarRisksOutputSchema},
   prompt: `You are an expert risk management analyst.
   
-  A user has entered the following risk description. Rephrase it to be clearer, more concise, and professionally worded.
-  
-  Only return the rephrased description in the 'rephrasedDescription' field.
+  A user has entered the following risk description:
+  "{{{description}}}"
 
-  Original Description: {{{description}}}`,
+  Here is a list of existing risks from the database:
+  {{#each existingRisks}}
+  - ID: {{this.id}}, Title: {{this.Title}}, Description: {{this.Description}}
+  {{/each}}
+
+  1.  Analyze the user's description and compare it to the list of existing risks.
+  2.  If you find a substantially similar risk in the list, identify it as a 'matchedRisk'. Populate the 'matchedRisk' object with the data from that existing risk (id, title, description, mitigationPlan, contingencyPlan, probability, impactRating). Use the exact field names: id, title, description, mitigationPlan, contingencyPlan, probability, impactRating.
+  3.  If you DO NOT find a similar risk, leave 'matchedRisk' empty. Instead, rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field.
+
+  Only return one or the other: either a 'matchedRisk' or a 'rephrasedDescription'.`,
 });
 
 const suggestSimilarRisksFlow = ai.defineFlow(
@@ -95,7 +76,6 @@ const suggestSimilarRisksFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    // When no match is found, we only expect a rephrased description.
-    return { rephrasedDescription: output?.rephrasedDescription };
+    return output!;
   }
 );

@@ -17,6 +17,7 @@ import { db } from '@/lib/firebase';
 
 const SuggestSimilarIssuesInputSchema = z.object({
   description: z.string().describe('The description of the issue being entered.'),
+  existingIssues: z.array(z.any()).describe('A list of existing issues from the database.'),
 });
 export type SuggestSimilarIssuesInput = z.infer<typeof SuggestSimilarIssuesInputSchema>;
 
@@ -33,50 +34,33 @@ const SuggestSimilarIssuesOutputSchema = z.object({
 });
 export type SuggestSimilarIssuesOutput = z.infer<typeof SuggestSimilarIssuesOutputSchema>;
 
-// Mock function to find similar issue
-const findSimilarIssue = async (description: string) => {
-    if (!description || description.length < 20) return null;
-    
+export async function suggestSimilarIssues(input: { description: string }): Promise<SuggestSimilarIssuesOutput> {
     const issuesRef = collection(db, 'issues');
-    const q = query(issuesRef, where('Discussion', '>=', description.substring(0, 50)), where('Discussion', '<=', description.substring(0, 50) + '\uf8ff'), limit(1));
-    
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(issuesRef);
+    const existingIssues = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
 
-    if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        const data = doc.data();
-        return {
-            id: doc.id,
-            title: data.Title,
-            discussion: data.Discussion, 
-            resolution: data.Resolution,
-        }
-    }
-    return null;
-}
-
-export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
-  const matchedIssue = await findSimilarIssue(input.description);
-
-  if (matchedIssue) {
-    return { matchedIssue };
-  }
-
-  // If no match is found, use AI to rephrase the description
-  return suggestSimilarIssuesFlow(input);
+    return suggestSimilarIssuesFlow({ description: input.description, existingIssues });
 }
 
 const prompt = ai.definePrompt({
-  name: 'rephraseIssueDiscussionPrompt',
+  name: 'suggestOrRephraseIssuePrompt',
   input: {schema: SuggestSimilarIssuesInputSchema},
   output: {schema: SuggestSimilarIssuesOutputSchema},
   prompt: `You are an expert project manager.
   
-  A user has entered the following issue discussion. Rephrase it to be clearer, more concise, and professionally worded.
-  
-  Only return the rephrased description in the 'rephrasedDescription' field.
+  A user has entered the following issue discussion:
+  "{{{description}}}"
 
-  Original Discussion: {{{description}}}`,
+  Here is a list of existing issues from the database:
+  {{#each existingIssues}}
+  - ID: {{this.id}}, Title: {{this.Title}}, Discussion: {{this.Discussion}}, Resolution: {{this.Resolution}}
+  {{/each}}
+
+  1.  Analyze the user's input and compare it to the list of existing issues.
+  2.  If you find a substantially similar issue in the list, identify it as a 'matchedIssue'. Populate the 'matchedIssue' object with the data from that existing issue (id, title, discussion, resolution).
+  3.  If you DO NOT find a similar issue, leave 'matchedIssue' empty. Instead, rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field.
+
+  Only return one or the other: either a 'matchedIssue' or a 'rephrasedDescription'.`,
 });
 
 const suggestSimilarIssuesFlow = ai.defineFlow(
@@ -86,8 +70,7 @@ const suggestSimilarIssuesFlow = ai.defineFlow(
     outputSchema: SuggestSimilarIssuesOutputSchema,
   },
   async input => {
-    // There's no matched issue, so we only expect a rephrased description.
     const {output} = await prompt(input);
-    return { rephrasedDescription: output?.rephrasedDescription };
+    return output!;
   }
 );
