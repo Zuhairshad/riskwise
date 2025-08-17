@@ -5,7 +5,7 @@ import type { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "./view-options";
 import { DataTableFacetedFilter } from "./faceted-filter";
-import { statuses, priorities, riskTypes, products } from "@/lib/data";
+import { statuses, priorities, riskTypes, products, issueCategories } from "@/lib/data";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -20,6 +20,10 @@ export function DataTableToolbar<TData>({
     label: product.name,
     value: product.name,
   }));
+
+  const riskStatusOptions = statuses.filter(s => ["Open", "Closed", "Mitigated", "Transferred"].includes(s.value));
+  const issueStatusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
+
 
   return (
     <div className="flex items-center justify-between">
@@ -46,6 +50,20 @@ export function DataTableToolbar<TData>({
             options={statuses}
           />
         )}
+         {table.getColumn("riskStatus") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("riskStatus")}
+            title="Status"
+            options={riskStatusOptions}
+          />
+        )}
+        {table.getColumn("issueStatus") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("issueStatus")}
+            title="Status"
+            options={issueStatusOptions}
+          />
+        )}
         {table.getColumn("priority") && (
           <DataTableFacetedFilter
             column={table.getColumn("priority")}
@@ -58,6 +76,13 @@ export function DataTableToolbar<TData>({
             column={table.getColumn("product")}
             title="Product"
             options={productOptions}
+          />
+        )}
+        {table.getColumn("category") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("category")}
+            title="Category"
+            options={issueCategories}
           />
         )}
       </div>

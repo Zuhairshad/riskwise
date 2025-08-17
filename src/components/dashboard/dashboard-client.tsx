@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -64,13 +65,13 @@ export function DashboardClient({ data }: DashboardClientProps) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="all" className="mt-4">
-              <DataTable columns={columns} data={data} />
+              <DataTable columns={columns} data={data} tableId="all" />
             </TabsContent>
             <TabsContent value="risks" className="mt-4">
-              <DataTable columns={riskColumns} data={risks} />
+              <DataTable columns={riskColumns} data={risks} tableId="risks" />
             </TabsContent>
             <TabsContent value="issues" className="mt-4">
-              <DataTable columns={issueColumns} data={issues} />
+              <DataTable columns={issueColumns} data={issues} tableId="issues" />
             </TabsContent>
           </Tabs>
         </CardContent>

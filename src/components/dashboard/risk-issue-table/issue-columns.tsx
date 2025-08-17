@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -47,6 +48,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
   },
   {
     accessorKey: "status",
+    id: "issueStatus",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
