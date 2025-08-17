@@ -29,13 +29,13 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 224 76% 12%; /* Dark Navy Blue */
-    --sidebar-foreground: 210 40% 98%; /* Light grey/white */
-    --sidebar-primary: 221 83% 53%; /* Same blue as main content */
+    --sidebar-background: 210 40% 96.1%;
+    --sidebar-foreground: 222.2 47.4% 11.2%;
+    --sidebar-primary: 221 83% 53%; 
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 76% 18%; /* Slightly lighter navy for hover */
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 224 76% 15%;
+    --sidebar-accent: 210 40% 92%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 210 40% 90%;
     --sidebar-ring: 221 83% 53%;
   }
 
