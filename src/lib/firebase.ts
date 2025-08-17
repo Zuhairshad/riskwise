@@ -3,13 +3,13 @@ import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: "riskwise-l2td9.firebaseapp.com",
-  projectId: "riskwise-l2td9",
-  storageBucket: "riskwise-l2td9.appspot.com",
-  messagingSenderId: "954229157369",
-  appId: "1:954229157369:web:26d2fe18decfaaa5176128",
-  measurementId: "G-XXXXXXXXXX",
+  apiKey: "AIzaSyCyDlDFgpTAxkPibgdDs-vFuXA0Vy1ny5A",
+  authDomain: "riskwise-c9df3.firebaseapp.com",
+  projectId: "riskwise-c9df3",
+  storageBucket: "riskwise-c9df3.appspot.com",
+  messagingSenderId: "290153782628",
+  appId: "1:290153782628:web:e9eb93421d972053da6e71",
+  measurementId: "G-EMYKZN4N92"
 };
 
 // Initialize Firebase
