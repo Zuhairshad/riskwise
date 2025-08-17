@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { updateRiskIssueField } from "@/app/(main)/actions";
+import { updateRiskIssueField, changeRiskIssueType } from "@/app/(main)/actions";
 
 
 export const columns: ColumnDef<RiskIssue>[] = [
@@ -46,7 +46,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
       if (!type) return null;
 
       const handleTypeChange = async (newType: RiskType) => {
-        const result = await updateRiskIssueField(row.original.id, 'type', newType);
+        const result = await changeRiskIssueType(row.original.id, newType);
         if (result.success) {
           toast({ title: "Type Updated", description: `Type for "${row.original.Title}" updated to ${newType}.`});
         } else {
