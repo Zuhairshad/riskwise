@@ -21,8 +21,15 @@ export function DataTableToolbar<TData>({
     value: product.name,
   }));
 
-  const riskStatusOptions = statuses.filter(s => ["Open", "Closed", "Mitigated", "Transferred"].includes(s.value));
-  const issueStatusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
+  let statusOptions = statuses;
+  // This logic is a bit of a hack to determine which statuses to show
+  // based on the available columns. A better approach might be to pass the
+  // tableId and filter the statuses based on that.
+  if (table.getColumn("riskStatus")) {
+    statusOptions = statuses.filter(s => ["Open", "Closed", "Mitigated", "Transferred"].includes(s.value));
+  } else if (table.getColumn("issueStatus")) {
+    statusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
+  }
 
 
   return (
@@ -47,21 +54,7 @@ export function DataTableToolbar<TData>({
           <DataTableFacetedFilter
             column={table.getColumn("status")}
             title="Status"
-            options={statuses}
-          />
-        )}
-         {table.getColumn("riskStatus") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("riskStatus")}
-            title="Status"
-            options={riskStatusOptions}
-          />
-        )}
-        {table.getColumn("issueStatus") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("issueStatus")}
-            title="Status"
-            options={issueStatusOptions}
+            options={statusOptions}
           />
         )}
         {table.getColumn("priority") && (

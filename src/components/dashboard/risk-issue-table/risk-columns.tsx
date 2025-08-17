@@ -1,11 +1,12 @@
+
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import type { RiskIssue, Status, Priority } from "@/lib/types";
-import { statuses, priorities, products } from "@/lib/data";
+import type { RiskIssue, Status } from "@/lib/types";
+import { statuses, products } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -46,16 +47,16 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     ),
   },
     {
-    accessorKey: "riskStatus",
+    accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.getValue("riskStatus"));
+      const status = statuses.find((s) => s.value === row.original.status);
 
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'riskStatus', newStatus);
+        const result = await updateField(row.original.id, 'status', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
         } else {
