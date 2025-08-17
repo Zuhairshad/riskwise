@@ -55,7 +55,7 @@ import { suggestSimilarRisksIssues } from "@/ai/flows/suggest-similar-risks-issu
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import type { Product, RiskType, Status, Priority } from "@/lib/types";
 import { riskTypes, statuses, priorities } from "@/lib/data";
-import { createRiskIssue } from "./add/actions";
+import { createRiskIssue } from "@/app/(main)/add/actions";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters."),
@@ -463,3 +463,5 @@ export function AddRiskIssueForm({ products }: AddRiskIssueFormProps) {
     </Form>
   );
 }
+
+    
