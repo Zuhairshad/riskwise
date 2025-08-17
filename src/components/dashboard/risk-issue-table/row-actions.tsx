@@ -1,7 +1,7 @@
 "use client";
 
 import type { Row } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Pen, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import type { RiskIssue } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -22,6 +23,14 @@ export function DataTableRowActions<TData extends RiskIssue>({
   row,
 }: DataTableRowActionsProps<TData>) {
   const riskIssue = row.original;
+  const { toast } = useToast();
+
+  const handleAction = (action: string) => {
+    toast({
+        title: `${action} action clicked`,
+        description: `This is a placeholder for ${riskIssue.title}.`,
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -35,11 +44,17 @@ export function DataTableRowActions<TData extends RiskIssue>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
-        <DropdownMenuItem>View Details</DropdownMenuItem>
-        <DropdownMenuItem>Edit</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleAction('View/Edit')}>
+            <Pen className="mr-2 h-4 w-4" />
+            View/Edit
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-          Delete
+        <DropdownMenuItem 
+            onClick={() => handleAction('Delete')}
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+        >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

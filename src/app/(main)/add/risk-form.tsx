@@ -52,6 +52,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
+import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import {
   Select,
   SelectContent,
@@ -105,6 +106,15 @@ export function RiskForm({ products }: RiskFormProps) {
   const [autoFillData, setAutoFillData] =
     React.useState<AutoFillData | null>(null);
 
+  const [similarSuggestions, setSimilarSuggestions] = React.useState<string[]>([]);
+  const [isFetchingSimilar, setIsFetchingSimilar] = React.useState(false);
+
+  const [mitigationSuggestions, setMitigationSuggestions] = React.useState<string[]>([]);
+  const [isFetchingMitigation, setIsFetchingMitigation] = React.useState(false);
+  
+  const [contingencySuggestions, setContingencySuggestions] = React.useState<string[]>([]);
+  const [isFetchingContingency, setIsFetchingContingency] = React.useState(false);
+
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
     defaultValues: {
@@ -127,6 +137,46 @@ export function RiskForm({ products }: RiskFormProps) {
   const impactRating = form.watch("impactRating");
   const impactValue = form.watch("impactValue");
   const budgetContingency = form.watch("budgetContingency");
+  const descriptionValue = form.watch("description");
+
+  const debouncedDescription = useDebounce(descriptionValue, 500);
+
+  React.useEffect(() => {
+    if (debouncedDescription.length > 10) {
+      setIsFetchingSimilar(true);
+      suggestSimilarRisks({ description: debouncedDescription })
+        .then((res) => setSimilarSuggestions(res.suggestions))
+        .catch(() => toast({ variant: 'destructive', title: 'Could not fetch similar risks.' }))
+        .finally(() => setIsFetchingSimilar(false));
+    } else {
+      setSimilarSuggestions([]);
+    }
+  }, [debouncedDescription, toast]);
+
+  const handleSuggestMitigations = async () => {
+    setIsFetchingMitigation(true);
+    try {
+      const res = await suggestMitigationStrategies({ riskOrIssueDescription: descriptionValue });
+      setMitigationSuggestions(res.suggestedMitigationStrategies);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Failed to suggest mitigations." });
+    } finally {
+      setIsFetchingMitigation(false);
+    }
+  };
+
+  const handleSuggestContingency = async () => {
+    setIsFetchingContingency(true);
+    try {
+      const res = await suggestMitigationStrategies({ riskOrIssueDescription: descriptionValue });
+      setContingencySuggestions(res.suggestedMitigationStrategies);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Failed to suggest contingency plans." });
+    } finally {
+      setIsFetchingContingency(false);
+    }
+  };
+
 
   const riskScore = React.useMemo(
     () => probability * impactRating,
@@ -273,7 +323,7 @@ export function RiskForm({ products }: RiskFormProps) {
                   )}
                 />
 
-                <div className="col-span-full">
+                <div className="col-span-full space-y-2">
                   <FormField
                     control={form.control}
                     name="description"
@@ -291,6 +341,26 @@ export function RiskForm({ products }: RiskFormProps) {
                       </FormItem>
                     )}
                   />
+                  {isFetchingSimilar && (
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking for similar risks...
+                    </div>
+                  )}
+                  {similarSuggestions.length > 0 && (
+                    <Alert>
+                      <Bot className="h-4 w-4" />
+                      <AlertTitle>AI Suggestion: Similar Risks Found</AlertTitle>
+                      <AlertDescription>
+                        Consider if this is a duplicate or related to the following:
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                          {similarSuggestions.map((s, i) => (
+                            <li key={i}>{s}</li>
+                          ))}
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -299,42 +369,94 @@ export function RiskForm({ products }: RiskFormProps) {
               <CardHeader>
                 <CardTitle>Plans</CardTitle>
                 <CardDescription>
-                  Outline mitigation and contingency plans.
+                  Outline mitigation and contingency plans. Use AI to get suggestions based on the description.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="mitigationPlan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mitigation Plan</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Describe the plan to reduce probability..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="contingencyPlan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contingency Plan</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Describe the plan if the risk materializes..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                    <FormField
+                    control={form.control}
+                    name="mitigationPlan"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Mitigation Plan</FormLabel>
+                        <FormControl>
+                            <Textarea
+                            placeholder="Describe the plan to reduce probability..."
+                            {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                     <Button type="button" variant="outline" size="sm" onClick={handleSuggestMitigations} disabled={isFetchingMitigation || !descriptionValue}>
+                        {isFetchingMitigation ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                        )}
+                        Suggest with AI
+                    </Button>
+                    {mitigationSuggestions.length > 0 && (
+                    <Alert>
+                        <Bot className="h-4 w-4" />
+                        <AlertTitle>AI Suggested Mitigation Strategies</AlertTitle>
+                        <AlertDescription>
+                            Click to use a suggestion.
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                {mitigationSuggestions.map((s, i) => (
+                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("mitigationPlan", s)}>
+                                    {s}
+                                </li>
+                                ))}
+                            </ul>
+                        </AlertDescription>
+                    </Alert>
+                    )}
+                </div>
+                <div className="space-y-2">
+                    <FormField
+                    control={form.control}
+                    name="contingencyPlan"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Contingency Plan</FormLabel>
+                        <FormControl>
+                            <Textarea
+                            placeholder="Describe the plan if the risk materializes..."
+                            {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={handleSuggestContingency} disabled={isFetchingContingency || !descriptionValue}>
+                        {isFetchingContingency ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                        )}
+                        Suggest with AI
+                    </Button>
+                     {contingencySuggestions.length > 0 && (
+                    <Alert>
+                        <Bot className="h-4 w-4" />
+                        <AlertTitle>AI Suggested Contingency Plans</AlertTitle>
+                        <AlertDescription>
+                            Click to use a suggestion.
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                {contingencySuggestions.map((s, i) => (
+                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("contingencyPlan", s)}>
+                                    {s}
+                                </li>
+                                ))}
+                            </ul>
+                        </AlertDescription>
+                    </Alert>
+                    )}
+                </div>
               </CardContent>
             </Card>
           </div>
