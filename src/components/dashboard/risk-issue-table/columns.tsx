@@ -177,8 +177,12 @@ export const columns: ColumnDef<RiskIssue>[] = [
       const currentProduct = row.original.product;
 
       const handleProductChange = async (newProductId: string) => {
+        const newProduct = products.find(p => p.id === newProductId);
+        if (!newProduct) return;
+        
         const fieldToUpdate = row.original.type === 'Risk' ? 'Project Code' : 'ProjectName';
-        const newValue = products.find(p => p.id === newProductId)?.[row.original.type === 'Risk' ? 'code' : 'name'];
+        const newValue = row.original.type === 'Risk' ? newProduct.code : newProduct.name;
+        
         const result = await updateRiskIssueField(row.original.id, fieldToUpdate, newValue);
         if (result.success) {
           toast({ title: "Product Updated" });
