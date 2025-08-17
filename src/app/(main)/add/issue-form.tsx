@@ -284,7 +284,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             name="ProjectName"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Project Name</FormLabel>
+                                <FormLabel>Project</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                     <FormControl>
@@ -298,7 +298,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                         >
                                         <span className="truncate">
                                         {field.value
-                                            ? products.find((p) => p.name === field.value)?.name
+                                            ? products.find((p) => p.code === field.value)?.name
                                             : "Select project"}
                                         </span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -316,18 +316,18 @@ export function IssueForm({ products }: IssueFormProps) {
                                                 value={product.name}
                                                 key={product.id}
                                                 onSelect={() => {
-                                                form.setValue("ProjectName", product.name);
+                                                form.setValue("ProjectName", product.code);
                                                 }}
                                             >
                                                 <Check
                                                 className={cn(
                                                     "mr-2 h-4 w-4",
-                                                    product.name === field.value
+                                                    product.code === field.value
                                                     ? "opacity-100"
                                                     : "opacity-0"
                                                 )}
                                                 />
-                                                <span className="truncate">{product.name}</span>
+                                                <span className="truncate">{product.name} ({product.code})</span>
                                             </CommandItem>
                                             ))}
                                         </CommandGroup>

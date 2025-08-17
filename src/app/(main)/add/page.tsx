@@ -17,14 +17,18 @@ async function getPageData() {
 
   const projectsMap = new Map<string, Product>();
 
+  // Prioritize risks for more descriptive project names
   riskSnapshot.docs.forEach(doc => {
     const data = doc.data();
-    if (data["Project Code"] && data.ProjectName) {
-      if (!projectsMap.has(data["Project Code"])) {
-        projectsMap.set(data["Project Code"], {
-          id: data["Project Code"],
-          code: data["Project Code"],
-          name: data.ProjectName,
+    const projectCode = data["Project Code"];
+    const projectName = data.ProjectName || data.Title; // Fallback to Title if ProjectName is generic
+
+    if (projectCode && projectName) {
+      if (!projectsMap.has(projectCode)) {
+        projectsMap.set(projectCode, {
+          id: projectCode,
+          code: projectCode,
+          name: projectName,
           paNumber: '', 
           value: 0, 
           currentStatus: '', 
@@ -35,15 +39,14 @@ async function getPageData() {
 
   issueSnapshot.docs.forEach(doc => {
     const data = doc.data();
-    // Assuming issues might not have a code, but we need one for consistency.
-    // We'll use ProjectName as the key if no code exists.
-    if (data.ProjectName) {
-        const key = data["Project Code"] || data.ProjectName;
-        if (!projectsMap.has(key)) {
-            projectsMap.set(key, {
-                id: key,
-                code: data["Project Code"] || 'N/A',
-                name: data.ProjectName,
+    // Issues might have ProjectName as code, so we use it as a key
+    const projectCode = data.ProjectName;
+    if (projectCode) {
+        if (!projectsMap.has(projectCode)) {
+            projectsMap.set(projectCode, {
+                id: projectCode,
+                code: projectCode, // Issues might not have a separate code field
+                name: data.Title || projectCode, // Fallback to the code itself if no better name
                 paNumber: '',
                 value: 0,
                 currentStatus: '',
@@ -51,7 +54,7 @@ async function getPageData() {
         }
     }
   });
-
+  
   const products: Product[] = Array.from(projectsMap.values());
   
   return {

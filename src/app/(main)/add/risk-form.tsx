@@ -353,7 +353,7 @@ export function RiskForm({ products }: RiskFormProps) {
                   name="Project Code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project Code</FormLabel>
+                      <FormLabel>Project</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -368,8 +368,8 @@ export function RiskForm({ products }: RiskFormProps) {
                               <span className="truncate">
                                 {field.value
                                   ? products.find((p) => p.code === field.value)
-                                      ?.code
-                                  : "Select project code"}
+                                      ?.name
+                                  : "Select project"}
                               </span>
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
@@ -377,13 +377,13 @@ export function RiskForm({ products }: RiskFormProps) {
                         </PopoverTrigger>
                         <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                           <Command>
-                            <CommandInput placeholder="Search project code..." />
+                            <CommandInput placeholder="Search project..." />
                             <CommandList>
                               <CommandEmpty>No project found.</CommandEmpty>
                               <CommandGroup>
                                 {products.map((product) => (
                                   <CommandItem
-                                    value={product.code}
+                                    value={product.name}
                                     key={product.id}
                                     onSelect={() => {
                                       form.setValue("Project Code", product.code);
@@ -397,7 +397,7 @@ export function RiskForm({ products }: RiskFormProps) {
                                           : "opacity-0"
                                       )}
                                     />
-                                    <span className="truncate">{product.code} - {product.name}</span>
+                                    <span className="truncate">{product.name} ({product.code})</span>
                                   </CommandItem>
                                 ))}
                               </CommandGroup>
@@ -505,6 +505,7 @@ export function RiskForm({ products }: RiskFormProps) {
                             <Textarea
                             placeholder="Describe the plan to reduce probability..."
                             {...field}
+                            value={field.value ?? ''}
                             />
                         </FormControl>
                         <FormMessage />
@@ -547,6 +548,7 @@ export function RiskForm({ products }: RiskFormProps) {
                             <Textarea
                             placeholder="Describe the plan if the risk materializes..."
                             {...field}
+                             value={field.value ?? ''}
                             />
                         </FormControl>
                         <FormMessage />
@@ -622,7 +624,7 @@ export function RiskForm({ products }: RiskFormProps) {
                     <FormItem>
                       <FormLabel>Owner</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter owner name" {...field} />
+                        <Input placeholder="Enter owner name" {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
