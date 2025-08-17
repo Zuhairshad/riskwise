@@ -30,8 +30,9 @@ export function DataTableToolbar<TData>({
     statusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
   }
   
-  const filterColumn = table.getAllColumns().find(c => c.id === "Title") ? "Title" : "Description";
-  const statusColumn = table.getAllColumns().find(c => c.id === "Status" || c.id === "Risk Status");
+  const filterColumn = table.getColumn("Title") ? "Title" : "Description";
+  const statusColumn = table.getColumn("Risk Status") || table.getColumn("Status");
+  const priorityColumn = table.getColumn("Priority");
 
 
   return (
@@ -59,9 +60,9 @@ export function DataTableToolbar<TData>({
             options={statusOptions}
           />
         )}
-        {table.getColumn("Priority") && (
+        {priorityColumn && (
           <DataTableFacetedFilter
-            column={table.getColumn("Priority")}
+            column={priorityColumn}
             title="Priority"
             options={priorities}
           />
