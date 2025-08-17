@@ -1,9 +1,6 @@
 "use server";
 
 import { z } from "zod";
-import dbConnect from "@/lib/db";
-import Risk from "@/models/Risk";
-import Issue from "@/models/Issue";
 
 const riskFormSchema = z.object({
   month: z.string().min(1, "Month is required"),
@@ -46,8 +43,9 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     }
   
     try {
-      await dbConnect();
-      await Risk.create(parsed.data);
+      // Dabase logic removed, returning success
+      console.log("Creating risk (mock):", parsed.data);
+      await new Promise(resolve => setTimeout(resolve, 500));
       return { success: true, message: "Risk created successfully." };
     } catch (error) {
       console.error("Error creating risk:", error);
@@ -63,8 +61,9 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     }
   
     try {
-        await dbConnect();
-        await Issue.create(parsed.data);
+        // Dabase logic removed, returning success
+        console.log("Creating issue (mock):", parsed.data);
+        await new Promise(resolve => setTimeout(resolve, 500));
         return { success: true, message: "Issue created successfully." };
       } catch (error) {
         console.error("Error creating issue:", error);
