@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --background: 240 10% 97%;
+    --background: 240 10% 97%; /* Lighter off-white */
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 221 83% 53%;
+    --primary: 221 83% 53%; /* Strong blue */
     --primary-foreground: 0 0% 100%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -29,13 +29,13 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 240 6% 12%;
-    --sidebar-foreground: 240 5% 95%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-background: 224 76% 12%; /* Dark Navy Blue */
+    --sidebar-foreground: 210 40% 98%; /* Light grey/white */
+    --sidebar-primary: 221 83% 53%; /* Same blue as main content */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 18%;
+    --sidebar-accent: 224 76% 18%; /* Slightly lighter navy for hover */
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 6% 18%;
+    --sidebar-border: 224 76% 15%;
     --sidebar-ring: 221 83% 53%;
   }
 
