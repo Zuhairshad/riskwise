@@ -16,13 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { updateRiskIssueField } from "@/app/(main)/actions";
 
-
-async function updateField(id: string, field: string, value: any) {
-  console.log(`Updating ${field} for item ${id} to ${value}`);
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return { success: true };
-}
 
 export const riskColumns: ColumnDef<RiskIssue>[] = [
   {
@@ -45,7 +40,6 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     {
     accessorKey: "Risk Status",
     header: "Status",
-    id: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
       const status = statuses.find((s) => s.value === row.original["Risk Status"]);
@@ -53,11 +47,11 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'Risk Status', newStatus);
+        const result = await updateRiskIssueField(row.original.id, 'Risk Status', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.Title}" updated to ${newStatus}.`});
         } else {
-          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
+          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
         }
       };
 
@@ -104,11 +98,11 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       const currentProduct = products.find(p => p.code === row.original["Project Code"]);
 
       const handleProductChange = async (newProductCode: string) => {
-        const result = await updateField(row.original.id, 'Project Code', newProductCode);
+        const result = await updateRiskIssueField(row.original.id, 'Project Code', newProductCode);
         if (result.success) {
           toast({ title: "Product Updated" });
         } else {
-          toast({ variant: 'destructive', title: "Update Failed"});
+          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
         }
       };
       

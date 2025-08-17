@@ -16,13 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { updateRiskIssueField } from "@/app/(main)/actions";
 
-
-async function updateField(id: string, field: string, value: any) {
-  console.log(`Updating ${field} for item ${id} to ${value}`);
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return { success: true };
-}
 
 export const issueColumns: ColumnDef<RiskIssue>[] = [
   {
@@ -52,11 +47,11 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'Status', newStatus);
+        const result = await updateRiskIssueField(row.original.id, 'Status', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.Title}" updated to ${newStatus}.`});
         } else {
-          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
+          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
         }
       };
 
@@ -94,11 +89,11 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       if (!priority) return null;
 
       const handlePriorityChange = async (newPriority: Priority) => {
-        const result = await updateField(row.original.id, 'Priority', newPriority);
+        const result = await updateRiskIssueField(row.original.id, 'Priority', newPriority);
         if (result.success) {
           toast({ title: "Priority Updated", description: `Priority for "${row.original.Title}" updated to ${newPriority}.`});
         } else {
-          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update priority."});
+          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
         }
       };
 
@@ -143,11 +138,11 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
         const currentProduct = products.find(p => p.name === row.original.ProjectName);
   
         const handleProductChange = async (newProductName: string) => {
-          const result = await updateField(row.original.id, 'ProjectName', newProductName);
+          const result = await updateRiskIssueField(row.original.id, 'ProjectName', newProductName);
           if (result.success) {
             toast({ title: "Product Updated" });
           } else {
-            toast({ variant: 'destructive', title: "Update Failed"});
+            toast({ variant: 'destructive', title: "Update Failed", description: result.message});
           }
         };
         
@@ -201,18 +196,17 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
   {
     accessorKey: "Category New",
     header: "Category",
-    id: "category",
     cell: ({ row }) => {
         const { toast } = useToast();
-       const category = issueCategories.find((c) => c.value === row.getValue("category"));
+       const category = issueCategories.find((c) => c.value === row.original["Category New"]);
        if (!category) return null;
  
        const handleCategoryChange = async (newCategory: string) => {
-         const result = await updateField(row.original.id, 'Category New', newCategory);
+         const result = await updateRiskIssueField(row.original.id, 'Category New', newCategory);
          if (result.success) {
            toast({ title: "Category Updated" });
          } else {
-           toast({ variant: 'destructive', title: "Update Failed"});
+           toast({ variant: 'destructive', title: "Update Failed", description: result.message});
          }
        };
  
@@ -235,7 +229,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
        );
      },
      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
+        return value.includes(row.original["Category New"]);
       },
   },
   {
