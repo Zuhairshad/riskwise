@@ -31,6 +31,7 @@ export function DataTableToolbar<TData>({
   }
   
   const filterColumn = table.getColumn("Title") ? "Title" : "Description";
+  const statusColumn = table.getColumn("Status") || table.getColumn("Risk Status");
 
 
   return (
@@ -51,9 +52,9 @@ export function DataTableToolbar<TData>({
             options={riskTypes}
           />
         )}
-        {table.getColumn("Status") && (
+        {statusColumn && (
           <DataTableFacetedFilter
-            column={table.getColumn("Status")}
+            column={statusColumn}
             title="Status"
             options={statusOptions}
           />
@@ -72,9 +73,9 @@ export function DataTableToolbar<TData>({
             options={productOptions}
           />
         )}
-        {tableId === 'issues' && table.getColumn("category") && (
+        {tableId === 'issues' && table.getColumn("Category New") && (
           <DataTableFacetedFilter
-            column={table.getColumn("category")}
+            column={table.getColumn("Category New")}
             title="Category"
             options={issueCategories}
           />
@@ -84,3 +85,4 @@ export function DataTableToolbar<TData>({
     </div>
   );
 }
+
