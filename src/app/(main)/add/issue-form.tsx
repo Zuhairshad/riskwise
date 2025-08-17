@@ -74,6 +74,9 @@ export function IssueForm({ products }: IssueFormProps) {
       discussion: "",
       owner: "",
       projectName: "",
+      portfolio: "",
+      resolution: "",
+      impactValue: 0,
     },
   });
 
@@ -386,3 +389,5 @@ export function IssueForm({ products }: IssueFormProps) {
     </Form>
   );
 }
+
+    
