@@ -29,16 +29,18 @@ export function DataTableToolbar<TData>({
   } else if (tableId === 'issues') {
     statusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
   }
+  
+  const filterColumn = table.getColumn("Title") ? "Title" : "Description";
 
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter by title..."
-          value={(table.getColumn("Title")?.getFilterValue() as string) ?? ""}
+          placeholder={`Filter by ${filterColumn.toLowerCase()}...`}
+          value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("Title")?.setFilterValue(event.target.value)
+            table.getColumn(filterColumn)?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
