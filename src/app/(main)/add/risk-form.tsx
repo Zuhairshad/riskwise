@@ -98,6 +98,19 @@ type AutoFillData = {
   endUser: string;
 };
 
+type Suggestion = {
+    matchedRisk?: {
+        id: string;
+        title: string;
+        description: string;
+        mitigationPlan?: string | undefined;
+        contingencyPlan?: string | undefined;
+        probability?: number | undefined;
+        impactRating?: number | undefined;
+    };
+    rephrasedDescription?: string;
+}
+
 export function RiskForm({ products }: RiskFormProps) {
   const { toast } = useToast();
   const [selectedProject, setSelectedProject] = React.useState<Product | null>(
@@ -106,8 +119,8 @@ export function RiskForm({ products }: RiskFormProps) {
   const [autoFillData, setAutoFillData] =
     React.useState<AutoFillData | null>(null);
 
-  const [similarSuggestions, setSimilarSuggestions] = React.useState<string[]>([]);
-  const [isFetchingSimilar, setIsFetchingSimilar] = React.useState(false);
+  const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
+  const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
 
   const [mitigationSuggestions, setMitigationSuggestions] = React.useState<string[]>([]);
   const [isFetchingMitigation, setIsFetchingMitigation] = React.useState(false);
@@ -143,13 +156,13 @@ export function RiskForm({ products }: RiskFormProps) {
 
   React.useEffect(() => {
     if (debouncedDescription.length > 10) {
-      setIsFetchingSimilar(true);
+      setIsFetchingSuggestion(true);
       suggestSimilarRisks({ description: debouncedDescription })
-        .then((res) => setSimilarSuggestions(res.suggestions))
-        .catch(() => toast({ variant: 'destructive', title: 'Could not fetch similar risks.' }))
-        .finally(() => setIsFetchingSimilar(false));
+        .then((res) => setSuggestion(res))
+        .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
+        .finally(() => setIsFetchingSuggestion(false));
     } else {
-      setSimilarSuggestions([]);
+        setSuggestion(null);
     }
   }, [debouncedDescription, toast]);
 
@@ -238,6 +251,16 @@ export function RiskForm({ products }: RiskFormProps) {
       });
     }
   };
+
+  const handleUseMatchedRisk = (matchedRisk: NonNullable<Suggestion['matchedRisk']>) => {
+    form.setValue("description", matchedRisk.description);
+    if (matchedRisk.mitigationPlan) form.setValue("mitigationPlan", matchedRisk.mitigationPlan);
+    if (matchedRisk.contingencyPlan) form.setValue("contingencyPlan", matchedRisk.contingencyPlan);
+    if (matchedRisk.probability) form.setValue("probability", matchedRisk.probability);
+    if (matchedRisk.impactRating) form.setValue("impactRating", matchedRisk.impactRating);
+    setSuggestion(null);
+    toast({ title: "Form Filled", description: "Form has been pre-filled with the matched risk data." });
+  }
 
   return (
     <Form {...form}>
@@ -341,24 +364,32 @@ export function RiskForm({ products }: RiskFormProps) {
                       </FormItem>
                     )}
                   />
-                  {isFetchingSimilar && (
+                  {isFetchingSuggestion && (
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Checking for similar risks...
                     </div>
                   )}
-                  {similarSuggestions.length > 0 && (
+                  {suggestion?.matchedRisk && (
                     <Alert>
                       <Bot className="h-4 w-4" />
-                      <AlertTitle>AI Suggestion: Similar Risks Found</AlertTitle>
+                      <AlertTitle>Potential Duplicate Found</AlertTitle>
                       <AlertDescription>
-                        Consider if this is a duplicate or related to the following:
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                          {similarSuggestions.map((s, i) => (
-                            <li key={i}>{s}</li>
-                          ))}
-                        </ul>
+                          <p>An existing risk with a similar description was found: <strong>{suggestion.matchedRisk.title}</strong>.</p>
+                          <p className="text-xs text-muted-foreground mt-1 mb-2">"{suggestion.matchedRisk.description}"</p>
+                          <Button type="button" size="sm" onClick={() => handleUseMatchedRisk(suggestion.matchedRisk!)}>Use This Data</Button>
                       </AlertDescription>
+                    </Alert>
+                  )}
+                   {suggestion?.rephrasedDescription && (
+                    <Alert>
+                        <Bot className="h-4 w-4" />
+                        <AlertTitle>AI Suggestion</AlertTitle>
+                        <AlertDescription>
+                            <p>Consider rephrasing for clarity:</p>
+                            <p className="italic my-2 p-2 bg-muted rounded">"{suggestion.rephrasedDescription}"</p>
+                            <Button type="button" size="sm" onClick={() => form.setValue("description", suggestion.rephrasedDescription || '')}>Use Suggestion</Button>
+                        </AlertDescription>
                     </Alert>
                   )}
                 </div>

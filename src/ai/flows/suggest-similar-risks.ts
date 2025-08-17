@@ -10,30 +10,72 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {risksAndIssues} from '@/lib/data';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
 });
 export type SuggestSimilarRisksInput = z.infer<typeof SuggestSimilarRisksInputSchema>;
 
+const MatchedRiskSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    mitigationPlan: z.string().optional(),
+    contingencyPlan: z.string().optional(),
+    probability: z.number().optional(),
+    impactRating: z.number().optional(),
+});
+
 const SuggestSimilarRisksOutputSchema = z.object({
-  suggestions: z.array(z.string()).describe('An array of suggested similar risks/issues.'),
+  matchedRisk: MatchedRiskSchema.optional().describe('The existing risk that matches the description.'),
+  rephrasedDescription: z.string().optional().describe('A rephrased version of the description for clarity if no match is found.'),
 });
 export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutputSchema>;
 
+// Mock function to find similar risk
+const findSimilarRisk = (description: string) => {
+    const lowercasedDescription = description.toLowerCase();
+    // This is a simple mock implementation. A real implementation would use a more sophisticated search.
+    const found = risksAndIssues.find(r => r.type === 'Risk' && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
+    if (found) {
+        return {
+            id: found.id,
+            title: found.title,
+            description: found.description,
+            mitigationPlan: found.mitigationPlan,
+            contingencyPlan: found.contingencyPlan,
+            probability: found.probability,
+            impactRating: found.impactRating,
+        }
+    }
+    return null;
+}
+
+
 export async function suggestSimilarRisks(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
+  // First, check for existing similar risks in our mock data
+  const matchedRisk = findSimilarRisk(input.description);
+
+  if (matchedRisk) {
+    return { matchedRisk };
+  }
+
+  // If no match is found, use AI to rephrase the description
   return suggestSimilarRisksFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'suggestSimilarRisksPrompt',
+  name: 'rephraseRiskDescriptionPrompt',
   input: {schema: SuggestSimilarRisksInputSchema},
   output: {schema: SuggestSimilarRisksOutputSchema},
-  prompt: `You are an AI assistant helping users identify potential duplicate risks or issues based on their descriptions.
+  prompt: `You are an expert risk management analyst.
+  
+  A user has entered the following risk description. Rephrase it to be clearer, more concise, and professionally worded.
+  
+  Only return the rephrased description in the 'rephrasedDescription' field.
 
-  Given the following description, suggest a list of existing risks or issues that are similar. Only return an array of strings that match the description.
-
-  Description: {{{description}}}`,
+  Original Description: {{{description}}}`,
 });
 
 const suggestSimilarRisksFlow = ai.defineFlow(
