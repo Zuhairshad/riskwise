@@ -55,6 +55,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
+import { autofillRiskForm } from "@/ai/flows/autofill-risk-form";
 import {
   Select,
   SelectContent,
@@ -133,6 +134,7 @@ export function RiskForm({ products }: RiskFormProps) {
   
   const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
+  const [isAutofilling, setIsAutofilling] = React.useState(false);
 
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
@@ -152,7 +154,10 @@ export function RiskForm({ products }: RiskFormProps) {
     },
   });
 
+  const titleValue = form.watch("Title");
+  const debouncedTitle = useDebounce(titleValue, 500);
   const projectCode = form.watch("Project Code");
+  
   const probability = form.watch("Probability");
   const impactRating = form.watch("Imapct Rating (0.05-0.8)");
   const impactValue = form.watch("Impact Value ($)");
@@ -160,6 +165,25 @@ export function RiskForm({ products }: RiskFormProps) {
   const descriptionValue = form.watch("Description");
 
   const debouncedDescription = useDebounce(descriptionValue, 500);
+
+  React.useEffect(() => {
+    if (debouncedTitle.length > 5 || projectCode) {
+        setIsAutofilling(true);
+        autofillRiskForm({ title: debouncedTitle, projectCode: projectCode })
+        .then((res) => {
+            if (res.matchedRisk) {
+            const date = res.matchedRisk.DueDate?.toDate ? res.matchedRisk.DueDate.toDate() : new Date();
+            form.reset({
+                ...res.matchedRisk,
+                DueDate: date,
+            });
+            toast({ title: "Form Auto-filled", description: "Loaded data from an existing risk." });
+            }
+        })
+        .finally(() => setIsAutofilling(false));
+    }
+  }, [debouncedTitle, projectCode, form, toast]);
+
 
   React.useEffect(() => {
     if (debouncedDescription.length > 10) {
@@ -257,7 +281,6 @@ export function RiskForm({ products }: RiskFormProps) {
         endUser: "Client Inc.", // mock data
       });
       form.setValue("Project Code", project.code);
-      form.setValue("Title", `Risk for ${project.name}`); // Auto-fill title
     } else {
       setAutoFillData(null);
     }
@@ -303,7 +326,7 @@ export function RiskForm({ products }: RiskFormProps) {
               <CardHeader>
                 <CardTitle>Project & Risk Identification</CardTitle>
                 <CardDescription>
-                  Start by identifying the project and the risk.
+                  Start by identifying the project and the risk. {isAutofilling && <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -338,7 +361,9 @@ export function RiskForm({ products }: RiskFormProps) {
                                 !field.value && "text-muted-foreground"
                               )}
                             >
-                              {field.value || "Select project code"}
+                              {field.value
+                                ? products.find((p) => p.code === field.value)?.code
+                                : "Select project code"}
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </FormControl>
@@ -565,6 +590,7 @@ export function RiskForm({ products }: RiskFormProps) {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>

@@ -47,6 +47,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
+import { autofillIssueForm } from "@/ai/flows/autofill-issue-form";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
@@ -89,6 +90,7 @@ export function IssueForm({ products }: IssueFormProps) {
   const [isFetchingResolution, setIsFetchingResolution] = React.useState(false);
   const [rephrasedDiscussion, setRephrasedDiscussion] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
+  const [isAutofilling, setIsAutofilling] = React.useState(false);
 
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
@@ -110,6 +112,28 @@ export function IssueForm({ products }: IssueFormProps) {
 
   const discussionValue = form.watch("Discussion");
   const debouncedDiscussion = useDebounce(discussionValue, 500);
+
+  const titleValue = form.watch("Title");
+  const debouncedTitle = useDebounce(titleValue, 500);
+  const projectNameValue = form.watch("ProjectName");
+  
+  React.useEffect(() => {
+    if (debouncedTitle.length > 5 || projectNameValue) {
+      setIsAutofilling(true);
+      autofillIssueForm({ title: debouncedTitle, projectName: projectNameValue })
+        .then((res) => {
+          if (res.matchedIssue) {
+            const date = res.matchedIssue['Due Date']?.toDate ? res.matchedIssue['Due Date'].toDate() : new Date();
+            form.reset({
+                ...res.matchedIssue,
+                "Due Date": date,
+            });
+            toast({ title: "Form Auto-filled", description: "Loaded data from an existing issue." });
+          }
+        })
+        .finally(() => setIsAutofilling(false));
+    }
+  }, [debouncedTitle, projectNameValue, form, toast]);
 
   React.useEffect(() => {
     if (debouncedDiscussion.length > 10) {
@@ -186,7 +210,7 @@ export function IssueForm({ products }: IssueFormProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Issue Details</CardTitle>
-                        <CardDescription>Provide the details for the new issue.</CardDescription>
+                        <CardDescription>Provide the details for the new issue. {isAutofilling && <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />}</CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
@@ -208,7 +232,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a category" />
@@ -232,9 +256,16 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Project Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Enter project name" {...field} />
-                                </FormControl>
+                                 <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a project" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {products.map(p => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                                 </FormItem>
                             )}
@@ -426,7 +457,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Status</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a status" />
@@ -449,7 +480,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Response</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value ?? ''}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a response" />
@@ -478,7 +509,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Impact</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select impact level" />
@@ -513,7 +544,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Priority</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select priority level" />
