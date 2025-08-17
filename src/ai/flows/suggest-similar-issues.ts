@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file contains a Genkit flow for suggesting similar issues
@@ -11,6 +12,8 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {risksAndIssues} from '@/lib/data';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const SuggestSimilarIssuesInputSchema = z.object({
   description: z.string().describe('The description of the issue being entered.'),
@@ -31,24 +34,29 @@ const SuggestSimilarIssuesOutputSchema = z.object({
 export type SuggestSimilarIssuesOutput = z.infer<typeof SuggestSimilarIssuesOutputSchema>;
 
 // Mock function to find similar issue
-const findSimilarIssue = (description: string) => {
-    if (!description) return null;
-    const lowercasedDescription = description.toLowerCase();
-    // This is a simple mock implementation. A real implementation would use a more sophisticated search.
-    const found = risksAndIssues.find(r => r.type === 'Issue' && r.description && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
-    if (found) {
+const findSimilarIssue = async (description: string) => {
+    if (!description || description.length < 20) return null;
+    
+    const issuesRef = collection(db, 'issues');
+    const q = query(issuesRef, where('Discussion', '>=', description.substring(0, 50)), where('Discussion', '<=', description.substring(0, 50) + '\uf8ff'), limit(1));
+    
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data();
         return {
-            id: found.id,
-            title: found.title,
-            discussion: found.description, // Map description to discussion for issues
-            resolution: found.resolution,
+            id: doc.id,
+            title: data.Title,
+            discussion: data.Discussion, 
+            resolution: data.Resolution,
         }
     }
     return null;
 }
 
 export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
-  const matchedIssue = findSimilarIssue(input.description);
+  const matchedIssue = await findSimilarIssue(input.description);
 
   if (matchedIssue) {
     return { matchedIssue };

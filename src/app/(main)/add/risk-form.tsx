@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -164,6 +165,7 @@ export function RiskForm({ products }: RiskFormProps) {
     if (debouncedDescription.length > 10) {
       setIsFetchingSuggestion(true);
       setRephrasedDescription(null);
+      setSuggestion(null);
       suggestSimilarRisks({ description: debouncedDescription })
         .then((res) => setSuggestion(res))
         .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
@@ -175,6 +177,7 @@ export function RiskForm({ products }: RiskFormProps) {
 
   const handleSuggestMitigations = async () => {
     setIsFetchingMitigation(true);
+    setMitigationSuggestions([]);
     try {
       const res = await suggestMitigationStrategies({ riskOrIssueDescription: descriptionValue });
       setMitigationSuggestions(res.suggestedMitigationStrategies);
@@ -187,6 +190,7 @@ export function RiskForm({ products }: RiskFormProps) {
 
   const handleSuggestContingency = async () => {
     setIsFetchingContingency(true);
+    setContingencySuggestions([]);
     try {
       const res = await suggestMitigationStrategies({ riskOrIssueDescription: descriptionValue });
       setContingencySuggestions(res.suggestedMitigationStrategies);
@@ -200,6 +204,7 @@ export function RiskForm({ products }: RiskFormProps) {
   const handleRephraseDescription = async () => {
     setIsRephrasing(true);
     setSuggestion(null); // Clear other suggestions
+    setRephrasedDescription(null);
     try {
         const res = await rephraseDescription({ description: descriptionValue });
         setRephrasedDescription(res.rephrasedDescription);
@@ -252,7 +257,7 @@ export function RiskForm({ products }: RiskFormProps) {
         endUser: "Client Inc.", // mock data
       });
       form.setValue("Project Code", project.code);
-      form.setValue("Title", project.name); // Auto-fill title
+      form.setValue("Title", `Risk for ${project.name}`); // Auto-fill title
     } else {
       setAutoFillData(null);
     }
@@ -264,6 +269,10 @@ export function RiskForm({ products }: RiskFormProps) {
       toast({ title: "Success", description: "New risk created." });
       form.reset();
       setSelectedProject(null);
+      setSuggestion(null);
+      setRephrasedDescription(null);
+      setMitigationSuggestions([]);
+      setContingencySuggestions([]);
     } else {
       toast({
         variant: "destructive",
@@ -274,6 +283,7 @@ export function RiskForm({ products }: RiskFormProps) {
   };
 
   const handleUseMatchedRisk = (matchedRisk: NonNullable<Suggestion['matchedRisk']>) => {
+    form.setValue("Title", matchedRisk.title);
     form.setValue("Description", matchedRisk.description);
     if (matchedRisk.mitigationPlan) form.setValue("MitigationPlan", matchedRisk.mitigationPlan);
     if (matchedRisk.contingencyPlan) form.setValue("ContingencyPlan", matchedRisk.contingencyPlan);
@@ -355,7 +365,7 @@ export function RiskForm({ products }: RiskFormProps) {
                                           : "opacity-0"
                                       )}
                                     />
-                                    {product.code}
+                                    {product.code} - {product.name}
                                   </CommandItem>
                                 ))}
                               </CommandGroup>

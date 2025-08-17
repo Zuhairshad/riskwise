@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -100,6 +101,10 @@ export function IssueForm({ products }: IssueFormProps) {
       Portfolio: "",
       Resolution: "",
       "Impact ($)": 0,
+      Response: "Under Review",
+      Impact: "Medium",
+      Priority: "Medium",
+      Status: "Open",
     },
   });
 
@@ -110,6 +115,7 @@ export function IssueForm({ products }: IssueFormProps) {
     if (debouncedDiscussion.length > 10) {
       setIsFetchingSuggestion(true);
       setRephrasedDiscussion(null);
+      setSuggestion(null);
       suggestSimilarIssues({ description: debouncedDiscussion })
         .then((res) => setSuggestion(res))
         .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
@@ -121,6 +127,7 @@ export function IssueForm({ products }: IssueFormProps) {
 
   const handleSuggestResolution = async () => {
     setIsFetchingResolution(true);
+    setResolutionSuggestions([]);
     try {
       const res = await suggestMitigationStrategies({ riskOrIssueDescription: discussionValue });
       setResolutionSuggestions(res.suggestedMitigationStrategies);
@@ -134,6 +141,7 @@ export function IssueForm({ products }: IssueFormProps) {
   const handleRephraseDiscussion = async () => {
     setIsRephrasing(true);
     setSuggestion(null); // Clear other suggestions
+    setRephrasedDiscussion(null);
     try {
         const res = await rephraseDescription({ description: discussionValue });
         setRephrasedDiscussion(res.rephrasedDescription);
@@ -146,6 +154,7 @@ export function IssueForm({ products }: IssueFormProps) {
 
   const handleUseMatchedIssue = (matchedIssue: NonNullable<Suggestion['matchedIssue']>) => {
     form.setValue("Discussion", matchedIssue.discussion);
+    form.setValue("Title", matchedIssue.title);
     if (matchedIssue.resolution) form.setValue("Resolution", matchedIssue.resolution);
     setSuggestion(null);
     setRephrasedDiscussion(null);
@@ -157,6 +166,9 @@ export function IssueForm({ products }: IssueFormProps) {
     if (result.success) {
       toast({ title: "Success", description: "New issue created." });
       form.reset();
+      setSuggestion(null);
+      setRephrasedDiscussion(null);
+      setResolutionSuggestions([]);
     } else {
       toast({
         variant: "destructive",
@@ -523,7 +535,7 @@ export function IssueForm({ products }: IssueFormProps) {
                 </Card>
 
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? "Creating..." : "Create Issue"}
+                    {form.formState.isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</> : "Create Issue"}
                 </Button>
             </div>
         </div>

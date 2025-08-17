@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview This file contains a Genkit flow for suggesting similar risks/issues
+ * @fileOverview This file contains a Genkit flow for suggesting similar risks
  * as the user types in the description textarea.
  *
  * - suggestSimilarRisks - A function that takes a description and returns suggested similar entries.
@@ -10,7 +11,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {risksAndIssues} from '@/lib/data';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
@@ -33,21 +35,27 @@ const SuggestSimilarRisksOutputSchema = z.object({
 });
 export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutputSchema>;
 
-// Mock function to find similar risk
-const findSimilarRisk = (description: string) => {
-    if (!description) return null;
-    const lowercasedDescription = description.toLowerCase();
-    // This is a simple mock implementation. A real implementation would use a more sophisticated search.
-    const found = risksAndIssues.find(r => r.type === 'Risk' && r.description && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
-    if (found) {
+// Function to find similar risk in Firestore
+const findSimilarRisk = async (description: string) => {
+    if (!description || description.length < 20) return null;
+    
+    const risksRef = collection(db, 'risks');
+    // Basic substring search. A more advanced implementation might use a dedicated search service.
+    const q = query(risksRef, where('Description', '>=', description.substring(0, 50)), where('Description', '<=', description.substring(0, 50) + '\uf8ff'), limit(1));
+    
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        const data = doc.data();
         return {
-            id: found.id,
-            title: found.title,
-            description: found.description,
-            mitigationPlan: found.mitigationPlan,
-            contingencyPlan: found.contingencyPlan,
-            probability: found.probability,
-            impactRating: found.impactRating,
+            id: doc.id,
+            title: data.Title,
+            description: data.Description,
+            mitigationPlan: data.MitigationPlan,
+            contingencyPlan: data.ContingencyPlan,
+            probability: data.Probability,
+            impactRating: data['Imapct Rating (0.05-0.8)'],
         }
     }
     return null;
@@ -55,8 +63,8 @@ const findSimilarRisk = (description: string) => {
 
 
 export async function suggestSimilarRisks(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
-  // First, check for existing similar risks in our mock data
-  const matchedRisk = findSimilarRisk(input.description);
+  // First, check for existing similar risks in our database
+  const matchedRisk = await findSimilarRisk(input.description);
 
   if (matchedRisk) {
     return { matchedRisk };
