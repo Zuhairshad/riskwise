@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Bot, Loader2, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -42,6 +42,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
 import { createIssue } from "./actions";
+import { useDebounce } from "@/hooks/use-debounce";
+import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
+import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
 
 const issueFormSchema = z.object({
     month: z.string().min(1, "Month is required"),
@@ -64,8 +69,23 @@ type IssueFormProps = {
   products: Product[];
 };
 
+type Suggestion = {
+    matchedIssue?: {
+        id: string;
+        title: string;
+        discussion: string;
+        resolution?: string | undefined;
+    };
+    rephrasedDescription?: string;
+}
+
 export function IssueForm({ products }: IssueFormProps) {
   const { toast } = useToast();
+  const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
+  const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
+  const [resolutionSuggestions, setResolutionSuggestions] = React.useState<string[]>([]);
+  const [isFetchingResolution, setIsFetchingResolution] = React.useState(false);
+
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
     defaultValues: {
@@ -77,8 +97,47 @@ export function IssueForm({ products }: IssueFormProps) {
       portfolio: "",
       resolution: "",
       impactValue: 0,
+      category: undefined,
+      response: undefined,
+      impact: undefined,
+      priority: undefined,
+      status: undefined,
     },
   });
+
+  const discussionValue = form.watch("discussion");
+  const debouncedDiscussion = useDebounce(discussionValue, 500);
+
+  React.useEffect(() => {
+    if (debouncedDiscussion.length > 10) {
+      setIsFetchingSuggestion(true);
+      suggestSimilarIssues({ description: debouncedDiscussion })
+        .then((res) => setSuggestion(res))
+        .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
+        .finally(() => setIsFetchingSuggestion(false));
+    } else {
+        setSuggestion(null);
+    }
+  }, [debouncedDiscussion, toast]);
+
+  const handleSuggestResolution = async () => {
+    setIsFetchingResolution(true);
+    try {
+      const res = await suggestMitigationStrategies({ riskOrIssueDescription: discussionValue });
+      setResolutionSuggestions(res.suggestedMitigationStrategies);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Failed to suggest resolutions." });
+    } finally {
+      setIsFetchingResolution(false);
+    }
+  };
+
+  const handleUseMatchedIssue = (matchedIssue: NonNullable<Suggestion['matchedIssue']>) => {
+    form.setValue("discussion", matchedIssue.discussion);
+    if (matchedIssue.resolution) form.setValue("resolution", matchedIssue.resolution);
+    setSuggestion(null);
+    toast({ title: "Form Filled", description: "Form has been pre-filled with the matched issue data." });
+  }
 
   const onSubmit = async (values: z.infer<typeof issueFormSchema>) => {
     const result = await createIssue(values);
@@ -180,32 +239,88 @@ export function IssueForm({ products }: IssueFormProps) {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="discussion"
-                            render={({ field }) => (
-                                <FormItem className="col-span-full">
-                                <FormLabel>Discussion</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Background, details, and explanation of issue" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
+                        <div className="col-span-full space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="discussion"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Discussion</FormLabel>
+                                    <FormControl>
+                                        <Textarea placeholder="Background, details, and explanation of issue" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             {isFetchingSuggestion && (
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Checking for similar issues...
+                                </div>
                             )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="resolution"
-                            render={({ field }) => (
-                                <FormItem className="col-span-full">
-                                <FormLabel>Resolution</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Proposed corrective action / solution" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
+                            {suggestion?.matchedIssue && (
+                                <Alert>
+                                <Bot className="h-4 w-4" />
+                                <AlertTitle>Potential Duplicate Found</AlertTitle>
+                                <AlertDescription>
+                                    <p>An existing issue with a similar description was found: <strong>{suggestion.matchedIssue.title}</strong>.</p>
+                                    <p className="text-xs text-muted-foreground mt-1 mb-2">"{suggestion.matchedIssue.discussion}"</p>
+                                    <Button type="button" size="sm" onClick={() => handleUseMatchedIssue(suggestion.matchedIssue!)}>Use This Data</Button>
+                                </AlertDescription>
+                                </Alert>
                             )}
-                        />
+                            {suggestion?.rephrasedDescription && (
+                                <Alert>
+                                    <Bot className="h-4 w-4" />
+                                    <AlertTitle>AI Suggestion</AlertTitle>
+                                    <AlertDescription>
+                                        <p>Consider rephrasing for clarity:</p>
+                                        <p className="italic my-2 p-2 bg-muted rounded">"{suggestion.rephrasedDescription}"</p>
+                                        <Button type="button" size="sm" onClick={() => form.setValue("discussion", suggestion.rephrasedDescription || '')}>Use Suggestion</Button>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+                        <div className="col-span-full space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="resolution"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Resolution</FormLabel>
+                                    <FormControl>
+                                        <Textarea placeholder="Proposed corrective action / solution" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button type="button" variant="outline" size="sm" onClick={handleSuggestResolution} disabled={isFetchingResolution || !discussionValue}>
+                                {isFetchingResolution ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                )}
+                                Suggest with AI
+                            </Button>
+                            {resolutionSuggestions.length > 0 && (
+                            <Alert>
+                                <Bot className="h-4 w-4" />
+                                <AlertTitle>AI Suggested Resolutions</AlertTitle>
+                                <AlertDescription>
+                                    Click to use a suggestion.
+                                    <ul className="list-disc pl-5 mt-2 space-y-1">
+                                        {resolutionSuggestions.map((s, i) => (
+                                        <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("resolution", s)}>
+                                            {s}
+                                        </li>
+                                        ))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
