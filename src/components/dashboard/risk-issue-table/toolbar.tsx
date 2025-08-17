@@ -45,7 +45,7 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("type") && (
+        {tableId === 'all' && table.getColumn("type") && (
           <DataTableFacetedFilter
             column={table.getColumn("type")}
             title="Type"
