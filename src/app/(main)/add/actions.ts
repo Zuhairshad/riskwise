@@ -1,6 +1,9 @@
 "use server";
 
 import { z } from "zod";
+import dbConnect from "@/lib/db";
+import Risk from "@/models/Risk";
+import Issue from "@/models/Issue";
 
 const riskFormSchema = z.object({
   month: z.string().min(1, "Month is required"),
@@ -39,32 +42,32 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     const parsed = riskFormSchema.safeParse(values);
   
     if (!parsed.success) {
-      console.error(parsed.error.errors);
       return { success: false, message: "Invalid data provided." };
     }
   
-    // In a real application, you would save this data to a database.
-    console.log("New Risk Created:", parsed.data);
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  
-    return { success: true, message: "Risk created successfully." };
+    try {
+      await dbConnect();
+      await Risk.create(parsed.data);
+      return { success: true, message: "Risk created successfully." };
+    } catch (error) {
+      console.error("Error creating risk:", error);
+      return { success: false, message: "Failed to create risk." };
+    }
   }
 
   export async function createIssue(values: z.infer<typeof issueFormSchema>) {
     const parsed = issueFormSchema.safeParse(values);
   
     if (!parsed.success) {
-      console.error(parsed.error.errors);
       return { success: false, message: "Invalid data provided." };
     }
   
-    // In a real application, you would save this data to a database.
-    console.log("New Issue Created:", parsed.data);
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  
-    return { success: true, message: "Issue created successfully." };
+    try {
+        await dbConnect();
+        await Issue.create(parsed.data);
+        return { success: true, message: "Issue created successfully." };
+      } catch (error) {
+        console.error("Error creating issue:", error);
+        return { success: false, message: "Failed to create issue." };
+      }
   }

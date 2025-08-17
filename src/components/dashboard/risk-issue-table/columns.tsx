@@ -22,6 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 // This is a mock update function. In a real app, this would be an API call.
 async function updateField(id: string, field: string, value: any) {
   console.log(`Updating ${field} for item ${id} to ${value}`);
+  // Here you would connect to your backend to update the database
+  // Example: await fetch(`/api/risks/${id}`, { method: 'PATCH', body: JSON.stringify({ [field]: value }) });
   await new Promise(resolve => setTimeout(resolve, 500));
   // In a real app, you might want to return the updated item
   return { success: true };
@@ -97,6 +99,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
         const result = await updateField(row.original.id, 'status', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
+          // Note: You might need to refresh your data source here to see the change reflected permanently.
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
         }
@@ -206,20 +209,26 @@ export const columns: ColumnDef<RiskIssue>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
+      // This filter is tricky because product is an object.
+      // We'll filter based on the product's name.
+      return value.includes(row.original.product.name);
     },
   },
   {
     accessorKey: "owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("owner")}</div>,
+    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("owner") || 'N/A'}</div>,
   },
   {
     accessorKey: "dueDate",
     header: "Due Date",
     cell: ({ row }) => {
       const date = row.getValue("dueDate");
-      return date ? format(new Date(date as string), "MM/dd/yyyy") : 'N/A';
+      try {
+        return date ? format(new Date(date as string), "dd/MM/yyyy") : 'N/A';
+      } catch (error) {
+        return 'Invalid Date';
+      }
     },
   },
   {

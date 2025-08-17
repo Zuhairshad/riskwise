@@ -19,6 +19,7 @@ export type IssueResponse = "Under Review" | "In Progress" | "Closed";
 
 export type RiskIssue = {
   id: string;
+  _id: string; // From MongoDB
   type: RiskType;
   title: string;
   description: string;
@@ -39,12 +40,15 @@ export type RiskIssue = {
   resolution?: string;
   impact?: IssueImpact;
   response?: IssueResponse;
+  discussion?: string;
+  projectName?: string;
+
 
   // Common fields
   owner?: string;
   dueDate?: string; // Using string for simplicity, can be Date
   createdAt: string;
-  createdBy: string;
+  createdBy?: string; // Made optional as it's not in the schema
 };
 
 
