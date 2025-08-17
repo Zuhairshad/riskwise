@@ -8,9 +8,22 @@ type StatsCardsProps = {
 
 export function StatsCards({ data }: StatsCardsProps) {
   const totalItems = data.length;
-  const openItems = data.filter((item) => item.status === "Open" || item.status === "In Progress").length;
-  const highPriorityItems = data.filter((item) => item.priority === "High" || item.priority === "Critical").length;
-  const resolvedItems = data.filter((item) => item.status === "Resolved" || item.status === "Closed").length;
+  
+  const openItems = data.filter((item) => {
+    const status = item["Risk Status"] || item.Status;
+    return status === "Open" || status === "In Progress";
+  }).length;
+
+  const highPriorityItems = data.filter((item) => {
+    const priority = item.Priority;
+    return priority === "High" || priority === "Critical" || priority === "(1) High";
+  }).length;
+  
+  const resolvedItems = data.filter((item) => {
+    const status = item["Risk Status"] || item.Status;
+    return status === "Resolved" || status === "Closed" || status === "Mitigated";
+  }).length;
+
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
