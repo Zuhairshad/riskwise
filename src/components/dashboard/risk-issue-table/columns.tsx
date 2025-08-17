@@ -175,25 +175,30 @@ export const columns: ColumnDef<RiskIssue>[] = [
     cell: ({ row }) => {
       const { toast } = useToast();
       const currentProduct = row.original.product;
-
+    
       const handleProductChange = async (newProductName: string) => {
         const newProduct = products.find(p => p.name === newProductName);
         if (!newProduct) return;
-        
+    
         const fieldToUpdate = row.original.type === 'Risk' ? 'Project Code' : 'ProjectName';
-        const newValue = row.original.type === 'Risk' ? newProduct.code : newProduct.name;
-        
-        const result = await updateRiskIssueField(row.original.id, fieldToUpdate, newValue);
+        const valueToUpdate = row.original.type === 'Risk' ? newProduct.code : newProduct.name;
+    
+        const result = await updateRiskIssueField(row.original.id, fieldToUpdate, valueToUpdate);
+    
         if (result.success) {
           toast({ title: "Product Updated" });
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: result.message });
         }
       };
-      
+    
+      if (!currentProduct) {
+        return row.original.type === 'Risk' ? row.original["Project Code"] : row.original.ProjectName;
+      }
+    
       return (
-        <Select defaultValue={currentProduct?.name} onValueChange={handleProductChange}>
-           <SelectTrigger className="w-[180px] h-8 text-xs truncate">
+        <Select defaultValue={currentProduct.name} onValueChange={handleProductChange}>
+          <SelectTrigger className="w-[180px] h-8 text-xs truncate">
             <SelectValue placeholder="Select Product" />
           </SelectTrigger>
           <SelectContent>
@@ -204,7 +209,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
             ))}
           </SelectContent>
         </Select>
-      )
+      );
     },
     filterFn: (row, id, value) => {
       return value.includes(row.original.product?.name);
