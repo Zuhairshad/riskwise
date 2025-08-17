@@ -3,9 +3,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from 'date-fns';
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Pen, Trash2 } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import type { RiskIssue, Status, Priority, RiskType } from "@/lib/types";
 import { statuses, priorities, riskTypes, products } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
@@ -31,7 +30,7 @@ async function updateField(id: string, field: string, value: any) {
 
 export const columns: ColumnDef<RiskIssue>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "Title",
     header: ({ column }) => {
       return (
         <Button
@@ -44,7 +43,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("title")}</div>
+      <div className="w-[250px] truncate font-medium">{row.getValue("Title")}</div>
     ),
   },
   {
@@ -58,7 +57,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
       const handleTypeChange = async (newType: RiskType) => {
         const result = await updateField(row.original.id, 'type', newType);
         if (result.success) {
-          toast({ title: "Type Updated", description: `Type for "${row.original.title}" updated to ${newType}.`});
+          toast({ title: "Type Updated", description: `Type for "${row.original.Title}" updated to ${newType}.`});
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update type."});
         }
@@ -87,19 +86,20 @@ export const columns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.getValue("status"));
+      const statusValue = row.original.Status || row.original["Risk Status"];
+      const status = statuses.find((s) => s.value === statusValue);
 
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'status', newStatus);
+        const fieldToUpdate = row.original.type === 'Risk' ? 'Risk Status' : 'Status';
+        const result = await updateField(row.original.id, fieldToUpdate, newStatus);
         if(result.success){
-          toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
-          // Note: You might need to refresh your data source here to see the change reflected permanently.
+          toast({ title: "Status Updated", description: `Status for "${row.original.Title}" updated to ${newStatus}.`});
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
         }
@@ -124,21 +124,22 @@ export const columns: ColumnDef<RiskIssue>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
+      const statusValue = row.original.Status || row.original["Risk Status"];
+      return value.includes(statusValue);
     },
   },
   {
-    accessorKey: "priority",
+    accessorKey: "Priority",
     header: "Priority",
     cell: ({ row }) => {
        const { toast } = useToast();
-      const priority = priorities.find((p) => p.value === row.getValue("priority"));
+      const priority = priorities.find((p) => p.value === row.getValue("Priority"));
       if (!priority) return null;
 
       const handlePriorityChange = async (newPriority: Priority) => {
-        const result = await updateField(row.original.id, 'priority', newPriority);
+        const result = await updateField(row.original.id, 'Priority', newPriority);
         if (result.success) {
-          toast({ title: "Priority Updated", description: `Priority for "${row.original.title}" updated to ${newPriority}.`});
+          toast({ title: "Priority Updated", description: `Priority for "${row.original.Title}" updated to ${newPriority}.`});
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update priority."});
         }
@@ -185,7 +186,9 @@ export const columns: ColumnDef<RiskIssue>[] = [
       const currentProduct = row.original.product;
 
       const handleProductChange = async (newProductId: string) => {
-        const result = await updateField(row.original.id, 'product', newProductId);
+        const fieldToUpdate = row.original.type === 'Risk' ? 'Project Code' : 'ProjectName';
+        const newValue = products.find(p => p.id === newProductId)?.[row.original.type === 'Risk' ? 'code' : 'name'];
+        const result = await updateField(row.original.id, fieldToUpdate, newValue);
         if (result.success) {
           toast({ title: "Product Updated" });
         } else {
@@ -194,9 +197,9 @@ export const columns: ColumnDef<RiskIssue>[] = [
       };
       
       return (
-        <Select defaultValue={currentProduct.id} onValueChange={handleProductChange}>
+        <Select defaultValue={currentProduct?.id} onValueChange={handleProductChange}>
            <SelectTrigger className="w-[180px] h-8 text-xs truncate">
-            <SelectValue />
+            <SelectValue placeholder="Select Product" />
           </SelectTrigger>
           <SelectContent>
             {products.map((p) => (
@@ -209,49 +212,45 @@ export const columns: ColumnDef<RiskIssue>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      // This filter is tricky because product is an object.
-      // We'll filter based on the product's name.
-      return value.includes(row.original.product.name);
+      return value.includes(row.original.product?.name);
     },
   },
   {
-    accessorKey: "owner",
+    accessorKey: "Owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("owner") || 'N/A'}</div>,
+    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("Owner") || 'N/A'}</div>,
   },
   {
-    accessorKey: "dueDate",
+    accessorKey: "DueDate",
     header: "Due Date",
     cell: ({ row }) => {
-      const date = row.getValue("dueDate");
+      const date = row.getValue("DueDate") || row.original["Due Date"];
+      if (!date) return 'N/A';
       try {
         const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
-        return date ? format(d, "dd/MM/yyyy") : 'N/A';
+        return format(d, "dd/MM/yyyy");
       } catch (error) {
-         // Fallback for Firestore Timestamps that might not be converted yet
-        if (date && typeof (date as any).toDate === 'function') {
-          return format((date as any).toDate(), "dd/MM/yyyy");
-        }
         return 'Invalid Date';
       }
     },
   },
   {
-    accessorKey: "probability",
+    accessorKey: "Probability",
     header: "Probability",
     cell: ({ row }) => {
-      const prob = row.getValue("probability") as number;
-      return row.original.type === 'Risk' ? `${(prob * 100).toFixed(0)}%` : 'N/A';
+      const prob = row.getValue("Probability") as number;
+      return row.original.type === 'Risk' && prob ? `${(prob * 100).toFixed(0)}%` : 'N/A';
     },
   },
   {
-    accessorKey: "impactRating",
+    accessorKey: "Impact",
     header: "Impact",
     cell: ({ row }) => {
        if (row.original.type === 'Risk') {
-         return row.original.impactRating?.toFixed(2) ?? 'N/A';
+         const impactRating = row.original["Imapct Rating (0.05-0.8)"];
+         return impactRating?.toFixed(2) ?? 'N/A';
        }
-       return row.original.impact ?? 'N/A';
+       return row.original.Impact ?? 'N/A';
     },
   },
   {

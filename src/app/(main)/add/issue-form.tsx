@@ -50,20 +50,20 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
 const issueFormSchema = z.object({
-    month: z.string().min(1, "Month is required"),
-    category: z.enum(["Technical", "Contractual", "Resource", "Schedule"], { required_error: "Category is required." }),
-    portfolio: z.string().optional(),
-    title: z.string().min(5, "Title must be at least 5 characters."),
-    discussion: z.string().min(10, "Discussion must be at least 10 characters."),
-    resolution: z.string().optional(),
-    dueDate: z.date().optional(),
-    owner: z.string().min(1, "Owner is required."),
-    response: z.enum(["Under Review", "In Progress", "Closed"], { required_error: "Response is required." }),
-    impact: z.enum(["Low", "Medium", "High"], { required_error: "Impact is required." }),
-    impactValue: z.coerce.number().optional(),
-    priority: z.enum(["Low", "Medium", "High", "Critical"], { required_error: "Priority is required." }),
-    projectName: z.string().min(1, "Project Name is required."),
-    status: z.enum(["Open", "Resolved", "Escalated", "Closed"], { required_error: "Status is required." }),
+    Month: z.string().min(1, "Month is required"),
+    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule"], { required_error: "Category is required." }),
+    Portfolio: z.string().optional(),
+    Title: z.string().min(5, "Title must be at least 5 characters."),
+    Discussion: z.string().min(10, "Discussion must be at least 10 characters."),
+    Resolution: z.string().optional(),
+    "Due Date": z.date().optional(),
+    Owner: z.string().min(1, "Owner is required."),
+    Response: z.enum(["Under Review", "In Progress", "Closed"]),
+    Impact: z.enum(["Low", "Medium", "High"], { required_error: "Impact is required." }),
+    "Impact ($)": z.coerce.number().optional(),
+    Priority: z.enum(["Low", "Medium", "High", "Critical", "(1) High"], { required_error: "Priority is required." }),
+    ProjectName: z.string().min(1, "Project Name is required."),
+    Status: z.enum(["Open", "Resolved", "Escalated", "Closed"], { required_error: "Status is required." }),
 });
 
 type IssueFormProps = {
@@ -92,23 +92,18 @@ export function IssueForm({ products }: IssueFormProps) {
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
     defaultValues: {
-      month: "",
-      title: "",
-      discussion: "",
-      owner: "",
-      projectName: "",
-      portfolio: "",
-      resolution: "",
-      impactValue: 0,
-      category: undefined,
-      response: undefined,
-      impact: undefined,
-      priority: undefined,
-      status: undefined,
+      Month: "",
+      Title: "",
+      Discussion: "",
+      Owner: "",
+      ProjectName: "",
+      Portfolio: "",
+      Resolution: "",
+      "Impact ($)": 0,
     },
   });
 
-  const discussionValue = form.watch("discussion");
+  const discussionValue = form.watch("Discussion");
   const debouncedDiscussion = useDebounce(discussionValue, 500);
 
   React.useEffect(() => {
@@ -150,15 +145,15 @@ export function IssueForm({ products }: IssueFormProps) {
   }
 
   const handleUseMatchedIssue = (matchedIssue: NonNullable<Suggestion['matchedIssue']>) => {
-    form.setValue("discussion", matchedIssue.discussion);
-    if (matchedIssue.resolution) form.setValue("resolution", matchedIssue.resolution);
+    form.setValue("Discussion", matchedIssue.discussion);
+    if (matchedIssue.resolution) form.setValue("Resolution", matchedIssue.resolution);
     setSuggestion(null);
     setRephrasedDiscussion(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched issue data." });
   }
 
   const onSubmit = async (values: z.infer<typeof issueFormSchema>) => {
-    const result = await createIssue(values);
+    const result = await createIssue(values as any);
     if (result.success) {
       toast({ title: "Success", description: "New issue created." });
       form.reset();
@@ -184,7 +179,7 @@ export function IssueForm({ products }: IssueFormProps) {
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
-                            name="month"
+                            name="Month"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Month</FormLabel>
@@ -197,7 +192,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="category"
+                            name="Category New"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Category</FormLabel>
@@ -208,6 +203,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                     </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
+                                        <SelectItem value="(15) Budget">(15) Budget</SelectItem>
                                         <SelectItem value="Technical">Technical</SelectItem>
                                         <SelectItem value="Contractual">Contractual</SelectItem>
                                         <SelectItem value="Resource">Resource</SelectItem>
@@ -220,7 +216,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="projectName"
+                            name="ProjectName"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Project Name</FormLabel>
@@ -233,7 +229,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="portfolio"
+                            name="Portfolio"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Portfolio</FormLabel>
@@ -246,7 +242,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="title"
+                            name="Title"
                             render={({ field }) => (
                                 <FormItem className="col-span-full">
                                 <FormLabel>Title</FormLabel>
@@ -260,7 +256,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         <div className="col-span-full space-y-2">
                             <FormField
                                 control={form.control}
-                                name="discussion"
+                                name="Discussion"
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Discussion</FormLabel>
@@ -304,7 +300,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                         <p>Consider rephrasing for clarity:</p>
                                         <p className="italic my-2 p-2 bg-muted rounded">"{rephrasedDiscussion || suggestion.rephrasedDescription}"</p>
                                         <Button type="button" size="sm" onClick={() => {
-                                            form.setValue("discussion", rephrasedDiscussion || suggestion.rephrasedDescription || '');
+                                            form.setValue("Discussion", rephrasedDiscussion || suggestion.rephrasedDescription || '');
                                             setRephrasedDiscussion(null);
                                             setSuggestion(null);
                                         }}>Use Suggestion</Button>
@@ -315,7 +311,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         <div className="col-span-full space-y-2">
                             <FormField
                                 control={form.control}
-                                name="resolution"
+                                name="Resolution"
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Resolution</FormLabel>
@@ -342,7 +338,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                     Click to use a suggestion.
                                     <ul className="list-disc pl-5 mt-2 space-y-1">
                                         {resolutionSuggestions.map((s, i) => (
-                                        <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("resolution", s)}>
+                                        <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("Resolution", s)}>
                                             {s}
                                         </li>
                                         ))}
@@ -362,7 +358,7 @@ export function IssueForm({ products }: IssueFormProps) {
                     <CardContent className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="owner"
+                            name="Owner"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Owner</FormLabel>
@@ -375,7 +371,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="dueDate"
+                            name="Due Date"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                 <FormLabel>Due Date</FormLabel>
@@ -414,7 +410,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="status"
+                            name="Status"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Status</FormLabel>
@@ -437,7 +433,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="response"
+                            name="Response"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Response</FormLabel>
@@ -466,7 +462,7 @@ export function IssueForm({ products }: IssueFormProps) {
                     <CardContent className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="impact"
+                            name="Impact"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Impact</FormLabel>
@@ -488,7 +484,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="impactValue"
+                            name="Impact ($)"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Impact Value ($)</FormLabel>
@@ -501,7 +497,7 @@ export function IssueForm({ products }: IssueFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="priority"
+                            name="Priority"
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Priority</FormLabel>
@@ -512,6 +508,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                     </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
+                                        <SelectItem value="(1) High">(1) High</SelectItem>
                                         <SelectItem value="Low">Low</SelectItem>
                                         <SelectItem value="Medium">Medium</SelectItem>
                                         <SelectItem value="High">High</SelectItem>

@@ -67,20 +67,21 @@ import type { Product } from "@/lib/types";
 import { createRisk } from "./actions";
 
 const riskFormSchema = z.object({
-  month: z.string().min(1, "Month is required"),
-  projectCode: z.string().min(1, "Project Code is required"),
-  riskStatus: z.enum(["Open", "Closed", "Mitigated", "Transferred"]),
-  description: z
+  Month: z.string().min(1, "Month is required"),
+  "Project Code": z.string().min(1, "Project Code is required"),
+  "Risk Status": z.enum(["Open", "Closed", "Mitigated", "Transferred"]),
+  Description: z
     .string()
     .min(10, "Description must be at least 10 characters."),
-  probability: z.coerce.number().min(0).max(1),
-  impactRating: z.coerce.number().min(0.05).max(0.8),
-  mitigationPlan: z.string().optional(),
-  contingencyPlan: z.string().optional(),
-  impactValue: z.coerce.number().min(0),
-  budgetContingency: z.coerce.number().min(0),
-  owner: z.string().optional(),
-  dueDate: z.date().optional(),
+  Probability: z.coerce.number().min(0).max(1),
+  "Imapct Rating (0.05-0.8)": z.coerce.number().min(0.05).max(0.8),
+  MitigationPlan: z.string().optional(),
+  ContingencyPlan: z.string().optional(),
+  "Impact Value ($)": z.coerce.number().min(0),
+  "Budget Contingency": z.coerce.number().min(0),
+  Owner: z.string().optional(),
+  DueDate: z.date().optional(),
+  Title: z.string().min(5, "Title must be at least 5 characters."),
 });
 
 type RiskFormProps = {
@@ -135,26 +136,27 @@ export function RiskForm({ products }: RiskFormProps) {
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
     defaultValues: {
-      month: "",
-      projectCode: "",
-      riskStatus: "Open",
-      description: "",
-      probability: 0.2,
-      impactRating: 0.05,
-      mitigationPlan: "",
-      contingencyPlan: "",
-      impactValue: 0,
-      budgetContingency: 0,
-      owner: "",
+      Month: "",
+      "Project Code": "",
+      "Risk Status": "Open",
+      Description: "",
+      Probability: 0.2,
+      "Imapct Rating (0.05-0.8)": 0.05,
+      MitigationPlan: "",
+      ContingencyPlan: "",
+      "Impact Value ($)": 0,
+      "Budget Contingency": 0,
+      Owner: "",
+      Title: "",
     },
   });
 
-  const projectCode = form.watch("projectCode");
-  const probability = form.watch("probability");
-  const impactRating = form.watch("impactRating");
-  const impactValue = form.watch("impactValue");
-  const budgetContingency = form.watch("budgetContingency");
-  const descriptionValue = form.watch("description");
+  const projectCode = form.watch("Project Code");
+  const probability = form.watch("Probability");
+  const impactRating = form.watch("Imapct Rating (0.05-0.8)");
+  const impactValue = form.watch("Impact Value ($)");
+  const budgetContingency = form.watch("Budget Contingency");
+  const descriptionValue = form.watch("Description");
 
   const debouncedDescription = useDebounce(descriptionValue, 500);
 
@@ -249,14 +251,14 @@ export function RiskForm({ products }: RiskFormProps) {
         bidVA: project.value * 0.11, // mock data
         endUser: "Client Inc.", // mock data
       });
-      form.setValue("projectCode", project.code);
+      form.setValue("Project Code", project.code);
     } else {
       setAutoFillData(null);
     }
   }, [projectCode, products, form]);
 
   const onSubmit = async (values: z.infer<typeof riskFormSchema>) => {
-    const result = await createRisk(values);
+    const result = await createRisk(values as any); // Cast to any to avoid type issues with spaced keys
     if (result.success) {
       toast({ title: "Success", description: "New risk created." });
       form.reset();
@@ -271,11 +273,11 @@ export function RiskForm({ products }: RiskFormProps) {
   };
 
   const handleUseMatchedRisk = (matchedRisk: NonNullable<Suggestion['matchedRisk']>) => {
-    form.setValue("description", matchedRisk.description);
-    if (matchedRisk.mitigationPlan) form.setValue("mitigationPlan", matchedRisk.mitigationPlan);
-    if (matchedRisk.contingencyPlan) form.setValue("contingencyPlan", matchedRisk.contingencyPlan);
-    if (matchedRisk.probability) form.setValue("probability", matchedRisk.probability);
-    if (matchedRisk.impactRating) form.setValue("impactRating", matchedRisk.impactRating);
+    form.setValue("Description", matchedRisk.description);
+    if (matchedRisk.mitigationPlan) form.setValue("MitigationPlan", matchedRisk.mitigationPlan);
+    if (matchedRisk.contingencyPlan) form.setValue("ContingencyPlan", matchedRisk.contingencyPlan);
+    if (matchedRisk.probability) form.setValue("Probability", matchedRisk.probability);
+    if (matchedRisk.impactRating) form.setValue("Imapct Rating (0.05-0.8)", matchedRisk.impactRating);
     setSuggestion(null);
     setRephrasedDescription(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched risk data." });
@@ -296,7 +298,7 @@ export function RiskForm({ products }: RiskFormProps) {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="month"
+                  name="Month"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Month</FormLabel>
@@ -310,7 +312,7 @@ export function RiskForm({ products }: RiskFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="projectCode"
+                  name="Project Code"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project Code</FormLabel>
@@ -341,7 +343,7 @@ export function RiskForm({ products }: RiskFormProps) {
                                     value={product.code}
                                     key={product.id}
                                     onSelect={() => {
-                                      form.setValue("projectCode", product.code);
+                                      form.setValue("Project Code", product.code);
                                     }}
                                   >
                                     <Check
@@ -364,11 +366,25 @@ export function RiskForm({ products }: RiskFormProps) {
                     </FormItem>
                   )}
                 />
+                
+                <FormField
+                    control={form.control}
+                    name="Title"
+                    render={({ field }) => (
+                        <FormItem className="col-span-full">
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                            <Input placeholder="A short, clear risk headline" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <div className="col-span-full space-y-2">
                   <FormField
                     control={form.control}
-                    name="description"
+                    name="Description"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Description</FormLabel>
@@ -416,7 +432,7 @@ export function RiskForm({ products }: RiskFormProps) {
                             <p>Consider rephrasing for clarity:</p>
                             <p className="italic my-2 p-2 bg-muted rounded">"{rephrasedDescription || suggestion.rephrasedDescription}"</p>
                             <Button type="button" size="sm" onClick={() => {
-                                form.setValue("description", rephrasedDescription || suggestion.rephrasedDescription || '');
+                                form.setValue("Description", rephrasedDescription || suggestion.rephrasedDescription || '');
                                 setRephrasedDescription(null);
                                 setSuggestion(null);
                             }}>Use Suggestion</Button>
@@ -438,7 +454,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 <div className="space-y-2">
                     <FormField
                     control={form.control}
-                    name="mitigationPlan"
+                    name="MitigationPlan"
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Mitigation Plan</FormLabel>
@@ -468,7 +484,7 @@ export function RiskForm({ products }: RiskFormProps) {
                             Click to use a suggestion.
                             <ul className="list-disc pl-5 mt-2 space-y-1">
                                 {mitigationSuggestions.map((s, i) => (
-                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("mitigationPlan", s)}>
+                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("MitigationPlan", s)}>
                                     {s}
                                 </li>
                                 ))}
@@ -480,7 +496,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 <div className="space-y-2">
                     <FormField
                     control={form.control}
-                    name="contingencyPlan"
+                    name="ContingencyPlan"
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Contingency Plan</FormLabel>
@@ -510,7 +526,7 @@ export function RiskForm({ products }: RiskFormProps) {
                             Click to use a suggestion.
                             <ul className="list-disc pl-5 mt-2 space-y-1">
                                 {contingencySuggestions.map((s, i) => (
-                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("contingencyPlan", s)}>
+                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("ContingencyPlan", s)}>
                                     {s}
                                 </li>
                                 ))}
@@ -531,7 +547,7 @@ export function RiskForm({ products }: RiskFormProps) {
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="riskStatus"
+                  name="Risk Status"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Risk Status</FormLabel>
@@ -557,7 +573,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="owner"
+                  name="Owner"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Owner</FormLabel>
@@ -570,7 +586,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="dueDate"
+                  name="DueDate"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Due Date</FormLabel>
@@ -643,7 +659,7 @@ export function RiskForm({ products }: RiskFormProps) {
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="probability"
+                  name="Probability"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Probability (0-1)</FormLabel>
@@ -656,7 +672,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="impactRating"
+                  name="Imapct Rating (0.05-0.8)"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Impact Rating (0.05-0.8)</FormLabel>
@@ -669,7 +685,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="impactValue"
+                  name="Impact Value ($)"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Impact Value ($)</FormLabel>
@@ -682,7 +698,7 @@ export function RiskForm({ products }: RiskFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="budgetContingency"
+                  name="Budget Contingency"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Budget Contingency ($)</FormLabel>

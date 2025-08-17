@@ -21,7 +21,6 @@ export function DataTableToolbar<TData>({
     value: product.name,
   }));
 
-  // Simplified logic to handle statuses for different views
   const tableId = (table.options.meta as any)?.tableId;
   let statusOptions = statuses;
   if (tableId === 'risks') {
@@ -36,9 +35,9 @@ export function DataTableToolbar<TData>({
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder="Filter by title..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("Title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
+            table.getColumn("Title")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
@@ -49,16 +48,16 @@ export function DataTableToolbar<TData>({
             options={riskTypes}
           />
         )}
-        {table.getColumn("status") && (
+        {table.getColumn("Status") && (
           <DataTableFacetedFilter
-            column={table.getColumn("status")}
+            column={table.getColumn("Status")}
             title="Status"
             options={statusOptions}
           />
         )}
-        {table.getColumn("priority") && (
+        {table.getColumn("Priority") && (
           <DataTableFacetedFilter
-            column={table.getColumn("priority")}
+            column={table.getColumn("Priority")}
             title="Priority"
             options={priorities}
           />

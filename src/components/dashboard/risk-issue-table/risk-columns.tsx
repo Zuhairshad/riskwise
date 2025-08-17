@@ -18,19 +18,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 
-// This is a mock update function. In a real app, this would be an API call.
 async function updateField(id: string, field: string, value: any) {
   console.log(`Updating ${field} for item ${id} to ${value}`);
-  // Here you would connect to your backend to update the database
-  // Example: await fetch(`/api/risks/${id}`, { method: 'PATCH', body: JSON.stringify({ [field]: value }) });
   await new Promise(resolve => setTimeout(resolve, 500));
-  // In a real app, you might want to return the updated item
   return { success: true };
 }
 
 export const riskColumns: ColumnDef<RiskIssue>[] = [
   {
-    accessorKey: "description",
+    accessorKey: "Description",
     header: ({ column }) => {
       return (
         <Button
@@ -43,23 +39,23 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("description")}</div>
+      <div className="w-[250px] truncate font-medium">{row.getValue("Description")}</div>
     ),
   },
     {
-    accessorKey: "riskStatus",
+    accessorKey: "Risk Status",
     header: "Status",
-    id: "status",
+    id: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.original.riskStatus);
+      const status = statuses.find((s) => s.value === row.original["Risk Status"]);
 
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'riskStatus', newStatus);
+        const result = await updateField(row.original.id, 'Risk Status', newStatus);
         if(result.success){
-          toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
+          toast({ title: "Status Updated", description: `Status for "${row.original.Title}" updated to ${newStatus}.`});
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
         }
@@ -86,11 +82,11 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
+      return value.includes(row.original["Risk Status"]);
     },
   },
   {
-    accessorKey: "projectCode",
+    accessorKey: "Project Code",
     id: "product",
     header: ({ column }) => {
       return (
@@ -105,10 +101,10 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
     cell: ({ row }) => {
       const { toast } = useToast();
-      const currentProduct = products.find(p => p.code === row.original.projectCode);
+      const currentProduct = products.find(p => p.code === row.original["Project Code"]);
 
       const handleProductChange = async (newProductCode: string) => {
-        const result = await updateField(row.original.id, 'projectCode', newProductCode);
+        const result = await updateField(row.original.id, 'Project Code', newProductCode);
         if (result.success) {
           toast({ title: "Product Updated" });
         } else {
@@ -116,7 +112,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
         }
       };
       
-      if (!currentProduct) return  row.original.projectCode;
+      if (!currentProduct) return  row.original["Project Code"];
 
       return (
         <Select defaultValue={currentProduct.code} onValueChange={handleProductChange}>
@@ -134,55 +130,54 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      const product = products.find(p => p.code === row.original.projectCode)
+      const product = products.find(p => p.code === row.original["Project Code"])
       return value.includes(product?.name);
     },
   },
   {
-    accessorKey: "owner",
+    accessorKey: "Owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("owner") || 'N/A'}</div>,
+    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("Owner") || 'N/A'}</div>,
   },
   {
-    accessorKey: "dueDate",
+    accessorKey: "DueDate",
     header: "Due Date",
     cell: ({ row }) => {
-      const date = row.getValue("dueDate");
+      const date = row.getValue("DueDate");
+       if (!date) return 'N/A';
       try {
         const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
-        return date ? format(d, "dd/MM/yyyy") : 'N/A';
+        return format(d, "dd/MM/yyyy");
       } catch (error) {
-        if (date && typeof (date as any).toDate === 'function') {
-          return format((date as any).toDate(), "dd/MM/yyyy");
-        }
         return 'Invalid Date';
       }
     },
   },
   {
-    accessorKey: "probability",
+    accessorKey: "Probability",
     header: "Probability",
     cell: ({ row }) => {
-      const prob = row.getValue("probability") as number;
-      return `${(prob * 100).toFixed(0)}%`;
+      const prob = row.getValue("Probability") as number;
+      return prob ? `${(prob * 100).toFixed(0)}%` : 'N/A';
     },
   },
   {
-    accessorKey: "impactRating",
+    accessorKey: "Imapct Rating (0.05-0.8)",
     header: "Impact",
     cell: ({ row }) => {
-       return row.original.impactRating?.toFixed(2) ?? 'N/A';
+       const impact = row.getValue("Imapct Rating (0.05-0.8)") as number;
+       return impact?.toFixed(2) ?? 'N/A';
     },
   },
    {
-    accessorKey: "mitigationPlan",
+    accessorKey: "MitigationPlan",
     header: "Mitigation Plan",
-    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("mitigationPlan") || 'N/A'}</div>,
+    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("MitigationPlan") || 'N/A'}</div>,
   },
   {
-    accessorKey: "contingencyPlan",
+    accessorKey: "ContingencyPlan",
     header: "Contingency Plan",
-    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("contingencyPlan") || 'N/A'}</div>,
+    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("ContingencyPlan") || 'N/A'}</div>,
   },
   {
     id: "actions",

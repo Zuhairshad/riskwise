@@ -10,9 +10,9 @@ export type Product = {
 };
 
 export type Status = "Open" | "In Progress" | "Resolved" | "Closed" | "Mitigated" | "Transferred" | "Escalated";
-export type Priority = "Low" | "Medium" | "High" | "Critical";
+export type Priority = "Low" | "Medium" | "High" | "Critical" | "(1) High";
 export type RiskType = "Risk" | "Issue";
-export type IssueCategory = "Technical" | "Contractual" | "Resource" | "Schedule";
+export type IssueCategory = "Technical" | "Contractual" | "Resource" | "Schedule" | "(15) Budget";
 export type IssueImpact = "Low" | "Medium" | "High";
 export type IssueResponse = "Under Review" | "In Progress" | "Closed";
 
@@ -21,34 +21,37 @@ export type RiskIssue = {
   id: string;
   _id: string; // From MongoDB
   type: RiskType;
-  title: string;
-  description: string;
+  Title: string;
+  Description?: string; // From Risk
+  Discussion?: string; // From Issue
   product: Product;
-  status: Status;
-  priority: Priority;
+  Status: Status;
+  "Risk Status"?: Status;
+  Priority: Priority;
   
   // Risk-specific fields
-  probability?: number;
-  impactRating?: number; // 0.05-0.8
-  mitigationPlan?: string;
-  contingencyPlan?: string;
-  impactValue?: number;
-  budgetContingency?: number;
+  "Project Code"?: string;
+  Probability?: number;
+  "Imapct Rating (0.05-0.8)"?: number;
+  MitigationPlan?: string;
+  ContingencyPlan?: string;
+  "Impact Value ($)"?: number;
+  "Budget Contingency"?: number;
   
   // Issue-specific fields
-  category?: IssueCategory;
-  resolution?: string;
-  impact?: IssueImpact;
-  response?: IssueResponse;
-  discussion?: string;
-  projectName?: string;
+  "Category New"?: IssueCategory;
+  Resolution?: string;
+  Impact?: IssueImpact;
+  Response?: IssueResponse | null;
+  ProjectName?: string;
 
 
   // Common fields
-  owner?: string;
-  dueDate?: string; // Using string for simplicity, can be Date
+  Owner?: string;
+  DueDate?: string; // Using string for simplicity, can be Date
+  "Due Date"?: string;
   createdAt: string;
-  createdBy?: string; // Made optional as it's not in the schema
+  createdBy?: string;
 };
 
 

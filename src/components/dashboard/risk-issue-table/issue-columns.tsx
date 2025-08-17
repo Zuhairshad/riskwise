@@ -18,19 +18,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 
-// This is a mock update function. In a real app, this would be an API call.
 async function updateField(id: string, field: string, value: any) {
   console.log(`Updating ${field} for item ${id} to ${value}`);
-  // Here you would connect to your backend to update the database
-  // Example: await fetch(`/api/risks/${id}`, { method: 'PATCH', body: JSON.stringify({ [field]: value }) });
   await new Promise(resolve => setTimeout(resolve, 500));
-  // In a real app, you might want to return the updated item
   return { success: true };
 }
 
 export const issueColumns: ColumnDef<RiskIssue>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "Title",
     header: ({ column }) => {
       return (
         <Button
@@ -43,22 +39,22 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("title")}</div>
+      <div className="w-[250px] truncate font-medium">{row.getValue("Title")}</div>
     ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.getValue("status"));
+      const status = statuses.find((s) => s.value === row.getValue("Status"));
 
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'status', newStatus);
+        const result = await updateField(row.original.id, 'Status', newStatus);
         if(result.success){
-          toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
+          toast({ title: "Status Updated", description: `Status for "${row.original.Title}" updated to ${newStatus}.`});
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
         }
@@ -90,17 +86,17 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "priority",
+    accessorKey: "Priority",
     header: "Priority",
     cell: ({ row }) => {
        const { toast } = useToast();
-      const priority = priorities.find((p) => p.value === row.getValue("priority"));
+      const priority = priorities.find((p) => p.value === row.getValue("Priority"));
       if (!priority) return null;
 
       const handlePriorityChange = async (newPriority: Priority) => {
-        const result = await updateField(row.original.id, 'priority', newPriority);
+        const result = await updateField(row.original.id, 'Priority', newPriority);
         if (result.success) {
-          toast({ title: "Priority Updated", description: `Priority for "${row.original.title}" updated to ${newPriority}.`});
+          toast({ title: "Priority Updated", description: `Priority for "${row.original.Title}" updated to ${newPriority}.`});
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update priority."});
         }
@@ -129,7 +125,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "projectName",
+    accessorKey: "ProjectName",
     id: "product",
     header: ({ column }) => {
       return (
@@ -144,10 +140,10 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
     },
     cell: ({ row }) => {
         const { toast } = useToast();
-        const currentProduct = products.find(p => p.name === row.original.projectName);
+        const currentProduct = products.find(p => p.name === row.original.ProjectName);
   
         const handleProductChange = async (newProductName: string) => {
-          const result = await updateField(row.original.id, 'projectName', newProductName);
+          const result = await updateField(row.original.id, 'ProjectName', newProductName);
           if (result.success) {
             toast({ title: "Product Updated" });
           } else {
@@ -155,7 +151,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
           }
         };
         
-        if (!currentProduct) return  row.original.projectName;
+        if (!currentProduct) return  row.original.ProjectName;
   
         return (
           <Select defaultValue={currentProduct.name} onValueChange={handleProductChange}>
@@ -173,47 +169,46 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
         )
       },
     filterFn: (row, id, value) => {
-      return value.includes(row.original.projectName);
+      return value.includes(row.original.ProjectName);
     },
   },
   {
-    accessorKey: "owner",
+    accessorKey: "Owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("owner") || 'N/A'}</div>,
+    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("Owner") || 'N/A'}</div>,
   },
   {
-    accessorKey: "dueDate",
+    accessorKey: "Due Date",
     header: "Due Date",
     cell: ({ row }) => {
-      const date = row.getValue("dueDate");
+      const date = row.getValue("Due Date");
+      if (!date) return 'N/A';
       try {
         const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
-        return date ? format(d, "dd/MM/yyyy") : 'N/A';
+        return format(d, "dd/MM/yyyy");
       } catch (error) {
-        if (date && typeof (date as any).toDate === 'function') {
-          return format((date as any).toDate(), "dd/MM/yyyy");
-        }
         return 'Invalid Date';
       }
     },
   },
     {
-    accessorKey: "impact",
+    accessorKey: "Impact",
     header: "Impact",
     cell: ({ row }) => {
-       return row.original.impact ?? 'N/A';
+       return row.original.Impact ?? 'N/A';
     },
   },
   {
-    accessorKey: "category",
+    accessorKey: "Category New",
     header: "Category",
+    id: "category",
     cell: ({ row }) => {
         const { toast } = useToast();
        const category = issueCategories.find((c) => c.value === row.getValue("category"));
        if (!category) return null;
  
        const handleCategoryChange = async (newCategory: string) => {
-         const result = await updateField(row.original.id, 'category', newCategory);
+         const result = await updateField(row.original.id, 'Category New', newCategory);
          if (result.success) {
            toast({ title: "Category Updated" });
          } else {
