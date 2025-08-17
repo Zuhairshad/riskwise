@@ -35,8 +35,10 @@ export async function autofillIssueForm(input: { title?: string, projectName?: s
     let q;
 
     if (input.title) {
+        // Query by the exact title.
         q = query(issuesRef, where('Title', '==', input.title), limit(1));
     } else if (input.projectName) {
+        // Query by the exact project name.
         q = query(issuesRef, where('ProjectName', '==', input.projectName), limit(1));
     } else {
          return { matchedIssue: null };
@@ -48,9 +50,8 @@ export async function autofillIssueForm(input: { title?: string, projectName?: s
         return { matchedIssue: null };
     }
 
-    const matchedIssue = {id: snapshot.docs[0].id, ...snapshot.docs[0].data()};
+    const docData = snapshot.docs[0].data();
+    const matchedIssue = {id: snapshot.docs[0].id, ...docData};
 
     return { matchedIssue };
 }
-
-    

@@ -61,16 +61,16 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const issueFormSchema = z.object({
     Month: z.string().min(1, "Month is required"),
-    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule"], { required_error: "Category is required." }),
+    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule", "(13) Supply"], { required_error: "Category is required." }),
     Portfolio: z.string().optional(),
     Title: z.string().min(5, "Title must be at least 5 characters."),
     Discussion: z.string().min(10, "Discussion must be at least 10 characters."),
     Resolution: z.string().optional(),
     "Due Date": z.date().optional(),
     Owner: z.string().min(1, "Owner is required."),
-    Response: z.enum(["Under Review", "In Progress", "Closed"]),
-    Impact: z.enum(["Low", "Medium", "High"], { required_error: "Impact is required." }),
-    "Impact ($)": z.coerce.number().optional(),
+    Response: z.enum(["Under Review", "In Progress", "Closed"]).nullable(),
+    Impact: z.enum(["Low", "Medium", "High"]).nullable(),
+    "Impact ($)": z.coerce.number().optional().nullable(),
     Priority: z.enum(["Low", "Medium", "High", "Critical", "(1) High"], { required_error: "Priority is required." }),
     ProjectName: z.string().min(1, "Project Name is required."),
     Status: z.enum(["Open", "Resolved", "Escalated", "Closed"], { required_error: "Status is required." }),
@@ -131,12 +131,14 @@ export function IssueForm({ products }: IssueFormProps) {
       autofillIssueForm({ title: debouncedTitle, projectName: projectNameValue })
         .then((res) => {
           if (res.matchedIssue) {
-            const date = res.matchedIssue['Due Date']?.toDate ? res.matchedIssue['Due Date'].toDate() : undefined;
+            const dateStr = res.matchedIssue['Due Date'];
+            const date = dateStr ? new Date(dateStr) : undefined;
             const matchedData = {
                 ...res.matchedIssue,
                 "Due Date": date,
-                Resolution: res.matchedIssue.Resolution ?? '',
-                Portfolio: res.matchedIssue.Portfolio ?? '',
+                Discussion: res.matchedIssue.Discussion || '',
+                Resolution: res.matchedIssue.Resolution || '',
+                Portfolio: res.matchedIssue.Portfolio || '',
             }
             form.reset(matchedData);
             toast({ title: "Form Auto-filled", description: "Loaded data from an existing issue." });
@@ -255,6 +257,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                         <SelectItem value="Contractual">Contractual</SelectItem>
                                         <SelectItem value="Resource">Resource</SelectItem>
                                         <SelectItem value="Schedule">Schedule</SelectItem>
+                                        <SelectItem value="(13) Supply">(13) Supply</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -328,7 +331,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                 <FormItem>
                                 <FormLabel>Portfolio</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter portfolio" {...field} />
+                                    <Input placeholder="Enter portfolio" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -410,7 +413,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                     <FormItem>
                                     <FormLabel>Resolution</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="Proposed corrective action / solution" {...field} />
+                                        <Textarea placeholder="Proposed corrective action / solution" {...field} value={field.value ?? ''} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -531,7 +534,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Response</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
+                                <Select onValueChange={field.onChange} value={field.value ?? undefined} defaultValue={field.value ?? undefined}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a response" />
@@ -560,7 +563,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Impact</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value ?? undefined} defaultValue={field.value ?? undefined}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select impact level" />
@@ -583,7 +586,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                 <FormItem>
                                 <FormLabel>Impact Value ($)</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="Estimated financial impact" {...field} />
+                                    <Input type="number" placeholder="Estimated financial impact" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -625,5 +628,3 @@ export function IssueForm({ products }: IssueFormProps) {
     </Form>
   );
 }
-
-    

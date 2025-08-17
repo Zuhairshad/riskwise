@@ -1,3 +1,4 @@
+
 "use server";
 
 import { z } from "zod";
@@ -23,16 +24,16 @@ const riskFormSchema = z.object({
 
 const issueFormSchema = z.object({
     Month: z.string().min(1, "Month is required"),
-    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule"]),
+    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule", "(13) Supply"]),
     Portfolio: z.string().optional(),
     Title: z.string().min(5, "Title must be at least 5 characters."),
     Discussion: z.string().min(10, "Discussion must be at least 10 characters."),
     Resolution: z.string().optional(),
     "Due Date": z.date().optional(),
     Owner: z.string().min(1, "Owner is required."),
-    Response: z.enum(["Under Review", "In Progress", "Closed"]),
-    Impact: z.enum(["Low", "Medium", "High"]),
-    "Impact ($)": z.coerce.number().optional(),
+    Response: z.enum(["Under Review", "In Progress", "Closed"]).nullable(),
+    Impact: z.enum(["Low", "Medium", "High"]).nullable(),
+    "Impact ($)": z.coerce.number().optional().nullable(),
     Priority: z.enum(["Low", "Medium", "High", "Critical", "(1) High"]),
     ProjectName: z.string().min(1, "Project Name is required."),
     Status: z.enum(["Open", "Resolved", "Escalated", "Closed"]),
