@@ -46,6 +46,7 @@ async function getDashboardData() {
       (item.type === 'Risk' && products.find((p) => p.code === item["Project Code"])) ||
       (item.type === 'Issue' && products.find((p) => p.name === item.ProjectName)) ||
       products[0],
+    ProjectName: item.ProjectName || (products.find((p) => p.code === item["Project Code"])?.name)
   }));
 
   return {

@@ -80,7 +80,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "Project Code",
+    accessorKey: "ProjectName",
     id: "product",
     header: ({ column }) => {
       return (
@@ -94,12 +94,10 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => {
-      const product = products.find(p => p.code === row.original["Project Code"]);
-      return <div className="w-[180px] truncate">{product?.name || row.original["Project Code"]}</div>;
+      return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
     },
     filterFn: (row, id, value) => {
-      const product = products.find(p => p.code === row.original["Project Code"])
-      return value.includes(product?.name);
+      return value.includes(row.original.ProjectName);
     },
   },
   {

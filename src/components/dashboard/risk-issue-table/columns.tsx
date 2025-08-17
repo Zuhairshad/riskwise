@@ -159,7 +159,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "product.name",
+    accessorKey: "ProjectName",
     id: "product",
     header: ({ column }) => {
       return (
@@ -173,14 +173,10 @@ export const columns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => {
-      const product = row.original.product;
-      if (!product) {
-        return row.original.type === 'Risk' ? row.original["Project Code"] : row.original.ProjectName;
-      }
-      return <div className="w-[180px] truncate">{product.name}</div>;
+      return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.original.product?.name);
+      return value.includes(row.original.ProjectName);
     },
   },
   {

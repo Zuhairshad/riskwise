@@ -134,8 +134,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => {
-        const product = products.find(p => p.name === row.original.ProjectName);
-        return <div className="w-[180px] truncate">{product?.name || row.original.ProjectName}</div>;
+        return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
       },
     filterFn: (row, id, value) => {
       return value.includes(row.original.ProjectName);

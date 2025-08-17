@@ -30,10 +30,7 @@ export function DataTableToolbar<TData>({
     statusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
   }
   
-  const titleColumn = table.getAllColumns().find(c => c.id === "Title");
-  const descriptionColumn = table.getAllColumns().find(c => c.id === "Description");
-  const filterColumn = titleColumn ? "Title" : "Description";
-  
+  const filterColumn = table.getAllColumns().find(c => c.id === "Title") ? "Title" : "Description";
   const statusColumn = table.getAllColumns().find(c => c.id === "Status" || c.id === "Risk Status");
 
 
