@@ -5,9 +5,25 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import type { RiskIssue } from "@/lib/types";
+import type { RiskIssue, Status } from "@/lib/types";
 import { statuses, priorities, riskTypes } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+
+
+// This is a mock update function. In a real app, this would be an API call.
+async function updateStatus(id: string, status: Status) {
+  console.log(`Updating status for item ${id} to ${status}`);
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return { success: true };
+}
 
 export const columns: ColumnDef<RiskIssue>[] = [
   {
@@ -48,13 +64,38 @@ export const columns: ColumnDef<RiskIssue>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
+      const { toast } = useToast();
       const status = statuses.find((s) => s.value === row.getValue("status"));
+
       if (!status) return null;
+      
+      const handleStatusChange = async (newStatus: Status) => {
+        const result = await updateStatus(row.original.id, newStatus);
+        if(result.success){
+          toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
+          // In a real app, you would refetch the data here to show the change.
+          // For this demo, we'll rely on the optimistic UI update.
+        } else {
+          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
+        }
+      };
+
       return (
-        <div className="flex w-[120px] items-center">
-          {status.icon && <status.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-          <span>{status.label}</span>
-        </div>
+        <Select defaultValue={status.value} onValueChange={handleStatusChange}>
+          <SelectTrigger className="w-[140px] h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {statuses.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                <div className="flex items-center">
+                   {s.icon && <s.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                   <span>{s.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       );
     },
     filterFn: (row, id, value) => {
