@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, PlusCircle, ShieldHalf } from "lucide-react";
+import { LayoutDashboard, PlusCircle, ShieldHalf, Bot } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -23,7 +23,7 @@ export function AppSidebar() {
             href="/"
             className="flex items-center gap-2 font-headline text-lg font-semibold text-primary"
           >
-            <ShieldHalf className="h-7 w-7 text-primary" />
+            <Bot className="h-7 w-7 text-primary" />
             <span className="text-sidebar-foreground">RiskWise</span>
           </Link>
         </div>
