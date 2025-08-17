@@ -23,6 +23,7 @@ export function DataTableToolbar<TData>({
 
   const tableId = (table.options.meta as any)?.tableId;
   let statusOptions = statuses;
+  
   if (tableId === 'risks') {
     statusOptions = statuses.filter(s => ["Open", "Closed", "Mitigated", "Transferred"].includes(s.value));
   } else if (tableId === 'issues') {
@@ -69,7 +70,7 @@ export function DataTableToolbar<TData>({
             options={productOptions}
           />
         )}
-        {table.getColumn("category") && (
+        {tableId === 'issues' && table.getColumn("category") && (
           <DataTableFacetedFilter
             column={table.getColumn("category")}
             title="Category"
