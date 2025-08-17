@@ -131,11 +131,14 @@ export function IssueForm({ products }: IssueFormProps) {
       autofillIssueForm({ title: debouncedTitle, projectName: projectNameValue })
         .then((res) => {
           if (res.matchedIssue) {
-            const date = res.matchedIssue['Due Date']?.toDate ? res.matchedIssue['Due Date'].toDate() : new Date();
-            form.reset({
+            const date = res.matchedIssue['Due Date']?.toDate ? res.matchedIssue['Due Date'].toDate() : undefined;
+            const matchedData = {
                 ...res.matchedIssue,
                 "Due Date": date,
-            });
+                Resolution: res.matchedIssue.Resolution ?? '',
+                Portfolio: res.matchedIssue.Portfolio ?? '',
+            }
+            form.reset(matchedData);
             toast({ title: "Form Auto-filled", description: "Loaded data from an existing issue." });
           }
         })

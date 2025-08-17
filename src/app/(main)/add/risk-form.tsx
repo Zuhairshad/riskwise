@@ -172,11 +172,15 @@ export function RiskForm({ products }: RiskFormProps) {
         autofillRiskForm({ title: debouncedTitle, projectCode: projectCode })
         .then((res) => {
             if (res.matchedRisk) {
-            const date = res.matchedRisk.DueDate?.toDate ? res.matchedRisk.DueDate.toDate() : new Date();
-            form.reset({
+            const date = res.matchedRisk.DueDate?.toDate ? res.matchedRisk.DueDate.toDate() : undefined;
+            const matchedData = {
                 ...res.matchedRisk,
                 DueDate: date,
-            });
+                MitigationPlan: res.matchedRisk.MitigationPlan ?? '',
+                ContingencyPlan: res.matchedRisk.ContingencyPlan ?? '',
+                Owner: res.matchedRisk.Owner ?? '',
+            }
+            form.reset(matchedData);
             toast({ title: "Form Auto-filled", description: "Loaded data from an existing risk." });
             }
         })
