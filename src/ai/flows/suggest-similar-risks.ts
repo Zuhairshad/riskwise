@@ -11,9 +11,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { RiskIssue } from '@/lib/types';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
@@ -66,6 +65,7 @@ const prompt = ai.definePrompt({
   3.  If you DO NOT find a similar risk, leave 'matchedRisk' empty. Instead, rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field.
 
   Only return one or the other: either a 'matchedRisk' or a 'rephrasedDescription'.`,
+  model: 'googleai/gemini-1.5-flash',
 });
 
 const suggestSimilarRisksFlow = ai.defineFlow(

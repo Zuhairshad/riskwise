@@ -50,6 +50,7 @@ const prompt = ai.definePrompt({
   Existing Data: {{{existingData}}}
 
   Suggest mitigation strategies that are relevant and effective in addressing the described risk or issue.`,
+  model: 'googleai/gemini-1.5-flash',
 });
 
 const suggestMitigationStrategiesFlow = ai.defineFlow(
