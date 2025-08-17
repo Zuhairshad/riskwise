@@ -4,9 +4,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
-import type { RiskIssue, Status } from "@/lib/types";
-import { statuses, priorities, riskTypes } from "@/lib/data";
+import { ArrowUpDown, Pen, Trash2 } from "lucide-react";
+import type { RiskIssue, Status, Priority, RiskType } from "@/lib/types";
+import { statuses, priorities, riskTypes, products } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -19,9 +19,10 @@ import { useToast } from "@/hooks/use-toast";
 
 
 // This is a mock update function. In a real app, this would be an API call.
-async function updateStatus(id: string, status: Status) {
-  console.log(`Updating status for item ${id} to ${status}`);
+async function updateField(id: string, field: string, value: any) {
+  console.log(`Updating ${field} for item ${id} to ${value}`);
   await new Promise(resolve => setTimeout(resolve, 500));
+  // In a real app, you might want to return the updated item
   return { success: true };
 }
 
@@ -47,13 +48,35 @@ export const columns: ColumnDef<RiskIssue>[] = [
     accessorKey: "type",
     header: "Type",
     cell: ({ row }) => {
+      const { toast } = useToast();
       const type = riskTypes.find((t) => t.value === row.getValue("type"));
       if (!type) return null;
+
+      const handleTypeChange = async (newType: RiskType) => {
+        const result = await updateField(row.original.id, 'type', newType);
+        if (result.success) {
+          toast({ title: "Type Updated", description: `Type for "${row.original.title}" updated to ${newType}.`});
+        } else {
+          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update type."});
+        }
+      };
+
       return (
-        <Badge variant={type.value === 'Risk' ? "secondary" : "destructive"}>
-          {type.icon && <type.icon className="mr-2 h-4 w-4" />}
-          {type.label}
-        </Badge>
+        <Select defaultValue={type.value} onValueChange={handleTypeChange}>
+          <SelectTrigger className="w-[120px] h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {riskTypes.map((t) => (
+              <SelectItem key={t.value} value={t.value}>
+                <div className="flex items-center">
+                   {t.icon && <t.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                   <span>{t.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       );
     },
     filterFn: (row, id, value) => {
@@ -70,11 +93,9 @@ export const columns: ColumnDef<RiskIssue>[] = [
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateStatus(row.original.id, newStatus);
+        const result = await updateField(row.original.id, 'status', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
-          // In a real app, you would refetch the data here to show the change.
-          // For this demo, we'll rely on the optimistic UI update.
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
         }
@@ -106,13 +127,35 @@ export const columns: ColumnDef<RiskIssue>[] = [
     accessorKey: "priority",
     header: "Priority",
     cell: ({ row }) => {
+       const { toast } = useToast();
       const priority = priorities.find((p) => p.value === row.getValue("priority"));
       if (!priority) return null;
+
+      const handlePriorityChange = async (newPriority: Priority) => {
+        const result = await updateField(row.original.id, 'priority', newPriority);
+        if (result.success) {
+          toast({ title: "Priority Updated", description: `Priority for "${row.original.title}" updated to ${newPriority}.`});
+        } else {
+          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update priority."});
+        }
+      };
+
       return (
-        <div className="flex w-[100px] items-center">
-          {priority.icon && <priority.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-          <span>{priority.label}</span>
-        </div>
+        <Select defaultValue={priority.value} onValueChange={handlePriorityChange}>
+          <SelectTrigger className="w-[120px] h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {priorities.map((p) => (
+              <SelectItem key={p.value} value={p.value}>
+                <div className="flex items-center">
+                   {p.icon && <p.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                   <span>{p.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       );
     },
     filterFn: (row, id, value) => {
@@ -133,11 +176,67 @@ export const columns: ColumnDef<RiskIssue>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => (
-      <div className="w-[150px] truncate">{row.getValue("product")}</div>
-    ),
+    cell: ({ row }) => {
+      const { toast } = useToast();
+      const currentProduct = row.original.product;
+
+      const handleProductChange = async (newProductId: string) => {
+        const result = await updateField(row.original.id, 'product', newProductId);
+        if (result.success) {
+          toast({ title: "Product Updated" });
+        } else {
+          toast({ variant: 'destructive', title: "Update Failed"});
+        }
+      };
+      
+      return (
+        <Select defaultValue={currentProduct.id} onValueChange={handleProductChange}>
+           <SelectTrigger className="w-[180px] h-8 text-xs truncate">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {products.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name} ({p.code})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )
+    },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
+    },
+  },
+  {
+    accessorKey: "owner",
+    header: "Owner",
+    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("owner")}</div>,
+  },
+  {
+    accessorKey: "dueDate",
+    header: "Due Date",
+    cell: ({ row }) => {
+      const date = row.getValue("dueDate");
+      return date ? new Date(date as string).toLocaleDateString() : 'N/A';
+    },
+  },
+  {
+    accessorKey: "probability",
+    header: "Probability",
+    cell: ({ row }) => {
+      const prob = row.getValue("probability") as number;
+      return row.original.type === 'Risk' ? `${(prob * 100).toFixed(0)}%` : 'N/A';
+    },
+  },
+  {
+    accessorKey: "impactRating",
+    header: "Impact",
+    cell: ({ row }) => {
+       if (row.original.type === 'Risk') {
+         return row.original.impactRating?.toFixed(2) ?? 'N/A';
+       }
+       return row.original.impact ?? 'N/A';
     },
   },
   {
