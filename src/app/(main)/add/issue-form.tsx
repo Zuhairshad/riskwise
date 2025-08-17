@@ -531,7 +531,7 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Response</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value ?? ''}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a response" />
@@ -625,3 +625,5 @@ export function IssueForm({ products }: IssueFormProps) {
     </Form>
   );
 }
+
+    
