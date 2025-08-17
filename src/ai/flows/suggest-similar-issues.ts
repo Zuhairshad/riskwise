@@ -32,9 +32,10 @@ export type SuggestSimilarIssuesOutput = z.infer<typeof SuggestSimilarIssuesOutp
 
 // Mock function to find similar issue
 const findSimilarIssue = (description: string) => {
+    if (!description) return null;
     const lowercasedDescription = description.toLowerCase();
     // This is a simple mock implementation. A real implementation would use a more sophisticated search.
-    const found = risksAndIssues.find(r => r.type === 'Issue' && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
+    const found = risksAndIssues.find(r => r.type === 'Issue' && r.description && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
     if (found) {
         return {
             id: found.id,
@@ -47,7 +48,6 @@ const findSimilarIssue = (description: string) => {
 }
 
 export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
-  // First, check for existing similar issues in our mock data
   const matchedIssue = findSimilarIssue(input.description);
 
   if (matchedIssue) {
@@ -78,9 +78,8 @@ const suggestSimilarIssuesFlow = ai.defineFlow(
     outputSchema: SuggestSimilarIssuesOutputSchema,
   },
   async input => {
+    // There's no matched issue, so we only expect a rephrased description.
     const {output} = await prompt(input);
-    return output!;
+    return { rephrasedDescription: output?.rephrasedDescription };
   }
 );
-
-    

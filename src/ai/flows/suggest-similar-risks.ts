@@ -35,9 +35,10 @@ export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutput
 
 // Mock function to find similar risk
 const findSimilarRisk = (description: string) => {
+    if (!description) return null;
     const lowercasedDescription = description.toLowerCase();
     // This is a simple mock implementation. A real implementation would use a more sophisticated search.
-    const found = risksAndIssues.find(r => r.type === 'Risk' && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
+    const found = risksAndIssues.find(r => r.type === 'Risk' && r.description && r.description.toLowerCase().includes(lowercasedDescription.substring(0, 50)));
     if (found) {
         return {
             id: found.id,
@@ -86,6 +87,7 @@ const suggestSimilarRisksFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    // When no match is found, we only expect a rephrased description.
+    return { rephrasedDescription: output?.rephrasedDescription };
   }
 );

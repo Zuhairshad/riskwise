@@ -252,6 +252,7 @@ export function RiskForm({ products }: RiskFormProps) {
         endUser: "Client Inc.", // mock data
       });
       form.setValue("Project Code", project.code);
+      form.setValue("Title", project.name); // Auto-fill title
     } else {
       setAutoFillData(null);
     }
