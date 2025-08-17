@@ -17,35 +17,23 @@ const riskFormSchema = z.object({
   dueDate: z.date().optional(),
 });
 
-// a more generic schema for the page
-const formSchema = z.object({
-  title: z.string(),
-  productId: z.string(),
-  type: z.enum(["Risk", "Issue"]),
-  status: z.enum(["Open", "In Progress", "Resolved", "Closed"]),
-  priority: z.enum(["Low", "Medium", "High", "Critical"]),
-  probability: z.number(),
-  impact: z.number(),
-  description: z.string(),
-  mitigationStrategy: z.string().optional(),
+const issueFormSchema = z.object({
+    month: z.string().min(1, "Month is required"),
+    category: z.enum(["Technical", "Contractual", "Resource", "Schedule"]),
+    portfolio: z.string().optional(),
+    title: z.string().min(5, "Title must be at least 5 characters."),
+    discussion: z.string().min(10, "Discussion must be at least 10 characters."),
+    resolution: z.string().optional(),
+    dueDate: z.date().optional(),
+    owner: z.string().min(1, "Owner is required."),
+    response: z.enum(["Under Review", "In Progress", "Closed"]),
+    impact: z.enum(["Low", "Medium", "High"]),
+    impactValue: z.coerce.number().optional(),
+    priority: z.enum(["Low", "Medium", "High", "Critical"]),
+    projectName: z.string().min(1, "Project Name is required."),
+    status: z.enum(["Open", "Resolved", "Escalated", "Closed"]),
 });
 
-
-export async function createRiskIssue(values: z.infer<typeof formSchema>) {
-  const parsed = formSchema.safeParse(values);
-
-  if (!parsed.success) {
-    return { success: false, message: "Invalid data provided." };
-  }
-
-  // In a real application, you would save this data to a database.
-  console.log("New Risk/Issue Created:", parsed.data);
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  return { success: true, message: "Entry created successfully." };
-}
 
 export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     const parsed = riskFormSchema.safeParse(values);
@@ -62,4 +50,21 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   
     return { success: true, message: "Risk created successfully." };
+  }
+
+  export async function createIssue(values: z.infer<typeof issueFormSchema>) {
+    const parsed = issueFormSchema.safeParse(values);
+  
+    if (!parsed.success) {
+      console.error(parsed.error.errors);
+      return { success: false, message: "Invalid data provided." };
+    }
+  
+    // In a real application, you would save this data to a database.
+    console.log("New Issue Created:", parsed.data);
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  
+    return { success: true, message: "Issue created successfully." };
   }
