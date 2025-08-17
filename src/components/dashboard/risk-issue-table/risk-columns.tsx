@@ -4,8 +4,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import type { RiskIssue, Status, Priority, RiskType } from "@/lib/types";
-import { statuses, priorities, riskTypes, products } from "@/lib/data";
+import type { RiskIssue, Status, Priority } from "@/lib/types";
+import { statuses, priorities, products } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -45,24 +45,25 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       <div className="w-[250px] truncate font-medium">{row.getValue("title")}</div>
     ),
   },
-  {
-    accessorKey: "status",
+    {
+    accessorKey: "riskStatus",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.getValue("status"));
+      const status = statuses.find((s) => s.value === row.getValue("riskStatus"));
 
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'status', newStatus);
+        const result = await updateField(row.original.id, 'riskStatus', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
-          // Note: You might need to refresh your data source here to see the change reflected permanently.
         } else {
           toast({ variant: 'destructive', title: "Update Failed", description: "Could not update status."});
         }
       };
+
+      const riskStatuses = statuses.filter(s => ["Open", "Closed", "Mitigated", "Transferred"].includes(s.value));
 
       return (
         <Select defaultValue={status.value} onValueChange={handleStatusChange}>
@@ -70,7 +71,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {statuses.map((s) => (
+            {riskStatuses.map((s) => (
               <SelectItem key={s.value} value={s.value}>
                 <div className="flex items-center">
                    {s.icon && <s.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
@@ -87,46 +88,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "priority",
-    header: "Priority",
-    cell: ({ row }) => {
-       const { toast } = useToast();
-      const priority = priorities.find((p) => p.value === row.getValue("priority"));
-      if (!priority) return null;
-
-      const handlePriorityChange = async (newPriority: Priority) => {
-        const result = await updateField(row.original.id, 'priority', newPriority);
-        if (result.success) {
-          toast({ title: "Priority Updated", description: `Priority for "${row.original.title}" updated to ${newPriority}.`});
-        } else {
-          toast({ variant: 'destructive', title: "Update Failed", description: "Could not update priority."});
-        }
-      };
-
-      return (
-        <Select defaultValue={priority.value} onValueChange={handlePriorityChange}>
-          <SelectTrigger className="w-[120px] h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {priorities.map((p) => (
-              <SelectItem key={p.value} value={p.value}>
-                <div className="flex items-center">
-                   {p.icon && <p.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                   <span>{p.label}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: "product.name",
+    accessorKey: "projectCode",
     id: "product",
     header: ({ column }) => {
       return (
@@ -141,10 +103,10 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
     cell: ({ row }) => {
       const { toast } = useToast();
-      const currentProduct = row.original.product;
+      const currentProduct = products.find(p => p.code === row.original.projectCode);
 
-      const handleProductChange = async (newProductId: string) => {
-        const result = await updateField(row.original.id, 'product', newProductId);
+      const handleProductChange = async (newProductCode: string) => {
+        const result = await updateField(row.original.id, 'projectCode', newProductCode);
         if (result.success) {
           toast({ title: "Product Updated" });
         } else {
@@ -152,14 +114,16 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
         }
       };
       
+      if (!currentProduct) return  row.original.projectCode;
+
       return (
-        <Select defaultValue={currentProduct.id} onValueChange={handleProductChange}>
+        <Select defaultValue={currentProduct.code} onValueChange={handleProductChange}>
            <SelectTrigger className="w-[180px] h-8 text-xs truncate">
-            <SelectValue />
+            <SelectValue placeholder="Select Product" />
           </SelectTrigger>
           <SelectContent>
             {products.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
+              <SelectItem key={p.id} value={p.code}>
                 {p.name} ({p.code})
               </SelectItem>
             ))}
@@ -168,9 +132,8 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      // This filter is tricky because product is an object.
-      // We'll filter based on the product's name.
-      return value.includes(row.original.product.name);
+      const product = products.find(p => p.code === row.original.projectCode)
+      return value.includes(product?.name);
     },
   },
   {
@@ -187,7 +150,6 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
         const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
         return date ? format(d, "dd/MM/yyyy") : 'N/A';
       } catch (error) {
-        // Fallback for Firestore Timestamps that might not be converted yet
         if (date && typeof (date as any).toDate === 'function') {
           return format((date as any).toDate(), "dd/MM/yyyy");
         }
@@ -200,17 +162,14 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     header: "Probability",
     cell: ({ row }) => {
       const prob = row.getValue("probability") as number;
-      return row.original.type === 'Risk' ? `${(prob * 100).toFixed(0)}%` : 'N/A';
+      return `${(prob * 100).toFixed(0)}%`;
     },
   },
   {
     accessorKey: "impactRating",
     header: "Impact",
     cell: ({ row }) => {
-       if (row.original.type === 'Risk') {
-         return row.original.impactRating?.toFixed(2) ?? 'N/A';
-       }
-       return row.original.impact ?? 'N/A';
+       return row.original.impactRating?.toFixed(2) ?? 'N/A';
     },
   },
   {

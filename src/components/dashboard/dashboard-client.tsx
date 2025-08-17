@@ -7,6 +7,7 @@ import { StatsCards } from "./stats-cards";
 import { DataTable } from "./risk-issue-table/data-table";
 import { columns } from "./risk-issue-table/columns";
 import { riskColumns } from "./risk-issue-table/risk-columns";
+import { issueColumns } from "./risk-issue-table/issue-columns";
 import type { RiskIssue } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,7 +70,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
               <DataTable columns={riskColumns} data={risks} />
             </TabsContent>
             <TabsContent value="issues" className="mt-4">
-              <DataTable columns={columns} data={issues} />
+              <DataTable columns={issueColumns} data={issues} />
             </TabsContent>
           </Tabs>
         </CardContent>
