@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { revalidatePath } from "next/cache";
 
 const riskFormSchema = z.object({
   Month: z.string().min(1, "Month is required"),
@@ -47,6 +48,7 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
   
     try {
       await addDoc(collection(db, "risks"), parsed.data);
+      revalidatePath('/');
       return { success: true, message: "Risk created successfully." };
     } catch (error) {
       console.error("Error creating risk:", error);
@@ -64,6 +66,7 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
   
     try {
         await addDoc(collection(db, "issues"), parsed.data);
+        revalidatePath('/');
         return { success: true, message: "Issue created successfully." };
       } catch (error) {
         console.error("Error creating issue:", error);
