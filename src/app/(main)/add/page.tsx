@@ -9,12 +9,50 @@ import { collection, getDocs } from "firebase/firestore";
 
 // This is a server component, so we can fetch data directly.
 async function getPageData() {
-  const productsCollection = collection(db, 'products');
-  const productSnapshot = await getDocs(productsCollection);
-  const products: Product[] = productSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Product[];
+  const risksCollection = collection(db, 'risks');
+  const issuesCollection = collection(db, 'issues');
+  
+  const riskSnapshot = await getDocs(risksCollection);
+  const issueSnapshot = await getDocs(issuesCollection);
+
+  const projectsMap = new Map<string, Product>();
+
+  riskSnapshot.docs.forEach(doc => {
+    const data = doc.data();
+    if (data["Project Code"] && data.ProjectName) {
+      if (!projectsMap.has(data["Project Code"])) {
+        projectsMap.set(data["Project Code"], {
+          id: data["Project Code"],
+          code: data["Project Code"],
+          name: data.ProjectName,
+          paNumber: '', 
+          value: 0, 
+          currentStatus: '', 
+        });
+      }
+    }
+  });
+
+  issueSnapshot.docs.forEach(doc => {
+    const data = doc.data();
+    // Assuming issues might not have a code, but we need one for consistency.
+    // We'll use ProjectName as the key if no code exists.
+    if (data.ProjectName) {
+        const key = data["Project Code"] || data.ProjectName;
+        if (!projectsMap.has(key)) {
+            projectsMap.set(key, {
+                id: key,
+                code: data["Project Code"] || 'N/A',
+                name: data.ProjectName,
+                paNumber: '',
+                value: 0,
+                currentStatus: '',
+            });
+        }
+    }
+  });
+
+  const products: Product[] = Array.from(projectsMap.values());
   
   return {
     products,
