@@ -45,6 +45,7 @@ import { createIssue } from "./actions";
 import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
+import { rephraseDescription } from "@/ai/flows/rephrase-description";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
@@ -85,6 +86,8 @@ export function IssueForm({ products }: IssueFormProps) {
   const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
   const [resolutionSuggestions, setResolutionSuggestions] = React.useState<string[]>([]);
   const [isFetchingResolution, setIsFetchingResolution] = React.useState(false);
+  const [rephrasedDiscussion, setRephrasedDiscussion] = React.useState<string | null>(null);
+  const [isRephrasing, setIsRephrasing] = React.useState(false);
 
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
@@ -111,6 +114,7 @@ export function IssueForm({ products }: IssueFormProps) {
   React.useEffect(() => {
     if (debouncedDiscussion.length > 10) {
       setIsFetchingSuggestion(true);
+      setRephrasedDiscussion(null);
       suggestSimilarIssues({ description: debouncedDiscussion })
         .then((res) => setSuggestion(res))
         .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
@@ -132,10 +136,24 @@ export function IssueForm({ products }: IssueFormProps) {
     }
   };
 
+  const handleRephraseDiscussion = async () => {
+    setIsRephrasing(true);
+    setSuggestion(null); // Clear other suggestions
+    try {
+        const res = await rephraseDescription({ description: discussionValue });
+        setRephrasedDiscussion(res.rephrasedDescription);
+    } catch(error) {
+        toast({ variant: 'destructive', title: 'Failed to rephrase description.'})
+    } finally {
+        setIsRephrasing(false);
+    }
+  }
+
   const handleUseMatchedIssue = (matchedIssue: NonNullable<Suggestion['matchedIssue']>) => {
     form.setValue("discussion", matchedIssue.discussion);
     if (matchedIssue.resolution) form.setValue("resolution", matchedIssue.resolution);
     setSuggestion(null);
+    setRephrasedDiscussion(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched issue data." });
   }
 
@@ -253,6 +271,14 @@ export function IssueForm({ products }: IssueFormProps) {
                                     </FormItem>
                                 )}
                             />
+                            <Button type="button" variant="outline" size="sm" onClick={handleRephraseDiscussion} disabled={isRephrasing || !discussionValue || discussionValue.length < 10}>
+                                {isRephrasing ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                )}
+                                Rephrase with AI
+                            </Button>
                              {isFetchingSuggestion && (
                                 <div className="flex items-center text-sm text-muted-foreground">
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -270,14 +296,18 @@ export function IssueForm({ products }: IssueFormProps) {
                                 </AlertDescription>
                                 </Alert>
                             )}
-                            {suggestion?.rephrasedDescription && (
+                            {(suggestion?.rephrasedDescription || rephrasedDiscussion) && (
                                 <Alert>
                                     <Bot className="h-4 w-4" />
                                     <AlertTitle>AI Suggestion</AlertTitle>
                                     <AlertDescription>
                                         <p>Consider rephrasing for clarity:</p>
-                                        <p className="italic my-2 p-2 bg-muted rounded">"{suggestion.rephrasedDescription}"</p>
-                                        <Button type="button" size="sm" onClick={() => form.setValue("discussion", suggestion.rephrasedDescription || '')}>Use Suggestion</Button>
+                                        <p className="italic my-2 p-2 bg-muted rounded">"{rephrasedDiscussion || suggestion.rephrasedDescription}"</p>
+                                        <Button type="button" size="sm" onClick={() => {
+                                            form.setValue("discussion", rephrasedDiscussion || suggestion.rephrasedDescription || '');
+                                            setRephrasedDiscussion(null);
+                                            setSuggestion(null);
+                                        }}>Use Suggestion</Button>
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -504,5 +534,3 @@ export function IssueForm({ products }: IssueFormProps) {
     </Form>
   );
 }
-
-    

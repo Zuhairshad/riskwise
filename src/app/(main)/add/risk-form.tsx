@@ -53,6 +53,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
+import { rephraseDescription } from "@/ai/flows/rephrase-description";
 import {
   Select,
   SelectContent,
@@ -127,6 +128,9 @@ export function RiskForm({ products }: RiskFormProps) {
   
   const [contingencySuggestions, setContingencySuggestions] = React.useState<string[]>([]);
   const [isFetchingContingency, setIsFetchingContingency] = React.useState(false);
+  
+  const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
+  const [isRephrasing, setIsRephrasing] = React.useState(false);
 
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
@@ -157,6 +161,7 @@ export function RiskForm({ products }: RiskFormProps) {
   React.useEffect(() => {
     if (debouncedDescription.length > 10) {
       setIsFetchingSuggestion(true);
+      setRephrasedDescription(null);
       suggestSimilarRisks({ description: debouncedDescription })
         .then((res) => setSuggestion(res))
         .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
@@ -189,6 +194,19 @@ export function RiskForm({ products }: RiskFormProps) {
       setIsFetchingContingency(false);
     }
   };
+
+  const handleRephraseDescription = async () => {
+    setIsRephrasing(true);
+    setSuggestion(null); // Clear other suggestions
+    try {
+        const res = await rephraseDescription({ description: descriptionValue });
+        setRephrasedDescription(res.rephrasedDescription);
+    } catch(error) {
+        toast({ variant: 'destructive', title: 'Failed to rephrase description.'})
+    } finally {
+        setIsRephrasing(false);
+    }
+  }
 
 
   const riskScore = React.useMemo(
@@ -259,6 +277,7 @@ export function RiskForm({ products }: RiskFormProps) {
     if (matchedRisk.probability) form.setValue("probability", matchedRisk.probability);
     if (matchedRisk.impactRating) form.setValue("impactRating", matchedRisk.impactRating);
     setSuggestion(null);
+    setRephrasedDescription(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched risk data." });
   }
 
@@ -364,6 +383,14 @@ export function RiskForm({ products }: RiskFormProps) {
                       </FormItem>
                     )}
                   />
+                    <Button type="button" variant="outline" size="sm" onClick={handleRephraseDescription} disabled={isRephrasing || !descriptionValue || descriptionValue.length < 10}>
+                        {isRephrasing ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                        )}
+                        Rephrase with AI
+                    </Button>
                   {isFetchingSuggestion && (
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -381,14 +408,18 @@ export function RiskForm({ products }: RiskFormProps) {
                       </AlertDescription>
                     </Alert>
                   )}
-                   {suggestion?.rephrasedDescription && (
+                   {(suggestion?.rephrasedDescription || rephrasedDescription) && (
                     <Alert>
                         <Bot className="h-4 w-4" />
                         <AlertTitle>AI Suggestion</AlertTitle>
                         <AlertDescription>
                             <p>Consider rephrasing for clarity:</p>
-                            <p className="italic my-2 p-2 bg-muted rounded">"{suggestion.rephrasedDescription}"</p>
-                            <Button type="button" size="sm" onClick={() => form.setValue("description", suggestion.rephrasedDescription || '')}>Use Suggestion</Button>
+                            <p className="italic my-2 p-2 bg-muted rounded">"{rephrasedDescription || suggestion.rephrasedDescription}"</p>
+                            <Button type="button" size="sm" onClick={() => {
+                                form.setValue("description", rephrasedDescription || suggestion.rephrasedDescription || '');
+                                setRephrasedDescription(null);
+                                setSuggestion(null);
+                            }}>Use Suggestion</Button>
                         </AlertDescription>
                     </Alert>
                   )}
