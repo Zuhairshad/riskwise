@@ -14,8 +14,8 @@ export default function MainLayout({
 }) {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen">
+        <AppSidebar />
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
             <div className="relative flex-1 max-w-md">
