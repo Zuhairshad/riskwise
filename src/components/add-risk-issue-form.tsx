@@ -463,5 +463,3 @@ export function AddRiskIssueForm({ products }: AddRiskIssueFormProps) {
     </Form>
   );
 }
-
-    

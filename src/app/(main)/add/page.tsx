@@ -1,5 +1,6 @@
 import { AddRiskIssueForm } from "@/components/add-risk-issue-form";
 import { products } from "@/lib/data";
+import { RiskForm } from "./risk-form";
 
 // This is a server component, so we can fetch data directly.
 // In a real application, this would be a database call.
@@ -19,7 +20,7 @@ export default async function AddPage() {
                 Fill out the form below to create a new risk or issue.
             </p>
         </div>
-      <AddRiskIssueForm products={products} />
+      <RiskForm products={products} />
     </div>
   );
 }
