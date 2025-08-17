@@ -2,7 +2,7 @@ import { products } from "@/lib/data";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import type { RiskIssue } from "@/lib/types";
 import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, Timestamp } from "firebase/firestore";
 
 // This is a server component, so we can use mock data directly.
 async function getDashboardData() {
@@ -12,19 +12,29 @@ async function getDashboardData() {
   const riskSnapshot = await getDocs(risksCollection);
   const issueSnapshot = await getDocs(issuesCollection);
 
-  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => ({
+  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      ...data,
       id: doc.id,
       _id: doc.id,
-      ...doc.data(),
-      type: 'Risk'
-  })) as RiskIssue[];
+      type: 'Risk',
+      dueDate: data.dueDate instanceof Timestamp ? data.dueDate.toDate().toISOString() : data.dueDate,
+      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
+    } as unknown as RiskIssue;
+  });
 
-  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => ({
+  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      ...data,
       id: doc.id,
       _id: doc.id,
-      ...doc.data(),
-      type: 'Issue'
-  })) as RiskIssue[];
+      type: 'Issue',
+      dueDate: data.dueDate instanceof Timestamp ? data.dueDate.toDate().toISOString() : data.dueDate,
+      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
+    } as unknown as RiskIssue;
+  });
 
   // Map mock data to include product details
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => ({

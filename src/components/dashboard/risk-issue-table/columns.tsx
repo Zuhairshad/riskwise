@@ -225,8 +225,13 @@ export const columns: ColumnDef<RiskIssue>[] = [
     cell: ({ row }) => {
       const date = row.getValue("dueDate");
       try {
-        return date ? format(new Date(date as string), "dd/MM/yyyy") : 'N/A';
+        const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
+        return date ? format(d, "dd/MM/yyyy") : 'N/A';
       } catch (error) {
+         // Fallback for Firestore Timestamps that might not be converted yet
+        if (date && typeof (date as any).toDate === 'function') {
+          return format((date as any).toDate(), "dd/MM/yyyy");
+        }
         return 'Invalid Date';
       }
     },

@@ -46,21 +46,6 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     ),
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => <div className="w-[300px] truncate">{row.getValue("description")}</div>
-  },
-  {
-    accessorKey: "mitigationPlan",
-    header: "Mitigation Plan",
-    cell: ({ row }) => <div className="w-[300px] truncate">{row.getValue("mitigationPlan")}</div>
-  },
-  {
-    accessorKey: "contingencyPlan",
-    header: "Contingency Plan",
-    cell: ({ row }) => <div className="w-[300px] truncate">{row.getValue("contingencyPlan")}</div>
-  },
-  {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
@@ -199,8 +184,13 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     cell: ({ row }) => {
       const date = row.getValue("dueDate");
       try {
-        return date ? format(new Date(date as string), "dd/MM/yyyy") : 'N/A';
+        const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
+        return date ? format(d, "dd/MM/yyyy") : 'N/A';
       } catch (error) {
+        // Fallback for Firestore Timestamps that might not be converted yet
+        if (date && typeof (date as any).toDate === 'function') {
+          return format((date as any).toDate(), "dd/MM/yyyy");
+        }
         return 'Invalid Date';
       }
     },
