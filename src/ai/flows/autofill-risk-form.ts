@@ -11,13 +11,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const AutofillRiskFormInputSchema = z.object({
   title: z.string().optional().describe('The title of the risk.'),
   projectCode: z.string().optional().describe('The project code.'),
-  existingRisks: z.array(z.any()).describe('A list of existing risks from the database.'),
 });
 export type AutofillRiskFormInput = z.infer<typeof AutofillRiskFormInputSchema>;
 
@@ -27,48 +26,29 @@ const AutofillRiskFormOutputSchema = z.object({
 export type AutofillRiskFormOutput = z.infer<typeof AutofillRiskFormOutputSchema>;
 
 export async function autofillRiskForm(input: { title?: string, projectCode?: string }): Promise<AutofillRiskFormOutput> {
-    const risksRef = collection(db, 'risks');
-    const snapshot = await getDocs(risksRef);
-    const existingRisks = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-    
-    // Only proceed if there's something to match on
+    // This is a simplified search. A real-world app would use a dedicated search service.
     if (!input.title && !input.projectCode) {
         return { matchedRisk: null };
     }
+    
+    const risksRef = collection(db, 'risks');
+    let q;
 
-    return autofillRiskFormFlow({ ...input, existingRisks });
+    if (input.title) {
+        q = query(risksRef, where('Title', '==', input.title), limit(1));
+    } else if (input.projectCode) {
+        q = query(risksRef, where('Project Code', '==', input.projectCode), limit(1));
+    } else {
+        return { matchedRisk: null };
+    }
+
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+        return { matchedRisk: null };
+    }
+
+    const matchedRisk = {id: snapshot.docs[0].id, ...snapshot.docs[0].data()};
+
+    return { matchedRisk };
 }
-
-const prompt = ai.definePrompt({
-  name: 'autofillRiskFormPrompt',
-  input: {schema: AutofillRiskFormInputSchema},
-  output: {schema: AutofillRiskFormOutputSchema},
-  prompt: `You are an expert risk management assistant. Your task is to find the most relevant existing risk from a database based on the user's input.
-
-  User's input:
-  Title: {{{title}}}
-  Project Code: {{{projectCode}}}
-
-  Existing Risks:
-  {{#each existingRisks}}
-  - ID: {{this.id}}, Title: {{this.Title}}, Project Code: {{this.[Project Code]}}, Description: {{this.Description}}
-  {{/each}}
-
-  1.  Analyze the user's input (Title and/or Project Code).
-  2.  Find the SINGLE best match from the 'Existing Risks' list. The match should be very strong. If the user provides both Title and Project Code, the existing risk should ideally match both.
-  3.  If you find a strong match, populate the 'matchedRisk' field with the complete data object of that existing risk.
-  4.  If there is no strong match, return 'matchedRisk' as null. Do not guess or return partial matches.`,
-  model: 'googleai/gemini-1.5-flash',
-});
-
-const autofillRiskFormFlow = ai.defineFlow(
-  {
-    name: 'autofillRiskFormFlow',
-    inputSchema: AutofillRiskFormInputSchema,
-    outputSchema: AutofillRiskFormOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);

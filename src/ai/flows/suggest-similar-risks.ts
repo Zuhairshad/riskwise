@@ -11,12 +11,11 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
-  existingRisks: z.array(z.any()).describe('A list of existing risks from the database.'),
 });
 export type SuggestSimilarRisksInput = z.infer<typeof SuggestSimilarRisksInputSchema>;
 
@@ -38,12 +37,10 @@ export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutput
 
 
 export async function suggestSimilarRisks(input: {description: string}): Promise<SuggestSimilarRisksOutput> {
-  const risksRef = collection(db, 'risks');
-  const snapshot = await getDocs(risksRef);
-  const existingRisks = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-
-  // Now, call the flow with the existing risks
-  return suggestSimilarRisksFlow({ description: input.description, existingRisks: existingRisks });
+  // Since we cannot pass the whole DB, we can't find a match.
+  // We will just rephrase the description.
+  // A more advanced implementation could use a vector DB for similarity search.
+  return suggestSimilarRisksFlow({ description: input.description });
 }
 
 const prompt = ai.definePrompt({
@@ -55,16 +52,9 @@ const prompt = ai.definePrompt({
   A user has entered the following risk description:
   "{{{description}}}"
 
-  Here is a list of existing risks from the database:
-  {{#each existingRisks}}
-  - ID: {{this.id}}, Title: {{this.Title}}, Description: {{this.Description}}
-  {{/each}}
-
-  1.  Analyze the user's description and compare it to the list of existing risks.
-  2.  If you find a substantially similar risk in the list, identify it as a 'matchedRisk'. Populate the 'matchedRisk' object with the data from that existing risk (id, title, description, mitigationPlan, contingencyPlan, probability, impactRating). Use the exact field names: id, title, description, mitigationPlan, contingencyPlan, probability, impactRating.
-  3.  If you DO NOT find a similar risk, leave 'matchedRisk' empty. Instead, rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field.
-
-  Only return one or the other: either a 'matchedRisk' or a 'rephrasedDescription'.`,
+  Your task is to rephrase the user's original description to be clearer, more concise, and professionally worded.
+  
+  Return this improved text in the 'rephrasedDescription' field. Leave 'matchedRisk' empty.`,
   model: 'googleai/gemini-1.5-flash',
 });
 
