@@ -30,33 +30,34 @@ async function updateField(id: string, field: string, value: any) {
 
 export const riskColumns: ColumnDef<RiskIssue>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "description",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Title
+          Description
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("title")}</div>
+      <div className="w-[250px] truncate font-medium">{row.getValue("description")}</div>
     ),
   },
     {
-    accessorKey: "status",
+    accessorKey: "riskStatus",
     header: "Status",
+    id: "status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.original.status);
+      const status = statuses.find((s) => s.value === row.original.riskStatus);
 
       if (!status) return null;
       
       const handleStatusChange = async (newStatus: Status) => {
-        const result = await updateField(row.original.id, 'status', newStatus);
+        const result = await updateField(row.original.id, 'riskStatus', newStatus);
         if(result.success){
           toast({ title: "Status Updated", description: `Status for "${row.original.title}" updated to ${newStatus}.`});
         } else {
@@ -172,6 +173,16 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     cell: ({ row }) => {
        return row.original.impactRating?.toFixed(2) ?? 'N/A';
     },
+  },
+   {
+    accessorKey: "mitigationPlan",
+    header: "Mitigation Plan",
+    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("mitigationPlan") || 'N/A'}</div>,
+  },
+  {
+    accessorKey: "contingencyPlan",
+    header: "Contingency Plan",
+    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("contingencyPlan") || 'N/A'}</div>,
   },
   {
     id: "actions",

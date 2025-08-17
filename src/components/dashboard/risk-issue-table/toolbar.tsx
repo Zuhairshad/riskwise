@@ -21,13 +21,12 @@ export function DataTableToolbar<TData>({
     value: product.name,
   }));
 
+  // Simplified logic to handle statuses for different views
+  const tableId = (table.options.meta as any)?.tableId;
   let statusOptions = statuses;
-  // This logic is a bit of a hack to determine which statuses to show
-  // based on the available columns. A better approach might be to pass the
-  // tableId and filter the statuses based on that.
-  if (table.getColumn("riskStatus")) {
+  if (tableId === 'risks') {
     statusOptions = statuses.filter(s => ["Open", "Closed", "Mitigated", "Transferred"].includes(s.value));
-  } else if (table.getColumn("issueStatus")) {
+  } else if (tableId === 'issues') {
     statusOptions = statuses.filter(s => ["Open", "Resolved", "Escalated", "Closed"].includes(s.value));
   }
 
