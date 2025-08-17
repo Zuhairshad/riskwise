@@ -1,12 +1,21 @@
-import { products } from "@/lib/data";
+
+import type { Product } from "@/lib/types";
 import { RiskForm } from "./risk-form";
 import { IssueForm } from "./issue-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, AlertTriangle } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 // This is a server component, so we can fetch data directly.
-// In a real application, this would be a database call.
 async function getPageData() {
+  const productsCollection = collection(db, 'products');
+  const productSnapshot = await getDocs(productsCollection);
+  const products: Product[] = productSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Product[];
+  
   return {
     products,
   };
