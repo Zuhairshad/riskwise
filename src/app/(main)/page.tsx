@@ -1,14 +1,34 @@
-import { products, risksAndIssues as mockData } from "@/lib/data";
+import { products } from "@/lib/data";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import type { RiskIssue } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 // This is a server component, so we can use mock data directly.
 async function getDashboardData() {
+  const risksCollection = collection(db, 'risks');
+  const issuesCollection = collection(db, 'issues');
+
+  const riskSnapshot = await getDocs(risksCollection);
+  const issueSnapshot = await getDocs(issuesCollection);
+
+  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => ({
+      id: doc.id,
+      _id: doc.id,
+      ...doc.data(),
+      type: 'Risk'
+  })) as RiskIssue[];
+
+  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => ({
+      id: doc.id,
+      _id: doc.id,
+      ...doc.data(),
+      type: 'Issue'
+  })) as RiskIssue[];
+
   // Map mock data to include product details
-  const combinedData: RiskIssue[] = mockData.map((item) => ({
+  const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => ({
     ...item,
-    id: item.id,
-    _id: item.id, // Use mock id for _id as well
     product: 
       (item.type === 'Risk' && products.find((p) => p.code === item.projectCode)) ||
       (item.type === 'Issue' && products.find((p) => p.name === item.projectName)) ||

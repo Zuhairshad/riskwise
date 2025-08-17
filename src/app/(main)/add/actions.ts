@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const riskFormSchema = z.object({
   month: z.string().min(1, "Month is required"),
@@ -43,9 +45,7 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     }
   
     try {
-      // Dabase logic removed, returning success
-      console.log("Creating risk (mock):", parsed.data);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await addDoc(collection(db, "risks"), parsed.data);
       return { success: true, message: "Risk created successfully." };
     } catch (error) {
       console.error("Error creating risk:", error);
@@ -61,9 +61,7 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     }
   
     try {
-        // Dabase logic removed, returning success
-        console.log("Creating issue (mock):", parsed.data);
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await addDoc(collection(db, "issues"), parsed.data);
         return { success: true, message: "Issue created successfully." };
       } catch (error) {
         console.error("Error creating issue:", error);
