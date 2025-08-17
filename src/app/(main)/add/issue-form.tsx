@@ -125,28 +125,43 @@ export function IssueForm({ products }: IssueFormProps) {
   const debouncedTitle = useDebounce(titleValue, 500);
   const projectNameValue = form.watch("ProjectName");
   
-  React.useEffect(() => {
-    if (debouncedTitle.length > 5 || projectNameValue) {
-      setIsAutofilling(true);
-      autofillIssueForm({ title: debouncedTitle, projectName: projectNameValue })
-        .then((res) => {
-          if (res.matchedIssue) {
-            const dateStr = res.matchedIssue['Due Date'];
-            const date = dateStr ? new Date(dateStr) : undefined;
-            const matchedData = {
-                ...res.matchedIssue,
-                "Due Date": date,
-                Discussion: res.matchedIssue.Discussion || '',
-                Resolution: res.matchedIssue.Resolution || '',
-                Portfolio: res.matchedIssue.Portfolio || '',
-            }
-            form.reset(matchedData);
-            toast({ title: "Form Auto-filled", description: "Loaded data from an existing issue." });
-          }
-        })
-        .finally(() => setIsAutofilling(false));
+  const handleAutofill = React.useCallback(async (params: { title?: string; projectName?: string }) => {
+    if (!params.title && !params.projectName) return;
+    
+    setIsAutofilling(true);
+    try {
+      const res = await autofillIssueForm(params);
+      if (res.matchedIssue) {
+        const dateStr = res.matchedIssue['Due Date'];
+        const date = dateStr ? new Date(dateStr) : undefined;
+        const matchedData = {
+          ...res.matchedIssue,
+          "Due Date": date,
+          Discussion: res.matchedIssue.Discussion || '',
+          Resolution: res.matchedIssue.Resolution || '',
+          Portfolio: res.matchedIssue.Portfolio || '',
+        };
+        form.reset(matchedData);
+        toast({ title: "Form Auto-filled", description: "Loaded data from an existing issue." });
+      }
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Auto-fill Failed', description: 'Could not fetch data.' });
+    } finally {
+      setIsAutofilling(false);
     }
-  }, [debouncedTitle, projectNameValue, form, toast]);
+  }, [form, toast]);
+  
+  React.useEffect(() => {
+    if (debouncedTitle.length > 5) {
+      handleAutofill({ title: debouncedTitle });
+    }
+  }, [debouncedTitle, handleAutofill]);
+
+  React.useEffect(() => {
+    if (projectNameValue) {
+        handleAutofill({ projectName: projectNameValue });
+    }
+  }, [projectNameValue, handleAutofill]);
 
   React.useEffect(() => {
     if (debouncedDiscussion.length > 10) {
