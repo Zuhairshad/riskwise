@@ -6,6 +6,7 @@ import { PlusCircle } from "lucide-react";
 import { StatsCards } from "./stats-cards";
 import { DataTable } from "./risk-issue-table/data-table";
 import { columns } from "./risk-issue-table/columns";
+import { riskColumns } from "./risk-issue-table/risk-columns";
 import type { RiskIssue } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -65,7 +66,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
               <DataTable columns={columns} data={data} />
             </TabsContent>
             <TabsContent value="risks" className="mt-4">
-              <DataTable columns={columns} data={risks} />
+              <DataTable columns={riskColumns} data={risks} />
             </TabsContent>
             <TabsContent value="issues" className="mt-4">
               <DataTable columns={columns} data={issues} />
