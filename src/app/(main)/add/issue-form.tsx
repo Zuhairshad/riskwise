@@ -5,7 +5,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { CalendarIcon, Bot, Loader2, Sparkles } from "lucide-react";
+import { CalendarIcon, Bot, Loader2, Sparkles, ChevronsUpDown, Check } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -25,6 +25,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+  } from "@/components/ui/command";
 import {
   Card,
   CardContent,
@@ -256,16 +264,54 @@ export function IssueForm({ products }: IssueFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Project Name</FormLabel>
-                                 <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                <Popover>
+                                    <PopoverTrigger asChild>
                                     <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a project" />
-                                    </SelectTrigger>
+                                        <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        className={cn(
+                                            "w-full justify-between",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value
+                                            ? products.find((p) => p.name === field.value)?.name
+                                            : "Select project"}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
                                     </FormControl>
-                                    <SelectContent>
-                                        {products.map(p => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Search project..." />
+                                        <CommandList>
+                                        <CommandEmpty>No project found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {products.map((product) => (
+                                            <CommandItem
+                                                value={product.name}
+                                                key={product.id}
+                                                onSelect={() => {
+                                                form.setValue("ProjectName", product.name);
+                                                }}
+                                            >
+                                                <Check
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    product.name === field.value
+                                                    ? "opacity-100"
+                                                    : "opacity-0"
+                                                )}
+                                                />
+                                                {product.name}
+                                            </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
                                 </FormItem>
                             )}
