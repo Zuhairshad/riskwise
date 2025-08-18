@@ -135,6 +135,8 @@ export function RiskForm() {
   const [isRephrasing, setIsRephrasing] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
   const [projectInput, setProjectInput] = React.useState("");
+  const [openCombobox, setOpenCombobox] = React.useState(false);
+
 
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
@@ -156,53 +158,10 @@ export function RiskForm() {
 
   React.useEffect(() => {
     async function getPageData() {
-        const risksCollection = collection(db, 'risks');
-        const issuesCollection = collection(db, 'issues');
-        
-        const riskSnapshot = await getDocs(risksCollection);
-        const issueSnapshot = await getDocs(issuesCollection);
-      
-        const projectsMap = new Map<string, Product>();
-      
-        // Prioritize risks for more descriptive project names
-        riskSnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const projectCode = data["Project Code"];
-          const projectName = data.ProjectName || data.Title; // Fallback to Title if ProjectName is generic
-      
-          if (projectCode && projectName) {
-            if (!projectsMap.has(projectCode) || (projectName && !projectsMap.get(projectCode)?.name)) {
-                projectsMap.set(projectCode, {
-                    id: doc.id,
-                    code: projectCode,
-                    name: projectName,
-                    paNumber: '', 
-                    value: 0, 
-                    currentStatus: '', 
-                });
-            }
-          }
-        });
-      
-        issueSnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const projectCode = data.ProjectName;
-          if (projectCode) {
-              if (!projectsMap.has(projectCode)) {
-                  projectsMap.set(projectCode, {
-                      id: doc.id,
-                      code: projectCode, 
-                      name: data.Title || projectCode,
-                      paNumber: '',
-                      value: 0,
-                      currentStatus: '',
-                  });
-              }
-          }
-        });
-        
-        const products: Product[] = Array.from(projectsMap.values());
-        setProducts(products);
+        const productsCollection = collection(db, 'products');
+        const productSnapshot = await getDocs(productsCollection);
+        const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productList);
       }
       getPageData();
   }, [])
@@ -234,12 +193,16 @@ export function RiskForm() {
                 Owner: res.matchedRisk.Owner ?? '',
             }
             form.reset(matchedData);
+            const project = products.find(p => p.code === matchedData['Project Code']);
+            if (project) {
+              setProjectInput(`${project.name} (${project.code})`);
+            }
             toast({ title: "Form Auto-filled", description: "Loaded data from an existing risk." });
             }
         })
         .finally(() => setIsAutofilling(false));
     }
-  }, [debouncedTitle, projectCode, form, toast]);
+  }, [debouncedTitle, projectCode, form, toast, products]);
 
 
   React.useEffect(() => {
@@ -324,14 +287,6 @@ export function RiskForm() {
   React.useEffect(() => {
     const project = products.find((p) => p.code === projectCode);
     setSelectedProject(project || null);
-    
-    // Update input only if the user hasn't typed a custom value
-    if (project && projectInput !== project.code) {
-        const projectLabel = project ? `${project.name} (${project.code})` : projectCode;
-        if(projectInput !== projectLabel) {
-            setProjectInput(projectLabel);
-        }
-    }
 
     if (project) {
       // In a real app, this data would be fetched from a database
@@ -347,6 +302,10 @@ export function RiskForm() {
         endUser: "Client Inc.", // mock data
       });
       form.setValue("Project Code", project.code);
+      const projectLabel = `${project.name} (${project.code})`;
+      if (projectInput !== projectLabel) {
+        setProjectInput(projectLabel);
+      }
     } else {
       setAutoFillData(null);
     }
@@ -417,7 +376,7 @@ export function RiskForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project</FormLabel>
-                        <Popover>
+                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                             <PopoverTrigger asChild>
                                 <FormControl>
                                     <div className="relative">
@@ -443,9 +402,9 @@ export function RiskForm() {
                             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                                 <Command
                                     filter={(value, search) => {
-                                        const project = products.find(p => p.id === value);
-                                        if (project) {
-                                          const textToSearch = `${project.name} ${project.code}`.toLowerCase();
+                                        const product = products.find(p => p.id === value);
+                                        if (product) {
+                                          const textToSearch = `${product.name} ${product.code}`.toLowerCase();
                                           if (textToSearch.includes(search.toLowerCase())) return 1;
                                         }
                                         return 0;
@@ -462,6 +421,7 @@ export function RiskForm() {
                                                     onSelect={() => {
                                                         form.setValue("Project Code", product.code);
                                                         setProjectInput(`${product.name} (${product.code})`);
+                                                        setOpenCombobox(false);
                                                     }}
                                                 >
                                                     <Check

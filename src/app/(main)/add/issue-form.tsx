@@ -119,53 +119,10 @@ export function IssueForm() {
 
   React.useEffect(() => {
     async function getPageData() {
-        const risksCollection = collection(db, 'risks');
-        const issuesCollection = collection(db, 'issues');
-        
-        const riskSnapshot = await getDocs(risksCollection);
-        const issueSnapshot = await getDocs(issuesCollection);
-      
-        const projectsMap = new Map<string, Product>();
-      
-        // Prioritize risks for more descriptive project names
-        riskSnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const projectCode = data["Project Code"];
-          const projectName = data.ProjectName || data.Title; // Fallback to Title if ProjectName is generic
-      
-          if (projectCode && projectName) {
-            if (!projectsMap.has(projectCode) || (projectName && !projectsMap.get(projectCode)?.name)) {
-                projectsMap.set(projectCode, {
-                    id: doc.id,
-                    code: projectCode,
-                    name: projectName,
-                    paNumber: '', 
-                    value: 0, 
-                    currentStatus: '', 
-                });
-            }
-          }
-        });
-      
-        issueSnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const projectCode = data.ProjectName;
-          if (projectCode) {
-              if (!projectsMap.has(projectCode)) {
-                  projectsMap.set(projectCode, {
-                      id: doc.id,
-                      code: projectCode, 
-                      name: data.Title || projectCode,
-                      paNumber: '',
-                      value: 0,
-                      currentStatus: '',
-                  });
-              }
-          }
-        });
-        
-        const products: Product[] = Array.from(projectsMap.values());
-        setProducts(products);
+        const productsCollection = collection(db, 'products');
+        const productSnapshot = await getDocs(productsCollection);
+        const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productList);
       }
       getPageData();
   }, [])
