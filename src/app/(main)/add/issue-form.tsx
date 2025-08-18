@@ -44,14 +44,16 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { Product, RiskIssue } from "@/lib/types";
-import { createIssue } from "./actions";
 import { useDebounce } from "@/hooks/use-debounce";
-import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
-import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
-import { rephraseDescription } from "@/ai/flows/rephrase-description";
-import { suggestTitle } from "@/ai/flows/suggest-title";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Combobox } from "@/components/ui/combobox";
+import {
+  createIssue,
+  suggestSimilarIssues,
+  suggestMitigationStrategies,
+  rephraseDescription,
+  suggestTitle
+} from "./actions";
 
 
 const issueFormSchema = z.object({

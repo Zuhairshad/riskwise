@@ -44,10 +44,6 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
-import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
-import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
-import { rephraseDescription } from "@/ai/flows/rephrase-description";
-import { suggestTitle } from "@/ai/flows/suggest-title";
 import {
   Select,
   SelectContent,
@@ -58,8 +54,14 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import type { Product, RiskIssue } from "@/lib/types";
-import { createRisk } from "./actions";
 import { Combobox } from "@/components/ui/combobox";
+import {
+  createRisk,
+  suggestSimilarRisks,
+  suggestMitigationStrategies,
+  rephraseDescription,
+  suggestTitle
+} from "./actions";
 
 const riskFormSchema = z.object({
   Month: z.string().min(1, "Month is required"),
@@ -88,7 +90,7 @@ type Suggestion = {
         mitigationPlan?: string | undefined;
         contingencyPlan?: string | undefined;
         probability?: number | undefined;
-        impactRating?: number | undefined;
+        "Imapct Rating (0.05-0.8)"?: number | undefined;
     };
     rephrasedDescription?: string;
 }
@@ -300,7 +302,7 @@ export function RiskForm() {
     if (matchedRisk.mitigationPlan) form.setValue("MitigationPlan", matchedRisk.mitigationPlan);
     if (matchedRisk.contingencyPlan) form.setValue("ContingencyPlan", matchedRisk.contingencyPlan);
     if (matchedRisk.probability) form.setValue("Probability", matchedRisk.probability);
-    if (matchedRisk.impactRating) form.setValue("Imapct Rating (0.05-0.8)", matchedRisk.impactRating);
+    if (matchedRisk['Imapct Rating (0.05-0.8)']) form.setValue("Imapct Rating (0.05-0.8)", matchedRisk['Imapct Rating (0.05-0.8)']);
     setSuggestion(null);
     setRephrasedDescription(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched risk data." });
