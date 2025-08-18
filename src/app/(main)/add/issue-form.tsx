@@ -54,13 +54,15 @@ import {
   suggestSimilarIssues,
   suggestMitigationStrategies,
   rephraseDescription,
-  suggestTitle
+  suggestTitle,
+  suggestCategory,
 } from "./actions";
 
 
 const issueFormSchema = z.object({
     Month: z.string().min(1, "Month is required"),
-    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule", "(13) Supply"], { required_error: "Category is required." }),
+    Category: z.string().optional(),
+    SubCategory: z.string().optional(),
     Portfolio: z.string().optional(),
     Title: z.string().min(5, "Title must be at least 5 characters."),
     Discussion: z.string().min(10, "Discussion must be at least 10 characters."),
@@ -102,7 +104,9 @@ export function IssueForm() {
   const [isRephrasing, setIsRephrasing] = React.useState(false);
   const [titleSuggestion, setTitleSuggestion] = React.useState<string | null>(null);
   const [isFetchingTitle, setIsFetchingTitle] = React.useState(false);
-  
+  const [categorySuggestion, setCategorySuggestion] = React.useState<{category: string, subCategory: string} | null>(null);
+  const [isFetchingCategory, setIsFetchingCategory] = React.useState(false);
+
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
     defaultValues: {
@@ -113,6 +117,8 @@ export function IssueForm() {
       ProjectName: "",
       Portfolio: "",
       Resolution: "",
+      Category: "",
+      SubCategory: "",
       "Impact ($)": 0,
       Response: "Under Review",
       Impact: "Medium",
@@ -171,6 +177,19 @@ export function IssueForm() {
       toast({ variant: "destructive", title: "Failed to suggest resolutions." });
     } finally {
       setIsFetchingResolution(false);
+    }
+  };
+
+  const handleSuggestCategory = async () => {
+    setIsFetchingCategory(true);
+    setCategorySuggestion(null);
+    try {
+        const res = await suggestCategory({ description: discussionValue });
+        setCategorySuggestion(res);
+    } catch (error) {
+        toast({ variant: "destructive", title: "Failed to suggest categories." });
+    } finally {
+        setIsFetchingCategory(false);
     }
   };
 
@@ -252,32 +271,7 @@ export function IssueForm() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="Category New"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a category" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="(15) Budget">(15) Budget</SelectItem>
-                                        <SelectItem value="Technical">Technical</SelectItem>
-                                        <SelectItem value="Contractual">Contractual</SelectItem>
-                                        <SelectItem value="Resource">Resource</SelectItem>
-                                        <SelectItem value="Schedule">Schedule</SelectItem>
-                                        <SelectItem value="(13) Supply">(13) Supply</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
+                         <FormField
                             control={form.control}
                             name="ProjectName"
                             render={({ field }) => (
@@ -432,6 +426,57 @@ export function IssueForm() {
                                     </AlertDescription>
                                 </Alert>
                             )}
+                        </div>
+                        <div className="md:col-span-2 grid md:grid-cols-2 gap-4 items-start">
+                            <FormField
+                                control={form.control}
+                                name="Category"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., Technical" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="SubCategory"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Sub-category</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., API Integration" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <div className="col-span-full space-y-2">
+                                <Button type="button" variant="outline" size="sm" onClick={handleSuggestCategory} disabled={isFetchingCategory || !discussionValue || discussionValue.length < 10}>
+                                    {isFetchingCategory ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                    Suggest Category with AI
+                                </Button>
+                                {categorySuggestion && (
+                                <Alert>
+                                    <Bot className="h-4 w-4" />
+                                    <AlertTitle>AI Suggested Category</AlertTitle>
+                                    <AlertDescription>
+                                        <div className="my-2 p-2 bg-muted rounded">
+                                            <p><strong>Category:</strong> {categorySuggestion.category}</p>
+                                            <p><strong>Sub-category:</strong> {categorySuggestion.subCategory}</p>
+                                        </div>
+                                        <Button type="button" size="sm" onClick={() => {
+                                            form.setValue("Category", categorySuggestion.category);
+                                            form.setValue("SubCategory", categorySuggestion.subCategory);
+                                            setCategorySuggestion(null);
+                                        }}>Use Suggestion</Button>
+                                    </AlertDescription>
+                                </Alert>
+                                )}
+                            </div>
                         </div>
                         <div className="col-span-full space-y-2">
                             <FormField
@@ -656,3 +701,5 @@ export function IssueForm() {
     </Form>
   );
 }
+
+    

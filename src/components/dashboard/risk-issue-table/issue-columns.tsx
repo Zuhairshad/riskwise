@@ -191,46 +191,31 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "Category New",
+    accessorKey: "Category",
     header: "Category",
-    cell: ({ row }) => {
-        const { toast } = useToast();
-       const category = issueCategories.find((c) => c.value === row.original["Category New"]);
-       if (!category) return null;
- 
-       const handleCategoryChange = async (newCategory: string) => {
-         const result = await updateRiskIssueField(row.original.id, 'Category New', newCategory);
-         if (result.success) {
-           toast({ title: "Category Updated" });
-         } else {
-           toast({ variant: 'destructive', title: "Update Failed", description: result.message});
-         }
-       };
- 
-       return (
-         <Select defaultValue={category.value} onValueChange={handleCategoryChange}>
-           <SelectTrigger className="w-[120px] h-8 text-xs">
-             <SelectValue />
-           </SelectTrigger>
-           <SelectContent>
-             {issueCategories.map((c) => (
-               <SelectItem key={c.value} value={c.value}>
-                 <div className="flex items-center">
-                    {c.icon && <c.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                    <span>{c.label}</span>
-                 </div>
-               </SelectItem>
-             ))}
-           </SelectContent>
-         </Select>
-       );
-     },
-     filterFn: (row, id, value) => {
-        return value.includes(row.original["Category New"]);
-      },
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("Category")}
+            rowId={row.original.id}
+            columnId="Category"
+        />
+    ),
+  },
+  {
+    accessorKey: "SubCategory",
+    header: "Sub-category",
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("SubCategory")}
+            rowId={row.original.id}
+            columnId="SubCategory"
+        />
+    ),
   },
   {
     id: "actions",
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
+
+    

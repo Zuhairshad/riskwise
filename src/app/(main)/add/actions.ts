@@ -26,7 +26,8 @@ const riskFormSchema = z.object({
 
 const issueFormSchema = z.object({
     Month: z.string().min(1, "Month is required"),
-    "Category New": z.enum(["(15) Budget", "Technical", "Contractual", "Resource", "Schedule", "(13) Supply"]),
+    Category: z.string().optional(),
+    SubCategory: z.string().optional(),
     Portfolio: z.string().optional(),
     Title: z.string().min(5, "Title must be at least 5 characters."),
     Discussion: z.string().min(10, "Discussion must be at least 10 characters."),
@@ -257,3 +258,31 @@ export async function suggestSimilarIssues(input: z.infer<typeof SuggestSimilarI
     const {output} = await suggestOrRephraseIssuePrompt(input);
     return output!;
 }
+
+
+// Suggest Category
+const SuggestCategoryInputSchema = z.object({
+  description: z.string().describe('The issue description to analyze.'),
+});
+const SuggestCategoryOutputSchema = z.object({
+  category: z.string().describe('The suggested primary category.'),
+  subCategory: z.string().describe('The suggested sub-category.'),
+});
+const suggestCategoryPrompt = ai.definePrompt({
+  name: 'suggestCategoryPrompt',
+  input: {schema: SuggestCategoryInputSchema},
+  output: {schema: SuggestCategoryOutputSchema},
+  prompt: `You are an expert at categorizing project management issues.
+  
+  Based on the following issue description, suggest a relevant Category and Sub-category.
+  The categories should be concise and professional.
+  
+  Description: {{{description}}}`,
+  model: 'googleai/gemini-1.5-flash',
+});
+export async function suggestCategory(input: z.infer<typeof SuggestCategoryInputSchema>): Promise<z.infer<typeof SuggestCategoryOutputSchema>> {
+    const {output} = await suggestCategoryPrompt(input);
+    return output!;
+}
+
+    

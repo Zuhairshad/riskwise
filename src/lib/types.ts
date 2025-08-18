@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from "lucide-react";
 
 export type Product = {
@@ -39,7 +40,8 @@ export type RiskIssue = {
   "Budget Contingency"?: number;
   
   // Issue-specific fields
-  "Category New"?: IssueCategory;
+  Category?: string;
+  SubCategory?: string;
   Resolution?: string;
   Impact?: IssueImpact;
   Response?: IssueResponse | null;
@@ -60,3 +62,5 @@ export type Option = {
   label: string;
   icon?: LucideIcon;
 };
+
+    
