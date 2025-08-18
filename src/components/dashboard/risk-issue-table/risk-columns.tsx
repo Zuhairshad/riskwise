@@ -99,6 +99,23 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
+    accessorKey: "Project Code",
+    header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Project Code
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    cell: ({ row }) => (
+        <div className="w-[120px] truncate">{row.getValue("Project Code")}</div>
+    ),
+  },
+  {
     accessorKey: "ProjectName",
     id: "product",
     header: ({ column }) => {
