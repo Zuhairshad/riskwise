@@ -85,7 +85,7 @@ export function EditableCell({ initialValue, rowId, columnId, isTextarea = false
 
   return (
     <div 
-        className="w-full h-full min-h-[2rem] p-2 -m-2 cursor-pointer truncate" 
+        className="w-full h-full min-h-[2rem] p-2 -m-2 cursor-pointer whitespace-normal break-words" 
         onClick={() => setIsEditing(true)}
         title={value}
     >
