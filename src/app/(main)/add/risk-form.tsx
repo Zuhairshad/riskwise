@@ -167,9 +167,9 @@ export function RiskForm() {
   const debouncedDescription = useDebounce(descriptionValue, 500);
 
   React.useEffect(() => {
-    if (debouncedTitle.length > 5 || projectCode) {
+    if (debouncedTitle.length > 5) {
         setIsAutofilling(true);
-        autofillRiskForm({ title: debouncedTitle, projectCode: projectCode })
+        autofillRiskForm({ title: debouncedTitle })
         .then((res) => {
             if (res.matchedRisk) {
             const date = res.matchedRisk.DueDate?.toDate ? res.matchedRisk.DueDate.toDate() : undefined;
@@ -187,7 +187,7 @@ export function RiskForm() {
         .catch(() => {})
         .finally(() => setIsAutofilling(false));
     }
-  }, [debouncedTitle, projectCode, form, toast, products]);
+  }, [debouncedTitle, form, toast]);
 
 
   React.useEffect(() => {

@@ -125,14 +125,13 @@ export function IssueForm() {
 
   const titleValue = form.watch("Title");
   const debouncedTitle = useDebounce(titleValue, 500);
-  const projectNameValue = form.watch("ProjectName");
   
-  const handleAutofill = React.useCallback(async (params: { title?: string; projectName?: string }) => {
-    if (!params.title && !params.projectName) return;
+  const handleAutofill = React.useCallback(async (title: string) => {
+    if (!title) return;
     
     setIsAutofilling(true);
     try {
-      const res = await autofillIssueForm(params);
+      const res = await autofillIssueForm({ title });
       if (res.matchedIssue) {
         const dateStr = res.matchedIssue['Due Date'];
         const date = dateStr ? new Date(dateStr) : undefined;
@@ -155,16 +154,9 @@ export function IssueForm() {
   
   React.useEffect(() => {
     if (debouncedTitle.length > 5) {
-      handleAutofill({ title: debouncedTitle });
+      handleAutofill(debouncedTitle);
     }
   }, [debouncedTitle, handleAutofill]);
-
-  React.useEffect(() => {
-    const project = products.find(p => p.name === projectNameValue);
-    if (project) {
-        handleAutofill({ projectName: project.name });
-    }
-  }, [projectNameValue, products, handleAutofill]);
 
   React.useEffect(() => {
     if (debouncedDiscussion.length > 10) {

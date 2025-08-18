@@ -2,9 +2,9 @@
 'use server';
 /**
  * @fileOverview This file contains a Genkit flow for auto-filling the issue form
- * based on a title and project name.
+ * based on a title.
  *
- * - autofillIssueForm - A function that takes a title and project name and returns a matching issue.
+ * - autofillIssueForm - A function that takes a title and returns a matching issue.
  * - AutofillIssueFormInput - The input type for the autofillIssueForm function.
  * - AutofillIssueFormOutput - The return type for the autofillIssueForm function.
  */
@@ -15,8 +15,7 @@ import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const AutofillIssueFormInputSchema = z.object({
-  title: z.string().optional().describe('The title of the issue.'),
-  projectName: z.string().optional().describe('The name of the project.'),
+  title: z.string().describe('The title of the issue.'),
 });
 export type AutofillIssueFormInput = z.infer<typeof AutofillIssueFormInputSchema>;
 
@@ -25,25 +24,15 @@ const AutofillIssueFormOutputSchema = z.object({
 });
 export type AutofillIssueFormOutput = z.infer<typeof AutofillIssueFormOutputSchema>;
 
-export async function autofillIssueForm(input: { title?: string, projectName?: string }): Promise<AutofillIssueFormOutput> {
+export async function autofillIssueForm(input: { title: string }): Promise<AutofillIssueFormOutput> {
     // This is a simplified search. A real-world app would use a dedicated search service.
-    if (!input.title && !input.projectName) {
+    if (!input.title) {
         return { matchedIssue: null };
     }
     
     const issuesRef = collection(db, 'issues');
-    let q;
-
-    if (input.title) {
-        // Query by the exact title.
-        q = query(issuesRef, where('Title', '==', input.title), limit(1));
-    } else if (input.projectName) {
-        // Query by the exact project name.
-        q = query(issuesRef, where('ProjectName', '==', input.projectName), limit(1));
-    } else {
-         return { matchedIssue: null };
-    }
-
+    const q = query(issuesRef, where('Title', '==', input.title), limit(1));
+    
     const snapshot = await getDocs(q);
     
     if (snapshot.empty) {
