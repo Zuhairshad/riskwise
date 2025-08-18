@@ -41,20 +41,14 @@ async function getDashboardData() {
 
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => ({
     ...item,
-    Status: (item["Risk Status"] || item.Status) || 'Open', // Default to Open if status is missing
+    Status: (item.Status || item["Risk Status"]) || 'Open', // Default to Open if status is missing
+    "Risk Status": (item["Risk Status"] || item.Status) || 'Open', // Also default Risk Status
     product: 
       (item.type === 'Risk' && products.find((p) => p.code === item["Project Code"])) ||
       (item.type === 'Issue' && products.find((p) => p.name === item.ProjectName)) ||
       products[0],
     ProjectName: item.ProjectName || (products.find((p) => p.code === item["Project Code"])?.name)
   }));
-
-  // Apply the default status logic to the 'Risk Status' field as well for consistency in filtering
-  combinedData.forEach(item => {
-    if (item.type === 'Risk') {
-      item['Risk Status'] = item['Risk Status'] || 'Open';
-    }
-  });
 
 
   return {
