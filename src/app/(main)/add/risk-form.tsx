@@ -93,6 +93,7 @@ type Suggestion = {
         "Imapct Rating (0.05-0.8)"?: number | undefined;
     };
     rephrasedDescription?: string;
+    detailedSummary?: string;
 }
 
 export function RiskForm() {
@@ -428,10 +429,9 @@ export function RiskForm() {
                   {suggestion?.matchedRisk && (
                     <Alert>
                       <Bot className="h-4 w-4" />
-                      <AlertTitle>Potential Duplicate Found</AlertTitle>
+                      <AlertTitle>Potential Duplicate Found: {suggestion.matchedRisk.title}</AlertTitle>
                       <AlertDescription>
-                          <p>An existing risk with a similar description was found: <strong>{suggestion.matchedRisk.title}</strong>.</p>
-                          <p className="text-xs text-muted-foreground mt-1 mb-2">"{suggestion.matchedRisk.description}"</p>
+                          <p className="text-sm text-muted-foreground mt-2 mb-2 whitespace-pre-wrap">{suggestion.detailedSummary}</p>
                           <Button type="button" size="sm" onClick={() => handleUseMatchedRisk(suggestion.matchedRisk!)}>Use This Data</Button>
                       </AlertDescription>
                     </Alert>

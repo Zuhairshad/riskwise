@@ -175,12 +175,13 @@ const MatchedRiskSchema = z.object({
 const SuggestSimilarRisksOutputSchema = z.object({
   matchedRisk: MatchedRiskSchema.optional().describe('The existing risk that matches the description.'),
   rephrasedDescription: z.string().optional().describe('A rephrased version of the description for clarity if no match is found.'),
+  detailedSummary: z.string().optional().describe('A detailed summary and analysis of the matched risk.'),
 });
 const suggestOrRephraseRiskPrompt = ai.definePrompt({
   name: 'suggestOrRephraseRiskPrompt',
   input: {schema: SuggestSimilarRisksInputSchema},
   output: {schema: SuggestSimilarRisksOutputSchema},
-  prompt: `You are an expert risk management analyst. A user is entering a new risk and you need to help them avoid duplicates.
+  prompt: `You are an expert risk management analyst. A user is entering a new risk and you need to help them avoid duplicates by providing insightful analysis of past data.
   
   Current risk description:
   "{{{description}}}"
@@ -188,10 +189,12 @@ const suggestOrRephraseRiskPrompt = ai.definePrompt({
   Here are the existing risks in the database:
   {{{existingRisks}}}
   
-  Your task is to determine if the new risk is a potential duplicate of an existing one.
+  Your primary task is to determine if the new risk is a potential duplicate of an existing one.
   
-  - If you find a strong match (semantic similarity > 0.8), return the 'matchedRisk' object with the data from the existing risk. When you find a match, only return the 'matchedRisk' and nothing else.
-  - If you do not find a strong match, your task is to rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' empty.`,
+  - If you find a strong match (semantic similarity > 0.8), your goal is to provide maximum context to the user.
+    1. Return the 'matchedRisk' object with the data from the existing risk.
+    2. In the 'detailedSummary' field, provide a rich, analytical summary of the matched risk. Explain WHY it's a match. Include details about the project it occurred on, the mitigation and contingency plans that were used, and a brief analysis of the historical context. The summary should be written to help the user understand the past situation and make an informed decision.
+  - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' and 'detailedSummary' empty.`,
   model: 'googleai/gemini-1.5-flash',
 });
 export async function suggestSimilarRisks(input: z.infer<typeof SuggestSimilarRisksInputSchema>): Promise<z.infer<typeof SuggestSimilarRisksOutputSchema>> {
@@ -214,12 +217,13 @@ const MatchedIssueSchema = z.object({
 const SuggestSimilarIssuesOutputSchema = z.object({
   matchedIssue: MatchedIssueSchema.optional().describe('The existing issue that matches the description.'),
   rephrasedDescription: z.string().optional().describe('A rephrased version of the description for clarity if no match is found.'),
+  detailedSummary: z.string().optional().describe('A detailed summary and analysis of the matched issue.'),
 });
 const suggestOrRephraseIssuePrompt = ai.definePrompt({
   name: 'suggestOrRephraseIssuePrompt',
   input: {schema: SuggestSimilarIssuesInputSchema},
   output: {schema: SuggestSimilarIssuesOutputSchema},
-  prompt: `You are an expert project manager. A user is entering a new issue and you need to help them avoid duplicates.
+  prompt: `You are an expert project manager. A user is entering a new issue and you need to help them avoid duplicates by providing insightful analysis of past data.
 
   Current issue description:
   "{{{description}}}"
@@ -227,10 +231,12 @@ const suggestOrRephraseIssuePrompt = ai.definePrompt({
   Here are the existing issues in the database:
   {{{existingIssues}}}
 
-  Your task is to determine if the new issue is a potential duplicate of an existing one.
+  Your primary task is to determine if the new issue is a potential duplicate of an existing one.
   
-  - If you find a strong match (semantic similarity > 0.8), return the 'matchedIssue' object with the data from the existing issue. When you find a match, only return the 'matchedIssue' and nothing else.
-  - If you do not find a strong match, your task is to rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' empty.`,
+  - If you find a strong match (semantic similarity > 0.8), your goal is to provide maximum context to the user.
+    1. Return the 'matchedIssue' object with the data from the existing issue.
+    2. In the 'detailedSummary' field, provide a rich, analytical summary of the matched issue. Explain WHY it's a match. Include details about the project it occurred on, the resolution that was implemented, and a brief analysis of the historical context. The summary should be written to help the user understand the past situation and make an informed decision.
+  - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' and 'detailedSummary' empty.`,
   model: 'googleai/gemini-1.5-flash',
 });
 export async function suggestSimilarIssues(input: z.infer<typeof SuggestSimilarIssuesInputSchema>): Promise<z.infer<typeof SuggestSimilarIssuesOutputSchema>> {

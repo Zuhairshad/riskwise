@@ -81,6 +81,7 @@ type Suggestion = {
         resolution?: string | undefined;
     };
     rephrasedDescription?: string;
+    detailedSummary?: string;
 }
 
 export function IssueForm() {
@@ -371,10 +372,9 @@ export function IssueForm() {
                             {suggestion?.matchedIssue && (
                                 <Alert>
                                 <Bot className="h-4 w-4" />
-                                <AlertTitle>Potential Duplicate Found</AlertTitle>
+                                <AlertTitle>Potential Duplicate Found: {suggestion.matchedIssue.title}</AlertTitle>
                                 <AlertDescription>
-                                    <p>An existing issue with a similar description was found: <strong>{suggestion.matchedIssue.title}</strong>.</p>
-                                    <p className="text-xs text-muted-foreground mt-1 mb-2">"{suggestion.matchedIssue.discussion}"</p>
+                                    <p className="text-sm text-muted-foreground mt-2 mb-2 whitespace-pre-wrap">{suggestion.detailedSummary}</p>
                                     <Button type="button" size="sm" onClick={() => handleUseMatchedIssue(suggestion.matchedIssue!)}>Use This Data</Button>
                                 </AlertDescription>
                                 </Alert>
