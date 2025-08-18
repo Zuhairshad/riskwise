@@ -64,7 +64,7 @@ const prompt = ai.definePrompt({
 
   Your task is to determine if the new issue is a potential duplicate of an existing one.
   
-  - If you find a strong match (semantic similarity > 0.8), return the 'matchedIssue' object with the data from the existing issue. Do not rephrase the description.
+  - If you find a strong match (semantic similarity > 0.8), return the 'matchedIssue' object with the data from the existing issue. When you find a match, only return the 'matchedIssue' and nothing else.
   - If you do not find a strong match, your task is to rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' empty.`,
   model: 'googleai/gemini-1.5-flash',
 });

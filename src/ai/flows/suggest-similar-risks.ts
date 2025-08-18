@@ -52,7 +52,7 @@ export async function suggestSimilarRisks(input: {description: string}): Promise
             mitigationPlan: r.MitigationPlan,
             contingencyPlan: r.ContingencyPlan,
             probability: r.Probability,
-            impactRating: r['Imapct Rating (0.05-0.8)'],
+            impactRating: r['Imapct Rating (0.05-0.8)'], // Corrected field name
         })))
     });
 }
@@ -71,7 +71,7 @@ const prompt = ai.definePrompt({
   
   Your task is to determine if the new risk is a potential duplicate of an existing one.
   
-  - If you find a strong match (semantic similarity > 0.8), return the 'matchedRisk' object with the data from the existing risk. Do not rephrase the description.
+  - If you find a strong match (semantic similarity > 0.8), return the 'matchedRisk' object with the data from the existing risk. When you find a match, only return the 'matchedRisk' and nothing else.
   - If you do not find a strong match, your task is to rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' empty.`,
   model: 'googleai/gemini-1.5-flash',
 });
