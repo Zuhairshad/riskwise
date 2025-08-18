@@ -57,7 +57,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import type { Product } from "@/lib/types";
+import type { Product, RiskIssue } from "@/lib/types";
 import { createRisk } from "./actions";
 import { Combobox } from "@/components/ui/combobox";
 
@@ -96,6 +96,7 @@ type Suggestion = {
 export function RiskForm() {
   const { toast } = useToast();
   const [products, setProducts] = React.useState<Product[]>([]);
+  const [risks, setRisks] = React.useState<RiskIssue[]>([]);
   const [selectedProject, setSelectedProject] = React.useState<Product | null>(
     null
   );
@@ -139,6 +140,11 @@ export function RiskForm() {
         const productSnapshot = await getDocs(productsCollection);
         const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(productList);
+
+        const risksCollection = collection(db, 'risks');
+        const riskSnapshot = await getDocs(risksCollection);
+        const riskList = riskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RiskIssue));
+        setRisks(riskList);
       }
       getPageData();
   }, [])
@@ -158,14 +164,25 @@ export function RiskForm() {
       setIsFetchingSuggestion(true);
       setRephrasedDescription(null);
       setSuggestion(null);
-      suggestSimilarRisks({ description: debouncedDescription })
+
+      const existingRisks = risks.map(r => ({
+            id: r.id,
+            title: r.Title,
+            description: r.Description,
+            mitigationPlan: r.MitigationPlan,
+            contingencyPlan: r.ContingencyPlan,
+            probability: r.Probability,
+            impactRating: r['Imapct Rating (0.05-0.8)'],
+        }))
+
+      suggestSimilarRisks({ description: debouncedDescription, existingRisks: JSON.stringify(existingRisks) })
         .then((res) => setSuggestion(res))
         .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
         .finally(() => setIsFetchingSuggestion(false));
     } else {
         setSuggestion(null);
     }
-  }, [debouncedDescription, toast]);
+  }, [debouncedDescription, toast, risks]);
 
   const handleSuggestMitigations = async () => {
     setIsFetchingMitigation(true);
@@ -252,7 +269,6 @@ export function RiskForm() {
     if (project) {
       const projectPOValue = project.value || 0;
       const projectVA = project.value * 0.1; // mock
-      const bidCost = project.value * 0.9; // mock
 
       form.setValue("Impact Value ($)", projectPOValue);
       form.setValue("Budget Contingency", projectVA);
@@ -328,9 +344,9 @@ export function RiskForm() {
                           options={products.map(p => ({ value: p.code, label: p.code }))}
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="Select or enter project code..."
+                          placeholder="Select project code..."
                           searchPlaceholder="Search project code..."
-                          notFoundText="No project found. You can add a new one."
+                          notFoundText="No project found. You can still type a new one."
                         />
                       </FormControl>
                       <FormMessage />
@@ -637,14 +653,6 @@ export function RiskForm() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">PO Value</span>
                     <span>${selectedProject.value.toLocaleString()}</span>
-                  </div>
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Project VA</span>
-                    <span>${(selectedProject.value * 0.1).toLocaleString()}</span>
-                  </div>
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Bid Cost</span>
-                    <span>${(selectedProject.value * 0.9).toLocaleString()}</span>
                   </div>
                 </CardContent>
               </Card>

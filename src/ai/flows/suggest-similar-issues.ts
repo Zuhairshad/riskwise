@@ -2,8 +2,7 @@
 'use server';
 /**
  * @fileOverview This file contains a Genkit flow for suggesting similar issues
- * as the user types in the description textarea. It searches the existing
- * Firestore database for potential duplicates.
+ * as the user types in the description textarea. It searches existing data for potential duplicates.
  *
  * - suggestSimilarIssues - A function that takes a description and returns a suggested similar entry or a rephrased description.
  * - SuggestSimilarIssuesInput - The input type for the suggestSimilarIssues function.
@@ -12,8 +11,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 const SuggestSimilarIssuesInputSchema = z.object({
   description: z.string().describe('The description of the issue being entered.'),
@@ -34,20 +31,8 @@ const SuggestSimilarIssuesOutputSchema = z.object({
 });
 export type SuggestSimilarIssuesOutput = z.infer<typeof SuggestSimilarIssuesOutputSchema>;
 
-export async function suggestSimilarIssues(input: { description: string }): Promise<SuggestSimilarIssuesOutput> {
-    const issuesRef = collection(db, 'issues');
-    const snapshot = await getDocs(issuesRef);
-    const issues = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    return suggestSimilarIssuesFlow({ 
-        description: input.description, 
-        existingIssues: JSON.stringify(issues.map(i => ({
-            id: i.id,
-            title: i.Title,
-            discussion: i.Discussion,
-            resolution: i.Resolution
-        })))
-    });
+export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
+    return suggestSimilarIssuesFlow(input);
 }
 
 const prompt = ai.definePrompt({

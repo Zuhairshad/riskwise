@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@/lib/types";
+import type { Product, RiskIssue } from "@/lib/types";
 import { createIssue } from "./actions";
 import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
@@ -84,6 +84,7 @@ type Suggestion = {
 export function IssueForm() {
   const { toast } = useToast();
   const [products, setProducts] = React.useState<Product[]>([]);
+  const [issues, setIssues] = React.useState<RiskIssue[]>([]);
   const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
   const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
   const [resolutionSuggestions, setResolutionSuggestions] = React.useState<string[]>([]);
@@ -117,6 +118,11 @@ export function IssueForm() {
         const productSnapshot = await getDocs(productsCollection);
         const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(productList);
+
+        const issuesCollection = collection(db, 'issues');
+        const issueSnapshot = await getDocs(issuesCollection);
+        const issueList = issueSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RiskIssue));
+        setIssues(issueList);
       }
       getPageData();
   }, [])
@@ -129,14 +135,22 @@ export function IssueForm() {
       setIsFetchingSuggestion(true);
       setRephrasedDiscussion(null);
       setSuggestion(null);
-      suggestSimilarIssues({ description: debouncedDiscussion })
+
+      const existingIssues = issues.map(i => ({
+            id: i.id,
+            title: i.Title,
+            discussion: i.Discussion,
+            resolution: i.Resolution
+        }));
+
+      suggestSimilarIssues({ description: debouncedDiscussion, existingIssues: JSON.stringify(existingIssues) })
         .then((res) => setSuggestion(res))
         .catch(() => toast({ variant: 'destructive', title: 'Could not fetch suggestions.' }))
         .finally(() => setIsFetchingSuggestion(false));
     } else {
         setSuggestion(null);
     }
-  }, [debouncedDiscussion, toast]);
+  }, [debouncedDiscussion, toast, issues]);
 
   const handleSuggestResolution = async () => {
     setIsFetchingResolution(true);

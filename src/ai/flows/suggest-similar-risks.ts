@@ -2,8 +2,7 @@
 'use server';
 /**
  * @fileOverview This file contains a Genkit flow for suggesting similar risks
- * as the user types in the description textarea. It searches the existing
- * Firestore database for potential duplicates.
+ * as the user types in the description textarea. It searches existing data for potential duplicates.
  *
  * - suggestSimilarRisks - A function that takes a description and returns a suggested similar entry or a rephrased description.
  * - SuggestSimilarRisksInput - The input type for the suggestSimilarRisks function.
@@ -12,8 +11,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
@@ -38,23 +35,8 @@ const SuggestSimilarRisksOutputSchema = z.object({
 export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutputSchema>;
 
 
-export async function suggestSimilarRisks(input: {description: string}): Promise<SuggestSimilarRisksOutput> {
-    const risksRef = collection(db, 'risks');
-    const snapshot = await getDocs(risksRef);
-    const risks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    return suggestSimilarRisksFlow({ 
-        description: input.description,
-        existingRisks: JSON.stringify(risks.map(r => ({
-            id: r.id,
-            title: r.Title,
-            description: r.Description,
-            mitigationPlan: r.MitigationPlan,
-            contingencyPlan: r.ContingencyPlan,
-            probability: r.Probability,
-            impactRating: r['Imapct Rating (0.05-0.8)'], // Corrected field name
-        })))
-    });
+export async function suggestSimilarRisks(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
+    return suggestSimilarRisksFlow(input);
 }
 
 const prompt = ai.definePrompt({
