@@ -39,16 +39,19 @@ async function getDashboardData() {
     } as unknown as RiskIssue;
   });
 
-  const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => ({
-    ...item,
-    Status: (item.Status || item["Risk Status"]) || 'Open', // Default to Open if status is missing
-    "Risk Status": (item["Risk Status"] || item.Status) || 'Open', // Also default Risk Status
-    product: 
-      (item.type === 'Risk' && products.find((p) => p.code === item["Project Code"])) ||
-      (item.type === 'Issue' && products.find((p) => p.name === item.ProjectName)) ||
-      products[0],
-    ProjectName: item.ProjectName || (products.find((p) => p.code === item["Project Code"])?.name)
-  }));
+  const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
+    const status = item.Status || item["Risk Status"] || 'Open';
+    return {
+      ...item,
+      Status: status,
+      "Risk Status": status,
+      product: 
+        (item.type === 'Risk' && products.find((p) => p.code === item["Project Code"])) ||
+        (item.type === 'Issue' && products.find((p) => p.name === item.ProjectName)) ||
+        products[0],
+      ProjectName: item.ProjectName || (products.find((p) => p.code === item["Project Code"])?.name)
+    }
+  });
 
 
   return {
