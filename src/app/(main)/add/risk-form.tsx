@@ -134,7 +134,6 @@ export function RiskForm() {
   const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
-  const [projectInput, setProjectInput] = React.useState("");
   const [openCombobox, setOpenCombobox] = React.useState(false);
 
 
@@ -193,13 +192,10 @@ export function RiskForm() {
                 Owner: res.matchedRisk.Owner ?? '',
             }
             form.reset(matchedData);
-            const project = products.find(p => p.code === matchedData['Project Code']);
-            if (project) {
-              setProjectInput(`${project.name} (${project.code})`);
-            }
             toast({ title: "Form Auto-filled", description: "Loaded data from an existing risk." });
             }
         })
+        .catch(() => {})
         .finally(() => setIsAutofilling(false));
     }
   }, [debouncedTitle, projectCode, form, toast, products]);
@@ -302,14 +298,10 @@ export function RiskForm() {
         endUser: "Client Inc.", // mock data
       });
       form.setValue("Project Code", project.code);
-      const projectLabel = `${project.name} (${project.code})`;
-      if (projectInput !== projectLabel) {
-        setProjectInput(projectLabel);
-      }
     } else {
       setAutoFillData(null);
     }
-  }, [projectCode, products, form, projectInput]);
+  }, [projectCode, products, form]);
 
   const onSubmit = async (values: z.infer<typeof riskFormSchema>) => {
     const result = await createRisk(values as any); // Cast to any to avoid type issues with spaced keys
@@ -321,7 +313,6 @@ export function RiskForm() {
       setRephrasedDescription(null);
       setMitigationSuggestions([]);
       setContingencySuggestions([]);
-      setProjectInput("");
     } else {
       toast({
         variant: "destructive",
@@ -375,25 +366,14 @@ export function RiskForm() {
                   name="Project Code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project</FormLabel>
+                      <FormLabel>Project Code</FormLabel>
                         <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                             <PopoverTrigger asChild>
                                 <FormControl>
                                     <div className="relative">
                                         <Input
                                             placeholder="Select or enter project code"
-                                            value={projectInput}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                setProjectInput(value);
-                                                const matchingProject = products.find(p => `${p.name} (${p.code})`.toLowerCase() === value.toLowerCase() || p.code.toLowerCase() === value.toLowerCase());
-                                                if (matchingProject) {
-                                                    field.onChange(matchingProject.code);
-                                                } else {
-                                                    field.onChange(value);
-                                                }
-                                            }}
-                                            className="pr-10"
+                                            {...field}
                                         />
                                         <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 shrink-0 opacity-50" />
                                     </div>
@@ -402,11 +382,7 @@ export function RiskForm() {
                             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                                 <Command
                                     filter={(value, search) => {
-                                        const product = products.find(p => p.id === value);
-                                        if (product) {
-                                          const textToSearch = `${product.name} ${product.code}`.toLowerCase();
-                                          if (textToSearch.includes(search.toLowerCase())) return 1;
-                                        }
+                                        if (value.toLowerCase().includes(search.toLowerCase())) return 1;
                                         return 0;
                                     }}
                                 >
@@ -416,11 +392,10 @@ export function RiskForm() {
                                         <CommandGroup>
                                             {products.map((product) => (
                                                 <CommandItem
-                                                    value={product.id}
+                                                    value={product.code}
                                                     key={product.id}
-                                                    onSelect={() => {
-                                                        form.setValue("Project Code", product.code);
-                                                        setProjectInput(`${product.name} (${product.code})`);
+                                                    onSelect={(currentValue) => {
+                                                        form.setValue("Project Code", currentValue === field.value ? "" : currentValue);
                                                         setOpenCombobox(false);
                                                     }}
                                                 >
@@ -430,7 +405,7 @@ export function RiskForm() {
                                                             product.code === field.value ? "opacity-100" : "opacity-0"
                                                         )}
                                                     />
-                                                    <span className="truncate">{product.name} ({product.code})</span>
+                                                    {product.code}
                                                 </CommandItem>
                                             ))}
                                         </CommandGroup>
