@@ -21,6 +21,23 @@ import { updateRiskIssueField } from "@/app/(main)/actions";
 
 export const riskColumns: ColumnDef<RiskIssue>[] = [
   {
+    accessorKey: "Title",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Title
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-[250px] truncate font-medium">{row.getValue("Title")}</div>
+    ),
+  },
+  {
     accessorKey: "Description",
     header: ({ column }) => {
       return (
@@ -34,7 +51,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("Description")}</div>
+      <div className="w-[250px] truncate">{row.getValue("Description")}</div>
     ),
   },
   {
