@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { updateRiskIssueField } from "@/app/(main)/actions";
+import { EditableCell } from "./editable-cell";
+import { EditableDateCell } from "./editable-date-cell";
 
 
 export const riskColumns: ColumnDef<RiskIssue>[] = [
@@ -34,7 +36,11 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("Title")}</div>
+      <EditableCell
+        initialValue={row.getValue("Title")}
+        rowId={row.original.id}
+        columnId="Title"
+      />
     ),
   },
   {
@@ -51,7 +57,12 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate">{row.getValue("Description")}</div>
+        <EditableCell
+            initialValue={row.getValue("Description")}
+            rowId={row.original.id}
+            columnId="Description"
+            isTextarea={true}
+        />
     ),
   },
   {
@@ -139,21 +150,24 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
   {
     accessorKey: "Owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("Owner") || 'N/A'}</div>,
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("Owner")}
+            rowId={row.original.id}
+            columnId="Owner"
+        />
+    ),
   },
   {
     accessorKey: "DueDate",
     header: "Due Date",
-    cell: ({ row }) => {
-      const date = row.getValue("DueDate");
-       if (!date) return 'N/A';
-      try {
-        const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
-        return format(d, "dd/MM/yyyy");
-      } catch (error) {
-        return 'Invalid Date';
-      }
-    },
+    cell: ({ row }) => (
+        <EditableDateCell
+            initialValue={row.getValue("DueDate")}
+            rowId={row.original.id}
+            columnId="DueDate"
+        />
+    )
   },
   {
     accessorKey: "Probability",
@@ -174,12 +188,26 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
    {
     accessorKey: "MitigationPlan",
     header: "Mitigation Plan",
-    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("MitigationPlan") || 'N/A'}</div>,
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("MitigationPlan")}
+            rowId={row.original.id}
+            columnId="MitigationPlan"
+            isTextarea={true}
+        />
+    ),
   },
   {
     accessorKey: "ContingencyPlan",
     header: "Contingency Plan",
-    cell: ({ row }) => <div className="w-[150px] truncate">{row.getValue("ContingencyPlan") || 'N/A'}</div>,
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("ContingencyPlan")}
+            rowId={row.original.id}
+            columnId="ContingencyPlan"
+            isTextarea={true}
+        />
+    ),
   },
   {
     id: "actions",

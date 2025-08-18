@@ -1,7 +1,8 @@
+
 "use server";
 
 import { db } from "@/lib/firebase";
-import { doc, updateDoc, collection, getDocs, deleteDoc, addDoc, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any, data: any } | null> {
@@ -34,6 +35,25 @@ export async function updateRiskIssueField(id: string, field: string, value: any
     console.error("Error updating document:", error);
     return { success: false, message: "Failed to update field." };
   }
+}
+
+export async function deleteRiskIssue(id: string) {
+    try {
+        const documentInfo = await findDocument(id);
+        if (!documentInfo) {
+          return { success: false, message: "Document not found in any collection." };
+        }
+        
+        await deleteDoc(documentInfo.docRef);
+    
+        // Revalidate the dashboard path to show the updated data
+        revalidatePath('/');
+    
+        return { success: true, message: "Entry deleted successfully." };
+      } catch (error) {
+        console.error("Error deleting document:", error);
+        return { success: false, message: "Failed to delete entry." };
+      }
 }
 
 export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue') {

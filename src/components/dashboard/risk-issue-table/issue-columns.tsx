@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { updateRiskIssueField } from "@/app/(main)/actions";
+import { EditableCell } from "./editable-cell";
+import { EditableDateCell } from "./editable-date-cell";
 
 
 export const issueColumns: ColumnDef<RiskIssue>[] = [
@@ -34,21 +36,35 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[200px] truncate font-medium">{row.getValue("Title")}</div>
+      <EditableCell
+        initialValue={row.getValue("Title")}
+        rowId={row.original.id}
+        columnId="Title"
+      />
     ),
   },
   {
     accessorKey: "Discussion",
     header: "Discussion",
     cell: ({ row }) => (
-      <div className="w-[250px] truncate">{row.getValue("Discussion")}</div>
+        <EditableCell
+            initialValue={row.getValue("Discussion")}
+            rowId={row.original.id}
+            columnId="Discussion"
+            isTextarea={true}
+        />
     )
   },
   {
     accessorKey: "Resolution",
     header: "Resolution",
     cell: ({ row }) => (
-      <div className="w-[250px] truncate">{row.getValue("Resolution")}</div>
+        <EditableCell
+            initialValue={row.getValue("Resolution")}
+            rowId={row.original.id}
+            columnId="Resolution"
+            isTextarea={true}
+        />
     )
   },
   {
@@ -146,21 +162,24 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
   {
     accessorKey: "Owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("Owner") || 'N/A'}</div>,
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("Owner")}
+            rowId={row.original.id}
+            columnId="Owner"
+        />
+    ),
   },
   {
     accessorKey: "Due Date",
     header: "Due Date",
-    cell: ({ row }) => {
-      const date = row.getValue("Due Date");
-      if (!date) return 'N/A';
-      try {
-        const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
-        return format(d, "dd/MM/yyyy");
-      } catch (error) {
-        return 'Invalid Date';
-      }
-    },
+    cell: ({ row }) => (
+        <EditableDateCell
+            initialValue={row.getValue("Due Date")}
+            rowId={row.original.id}
+            columnId="Due Date"
+        />
+    ),
   },
     {
     accessorKey: "Impact",

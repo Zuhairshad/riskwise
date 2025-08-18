@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { updateRiskIssueField, changeRiskIssueType } from "@/app/(main)/actions";
+import { EditableCell } from "./editable-cell";
+import { EditableDateCell } from "./editable-date-cell";
 
 
 export const columns: ColumnDef<RiskIssue>[] = [
@@ -34,7 +36,11 @@ export const columns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("Title")}</div>
+        <EditableCell
+            initialValue={row.getValue("Title")}
+            rowId={row.original.id}
+            columnId="Title"
+        />
     ),
   },
   {
@@ -182,20 +188,27 @@ export const columns: ColumnDef<RiskIssue>[] = [
   {
     accessorKey: "Owner",
     header: "Owner",
-    cell: ({ row }) => <div className="w-[120px] truncate">{row.getValue("Owner") || 'N/A'}</div>,
+    cell: ({ row }) => (
+        <EditableCell
+            initialValue={row.getValue("Owner")}
+            rowId={row.original.id}
+            columnId="Owner"
+        />
+    ),
   },
   {
     accessorKey: "DueDate",
     header: "Due Date",
     cell: ({ row }) => {
       const date = row.getValue("DueDate") || row.original["Due Date"];
-      if (!date) return 'N/A';
-      try {
-        const d = (date as any)?.toDate ? (date as any).toDate() : new Date(date as string);
-        return format(d, "dd/MM/yyyy");
-      } catch (error) {
-        return 'Invalid Date';
-      }
+      const field = row.original.type === 'Risk' ? 'DueDate' : 'Due Date';
+      return (
+        <EditableDateCell
+            initialValue={date}
+            rowId={row.original.id}
+            columnId={field}
+        />
+      )
     },
   },
   {
