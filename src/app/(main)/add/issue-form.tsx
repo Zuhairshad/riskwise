@@ -49,7 +49,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
-import { autofillIssueForm } from "@/ai/flows/autofill-issue-form";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Combobox } from "@/components/ui/combobox";
 
@@ -90,8 +89,7 @@ export function IssueForm() {
   const [isFetchingResolution, setIsFetchingResolution] = React.useState(false);
   const [rephrasedDiscussion, setRephrasedDiscussion] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
-  const [isAutofilling, setIsAutofilling] = React.useState(false);
-
+  
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
     defaultValues: {
@@ -122,41 +120,6 @@ export function IssueForm() {
 
   const discussionValue = form.watch("Discussion");
   const debouncedDiscussion = useDebounce(discussionValue, 500);
-
-  const titleValue = form.watch("Title");
-  const debouncedTitle = useDebounce(titleValue, 500);
-  
-  const handleAutofill = React.useCallback(async (title: string) => {
-    if (!title) return;
-    
-    setIsAutofilling(true);
-    try {
-      const res = await autofillIssueForm({ title });
-      if (res.matchedIssue) {
-        const dateStr = res.matchedIssue['Due Date'];
-        const date = dateStr ? new Date(dateStr) : undefined;
-        const matchedData = {
-          ...res.matchedIssue,
-          "Due Date": date,
-          Discussion: res.matchedIssue.Discussion || '',
-          Resolution: res.matchedIssue.Resolution || '',
-          Portfolio: res.matchedIssue.Portfolio || '',
-        };
-        form.reset(matchedData);
-        toast({ title: "Form Auto-filled", description: "Loaded data from an existing issue." });
-      }
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Auto-fill Failed', description: 'Could not fetch data.' });
-    } finally {
-      setIsAutofilling(false);
-    }
-  }, [form, toast]);
-  
-  React.useEffect(() => {
-    if (debouncedTitle.length > 5) {
-      handleAutofill(debouncedTitle);
-    }
-  }, [debouncedTitle, handleAutofill]);
 
   React.useEffect(() => {
     if (debouncedDiscussion.length > 10) {
@@ -233,7 +196,7 @@ export function IssueForm() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Issue Details</CardTitle>
-                        <CardDescription>Provide the details for the new issue. {isAutofilling && <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />}</CardDescription>
+                        <CardDescription>Provide the details for the new issue.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField

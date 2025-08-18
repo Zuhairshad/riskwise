@@ -47,7 +47,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
-import { autofillRiskForm } from "@/ai/flows/autofill-risk-form";
 import {
   Select,
   SelectContent,
@@ -124,8 +123,7 @@ export function RiskForm() {
   
   const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
-  const [isAutofilling, setIsAutofilling] = React.useState(false);
-
+  
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
     defaultValues: {
@@ -154,8 +152,6 @@ export function RiskForm() {
       getPageData();
   }, [])
 
-  const titleValue = form.watch("Title");
-  const debouncedTitle = useDebounce(titleValue, 500);
   const projectCode = form.watch("Project Code");
   
   const probability = form.watch("Probability");
@@ -165,30 +161,6 @@ export function RiskForm() {
   const descriptionValue = form.watch("Description");
 
   const debouncedDescription = useDebounce(descriptionValue, 500);
-
-  React.useEffect(() => {
-    if (debouncedTitle.length > 5) {
-        setIsAutofilling(true);
-        autofillRiskForm({ title: debouncedTitle })
-        .then((res) => {
-            if (res.matchedRisk) {
-            const date = res.matchedRisk.DueDate?.toDate ? res.matchedRisk.DueDate.toDate() : undefined;
-            const matchedData = {
-                ...res.matchedRisk,
-                DueDate: date,
-                MitigationPlan: res.matchedRisk.MitigationPlan ?? '',
-                ContingencyPlan: res.matchedRisk.ContingencyPlan ?? '',
-                Owner: res.matchedRisk.Owner ?? '',
-            }
-            form.reset(matchedData);
-            toast({ title: "Form Auto-filled", description: "Loaded data from an existing risk." });
-            }
-        })
-        .catch(() => {})
-        .finally(() => setIsAutofilling(false));
-    }
-  }, [debouncedTitle, form, toast]);
-
 
   React.useEffect(() => {
     if (debouncedDescription.length > 10) {
@@ -275,18 +247,25 @@ export function RiskForm() {
 
     if (project) {
       // In a real app, this data would be fetched from a database
+      const projectPOValue = project.value || 0;
+      const projectVA = project.value * 0.1; // mock
+      const bidCost = project.value * 0.9; // mock
+
       setAutoFillData({
         projectName: project.name,
         projectCategorization: "EPC", // mock data
         projectStatus: project.currentStatus,
         projectTeam: ["Alice", "Bob"], // mock data
-        projectVA: project.value * 0.1, // mock data
-        poValue: project.value * 0.8, // mock data
-        bidCost: project.value * 0.9, // mock data
+        projectVA: projectVA,
+        poValue: projectPOValue,
+        bidCost: bidCost, // mock data
         bidVA: project.value * 0.11, // mock data
         endUser: "Client Inc.", // mock data
       });
-      form.setValue("Project Code", project.code);
+      form.setValue("Impact Value ($)", projectPOValue);
+      form.setValue("Budget Contingency", projectVA);
+      // This is just an example, you can decide which fields to autofill
+      // form.setValue("someOtherField", bidCost); 
     } else {
       setAutoFillData(null);
     }
@@ -332,7 +311,7 @@ export function RiskForm() {
               <CardHeader>
                 <CardTitle>Project & Risk Identification</CardTitle>
                 <CardDescription>
-                  Start by identifying the project and the risk. {isAutofilling && <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />}
+                  Start by identifying the project and the risk.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
