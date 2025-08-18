@@ -131,8 +131,8 @@ export function RiskForm() {
       "Project Code": "",
       "Risk Status": "Open",
       Description: "",
-      Probability: 0.2,
-      "Imapct Rating (0.05-0.8)": 0.05,
+      Probability: 0.5,
+      "Imapct Rating (0.05-0.8)": 0.20,
       MitigationPlan: "",
       ContingencyPlan: "",
       "Impact Value ($)": 0,
@@ -707,10 +707,21 @@ export function RiskForm() {
                   name="Probability"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Probability (0-1)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.1" {...field} />
-                      </FormControl>
+                      <FormLabel>Probability</FormLabel>
+                      <Select onValueChange={(value) => field.onChange(parseFloat(value))} value={String(field.value)}>
+                          <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a probability" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0.1">Very Low (0.1)</SelectItem>
+                            <SelectItem value="0.3">Low (0.3)</SelectItem>
+                            <SelectItem value="0.5">Medium (0.5)</SelectItem>
+                            <SelectItem value="0.7">High (0.7)</SelectItem>
+                            <SelectItem value="0.9">Very High (0.9)</SelectItem>
+                          </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -720,10 +731,21 @@ export function RiskForm() {
                   name="Imapct Rating (0.05-0.8)"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Impact Rating (0.05-0.8)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.05" {...field} />
-                      </FormControl>
+                      <FormLabel>Impact Rating</FormLabel>
+                      <Select onValueChange={(value) => field.onChange(parseFloat(value))} value={String(field.value)}>
+                          <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select an impact rating" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0.05">Very Low (0.05)</SelectItem>
+                            <SelectItem value="0.1">Low (0.10)</SelectItem>
+                            <SelectItem value="0.2">Medium (0.20)</SelectItem>
+                            <SelectItem value="0.4">High (0.40)</SelectItem>
+                            <SelectItem value="0.8">Very High (0.80)</SelectItem>
+                          </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
