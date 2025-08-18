@@ -135,20 +135,9 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
   },
   {
     accessorKey: "ProjectName",
-    id: "product",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Product
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Project Code",
     cell: ({ row }) => {
-        return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
+        return <div className="w-[120px] truncate">{row.original.ProjectName}</div>;
       },
     filterFn: (row, id, value) => {
       return value.includes(row.original.ProjectName);

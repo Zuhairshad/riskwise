@@ -33,6 +33,7 @@ export function DataTableToolbar<TData>({
   const filterColumn = table.getColumn("Title") ? "Title" : "Description";
   const statusColumn = table.getColumn("Risk Status") || table.getColumn("Status");
   const priorityColumn = table.getColumn("Priority");
+  const productColumn = table.getColumn("ProjectName");
 
 
   return (
@@ -67,9 +68,9 @@ export function DataTableToolbar<TData>({
             options={priorities}
           />
         )}
-        {table.getColumn("product") && (
+        {productColumn && (
           <DataTableFacetedFilter
-            column={table.getColumn("product")}
+            column={productColumn}
             title="Product"
             options={productOptions}
           />
