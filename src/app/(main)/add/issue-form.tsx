@@ -5,7 +5,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { CalendarIcon, Bot, Loader2, Sparkles, ChevronsUpDown, Check } from "lucide-react";
+import { CalendarIcon, Bot, Loader2, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -27,14 +27,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-  } from "@/components/ui/command";
 import {
   Card,
   CardContent,
@@ -59,6 +51,7 @@ import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strat
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
 import { autofillIssueForm } from "@/ai/flows/autofill-issue-form";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Combobox } from "@/components/ui/combobox";
 
 
 const issueFormSchema = z.object({
@@ -167,10 +160,11 @@ export function IssueForm() {
   }, [debouncedTitle, handleAutofill]);
 
   React.useEffect(() => {
-    if (projectNameValue) {
-        handleAutofill({ projectName: projectNameValue });
+    const project = products.find(p => p.code === projectNameValue);
+    if (project) {
+        handleAutofill({ projectName: project.name });
     }
-  }, [projectNameValue, handleAutofill]);
+  }, [projectNameValue, products, handleAutofill]);
 
   React.useEffect(() => {
     if (debouncedDiscussion.length > 10) {
@@ -293,61 +287,21 @@ export function IssueForm() {
                             name="ProjectName"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Project</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
+                                    <FormLabel>Project</FormLabel>
                                     <FormControl>
-                                        <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        className={cn(
-                                            "w-full justify-between",
-                                            !field.value && "text-muted-foreground"
-                                        )}
-                                        >
-                                        <span className="truncate">
-                                        {field.value
-                                            ? products.find((p) => p.code === field.value)?.name ?? field.value
-                                            : "Select project"}
-                                        </span>
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
+                                    <Combobox
+                                        options={products.map(p => ({ value: p.code, label: `${p.name} (${p.code})` }))}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Select project..."
+                                        searchPlaceholder="Search project..."
+                                        notFoundText="No project found."
+                                    />
                                     </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Search project..." />
-                                        <CommandList>
-                                        <CommandEmpty>No project found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {products.map((product) => (
-                                            <CommandItem
-                                                value={product.name}
-                                                key={product.id}
-                                                onSelect={() => {
-                                                form.setValue("ProjectName", product.code);
-                                                }}
-                                            >
-                                                <Check
-                                                className={cn(
-                                                    "mr-2 h-4 w-4",
-                                                    product.code === field.value
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                                )}
-                                                />
-                                                <span className="truncate">{product.name} ({product.code})</span>
-                                            </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                    </PopoverContent>
-                                </Popover>
-                                <FormMessage />
+                                    <FormMessage />
                                 </FormItem>
                             )}
-                        />
+                            />
                         <FormField
                             control={form.control}
                             name="Portfolio"

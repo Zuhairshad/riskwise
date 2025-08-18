@@ -7,8 +7,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
   Bot,
-  ChevronsUpDown,
-  Check,
   Loader2,
   Sparkles,
   Info,
@@ -36,14 +34,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -69,6 +59,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import type { Product } from "@/lib/types";
 import { createRisk } from "./actions";
+import { Combobox } from "@/components/ui/combobox";
 
 const riskFormSchema = z.object({
   Month: z.string().min(1, "Month is required"),
@@ -134,8 +125,6 @@ export function RiskForm() {
   const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
-  const [openCombobox, setOpenCombobox] = React.useState(false);
-
 
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
@@ -367,52 +356,16 @@ export function RiskForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project Code</FormLabel>
-                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                            <PopoverTrigger asChild>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Input
-                                            placeholder="Select or enter project code"
-                                            {...field}
-                                        />
-                                        <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 shrink-0 opacity-50" />
-                                    </div>
-                                </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                <Command
-                                    filter={(value, search) => {
-                                        if (value.toLowerCase().includes(search.toLowerCase())) return 1;
-                                        return 0;
-                                    }}
-                                >
-                                    <CommandInput placeholder="Search project..." />
-                                    <CommandList>
-                                        <CommandEmpty>No project found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {products.map((product) => (
-                                                <CommandItem
-                                                    value={product.code}
-                                                    key={product.id}
-                                                    onSelect={(currentValue) => {
-                                                        form.setValue("Project Code", currentValue === field.value ? "" : currentValue);
-                                                        setOpenCombobox(false);
-                                                    }}
-                                                >
-                                                    <Check
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4",
-                                                            product.code === field.value ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    />
-                                                    {product.code}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
+                      <FormControl>
+                        <Combobox
+                          options={products.map(p => ({ value: p.code, label: p.code }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select or enter project code..."
+                          searchPlaceholder="Search project code..."
+                          notFoundText="No project found. You can add a new one."
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
