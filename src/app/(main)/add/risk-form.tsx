@@ -47,6 +47,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
+import { suggestTitle } from "@/ai/flows/suggest-title";
 import {
   Select,
   SelectContent,
@@ -78,17 +79,6 @@ const riskFormSchema = z.object({
   Title: z.string().min(5, "Title must be at least 5 characters."),
 });
 
-type AutoFillData = {
-  projectName: string;
-  projectCategorization: string;
-  projectStatus: string;
-  projectTeam: string[];
-  projectVA: number;
-  poValue: number;
-  bidCost: number;
-  bidVA: number;
-  endUser: string;
-};
 
 type Suggestion = {
     matchedRisk?: {
@@ -109,9 +99,7 @@ export function RiskForm() {
   const [selectedProject, setSelectedProject] = React.useState<Product | null>(
     null
   );
-  const [autoFillData, setAutoFillData] =
-    React.useState<AutoFillData | null>(null);
-
+  
   const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
   const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
 
@@ -123,6 +111,9 @@ export function RiskForm() {
   
   const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
+
+  const [titleSuggestion, setTitleSuggestion] = React.useState<string | null>(null);
+  const [isFetchingTitle, setIsFetchingTitle] = React.useState(false);
   
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
@@ -189,6 +180,19 @@ export function RiskForm() {
     }
   };
 
+  const handleSuggestTitle = async () => {
+    setIsFetchingTitle(true);
+    setTitleSuggestion(null);
+    try {
+      const res = await suggestTitle({ description: descriptionValue });
+      setTitleSuggestion(res.title);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Failed to suggest a title." });
+    } finally {
+      setIsFetchingTitle(false);
+    }
+  };
+
   const handleSuggestContingency = async () => {
     setIsFetchingContingency(true);
     setContingencySuggestions([]);
@@ -246,29 +250,13 @@ export function RiskForm() {
     setSelectedProject(project || null);
 
     if (project) {
-      // In a real app, this data would be fetched from a database
       const projectPOValue = project.value || 0;
       const projectVA = project.value * 0.1; // mock
       const bidCost = project.value * 0.9; // mock
 
-      setAutoFillData({
-        projectName: project.name,
-        projectCategorization: "EPC", // mock data
-        projectStatus: project.currentStatus,
-        projectTeam: ["Alice", "Bob"], // mock data
-        projectVA: projectVA,
-        poValue: projectPOValue,
-        bidCost: bidCost, // mock data
-        bidVA: project.value * 0.11, // mock data
-        endUser: "Client Inc.", // mock data
-      });
       form.setValue("Impact Value ($)", projectPOValue);
       form.setValue("Budget Contingency", projectVA);
-      // This is just an example, you can decide which fields to autofill
-      // form.setValue("someOtherField", bidCost); 
-    } else {
-      setAutoFillData(null);
-    }
+    } 
   }, [projectCode, products, form]);
 
   const onSubmit = async (values: z.infer<typeof riskFormSchema>) => {
@@ -350,19 +338,42 @@ export function RiskForm() {
                   )}
                 />
                 
-                <FormField
-                    control={form.control}
-                    name="Title"
-                    render={({ field }) => (
-                        <FormItem className="col-span-full">
-                        <FormLabel>Title</FormLabel>
-                        <FormControl>
-                            <Input placeholder="A short, clear risk headline" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
+                <div className="col-span-full space-y-2">
+                    <FormField
+                        control={form.control}
+                        name="Title"
+                        render={({ field }) => (
+                            <FormItem >
+                            <FormLabel>Title</FormLabel>
+                            <FormControl>
+                                <Input placeholder="A short, clear risk headline" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <Button type="button" variant="outline" size="sm" onClick={handleSuggestTitle} disabled={isFetchingTitle || !descriptionValue || descriptionValue.length < 10}>
+                        {isFetchingTitle ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                        )}
+                        Suggest Title with AI
+                    </Button>
+                    {titleSuggestion && (
+                        <Alert>
+                        <Bot className="h-4 w-4" />
+                        <AlertTitle>AI Suggested Title</AlertTitle>
+                        <AlertDescription>
+                            <p className="italic my-2 p-2 bg-muted rounded">&quot;{titleSuggestion}&quot;</p>
+                            <Button type="button" size="sm" onClick={() => {
+                                form.setValue("Title", titleSuggestion);
+                                setTitleSuggestion(null);
+                            }}>Use Suggestion</Button>
+                        </AlertDescription>
+                        </Alert>
                     )}
-                />
+                </div>
 
                 <div className="col-span-full space-y-2">
                   <FormField
@@ -612,27 +623,28 @@ export function RiskForm() {
               </CardContent>
             </Card>
 
-            {autoFillData && (
+            {selectedProject && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Auto-filled Project Details</CardTitle>
+                  <CardTitle>{selectedProject.name}</CardTitle>
+                  <CardDescription>({selectedProject.code})</CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Project Name</span>
-                    <span>{autoFillData.projectName}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-muted-foreground">Status</span>
-                    <span>{autoFillData.projectStatus}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">End User</span>
-                    <span>{autoFillData.endUser}</span>
+                    <span>{selectedProject.currentStatus}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">PO Value</span>
-                    <span>${autoFillData.poValue.toLocaleString()}</span>
+                    <span>${selectedProject.value.toLocaleString()}</span>
+                  </div>
+                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Project VA</span>
+                    <span>${(selectedProject.value * 0.1).toLocaleString()}</span>
+                  </div>
+                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Bid Cost</span>
+                    <span>${(selectedProject.value * 0.9).toLocaleString()}</span>
                   </div>
                 </CardContent>
               </Card>

@@ -49,6 +49,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
 import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
 import { rephraseDescription } from "@/ai/flows/rephrase-description";
+import { suggestTitle } from "@/ai/flows/suggest-title";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Combobox } from "@/components/ui/combobox";
 
@@ -89,6 +90,8 @@ export function IssueForm() {
   const [isFetchingResolution, setIsFetchingResolution] = React.useState(false);
   const [rephrasedDiscussion, setRephrasedDiscussion] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
+  const [titleSuggestion, setTitleSuggestion] = React.useState<string | null>(null);
+  const [isFetchingTitle, setIsFetchingTitle] = React.useState(false);
   
   const form = useForm<z.infer<typeof issueFormSchema>>({
     resolver: zodResolver(issueFormSchema),
@@ -147,6 +150,20 @@ export function IssueForm() {
       setIsFetchingResolution(false);
     }
   };
+
+  const handleSuggestTitle = async () => {
+    setIsFetchingTitle(true);
+    setTitleSuggestion(null);
+    try {
+      const res = await suggestTitle({ description: discussionValue });
+      setTitleSuggestion(res.title);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Failed to suggest a title." });
+    } finally {
+      setIsFetchingTitle(false);
+    }
+  };
+
 
   const handleRephraseDiscussion = async () => {
     setIsRephrasing(true);
@@ -270,19 +287,43 @@ export function IssueForm() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="Title"
-                            render={({ field }) => (
-                                <FormItem className="col-span-full">
-                                <FormLabel>Title</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="A short, clear issue headline" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
+                        <div className="col-span-full space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="Title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Title</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="A short, clear issue headline" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <Button type="button" variant="outline" size="sm" onClick={handleSuggestTitle} disabled={isFetchingTitle || !discussionValue || discussionValue.length < 10}>
+                                {isFetchingTitle ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                )}
+                                Suggest Title with AI
+                            </Button>
+                             {titleSuggestion && (
+                                <Alert>
+                                <Bot className="h-4 w-4" />
+                                <AlertTitle>AI Suggested Title</AlertTitle>
+                                <AlertDescription>
+                                    <p className="italic my-2 p-2 bg-muted rounded">&quot;{titleSuggestion}&quot;</p>
+                                    <Button type="button" size="sm" onClick={() => {
+                                        form.setValue("Title", titleSuggestion);
+                                        setTitleSuggestion(null);
+                                    }}>Use Suggestion</Button>
+                                </AlertDescription>
+                                </Alert>
                             )}
-                        />
+                        </div>
+
                         <div className="col-span-full space-y-2">
                             <FormField
                                 control={form.control}
