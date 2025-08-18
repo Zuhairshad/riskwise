@@ -160,7 +160,7 @@ export function IssueForm() {
   }, [debouncedTitle, handleAutofill]);
 
   React.useEffect(() => {
-    const project = products.find(p => p.code === projectNameValue);
+    const project = products.find(p => p.name === projectNameValue);
     if (project) {
         handleAutofill({ projectName: project.name });
     }
@@ -290,7 +290,7 @@ export function IssueForm() {
                                     <FormLabel>Project</FormLabel>
                                     <FormControl>
                                     <Combobox
-                                        options={products.map(p => ({ value: p.code, label: `${p.name} (${p.code})` }))}
+                                        options={products.map(p => ({ value: p.name, label: `${p.name} (${p.code})` }))}
                                         value={field.value}
                                         onChange={field.onChange}
                                         placeholder="Select project..."

@@ -2,20 +2,22 @@
 'use server';
 /**
  * @fileOverview This file contains a Genkit flow for suggesting similar risks
- * as the user types in the description textarea.
+ * as the user types in the description textarea. It searches the existing
+ * Firestore database for potential duplicates.
  *
- * - suggestSimilarRisks - A function that takes a description and returns suggested similar entries.
+ * - suggestSimilarRisks - A function that takes a description and returns a suggested similar entry or a rephrased description.
  * - SuggestSimilarRisksInput - The input type for the suggestSimilarRisks function.
  * - SuggestSimilarRisksOutput - The return type for the suggestSimilarRisks function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { collection, getDocs, query, where, limit } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const SuggestSimilarRisksInputSchema = z.object({
   description: z.string().describe('The description of the risk or issue being entered.'),
+  existingRisks: z.string().describe('A JSON string of existing risks to compare against.'),
 });
 export type SuggestSimilarRisksInput = z.infer<typeof SuggestSimilarRisksInputSchema>;
 
@@ -37,24 +39,40 @@ export type SuggestSimilarRisksOutput = z.infer<typeof SuggestSimilarRisksOutput
 
 
 export async function suggestSimilarRisks(input: {description: string}): Promise<SuggestSimilarRisksOutput> {
-  // Since we cannot pass the whole DB, we can't find a match.
-  // We will just rephrase the description.
-  // A more advanced implementation could use a vector DB for similarity search.
-  return suggestSimilarRisksFlow({ description: input.description });
+    const risksRef = collection(db, 'risks');
+    const snapshot = await getDocs(risksRef);
+    const risks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return suggestSimilarRisksFlow({ 
+        description: input.description,
+        existingRisks: JSON.stringify(risks.map(r => ({
+            id: r.id,
+            title: r.Title,
+            description: r.Description,
+            mitigationPlan: r.MitigationPlan,
+            contingencyPlan: r.ContingencyPlan,
+            probability: r.Probability,
+            impactRating: r['Imapct Rating (0.05-0.8)'],
+        })))
+    });
 }
 
 const prompt = ai.definePrompt({
   name: 'suggestOrRephraseRiskPrompt',
   input: {schema: SuggestSimilarRisksInputSchema},
   output: {schema: SuggestSimilarRisksOutputSchema},
-  prompt: `You are an expert risk management analyst.
+  prompt: `You are an expert risk management analyst. A user is entering a new risk and you need to help them avoid duplicates.
   
-  A user has entered the following risk description:
+  Current risk description:
   "{{{description}}}"
 
-  Your task is to rephrase the user's original description to be clearer, more concise, and professionally worded.
+  Here are the existing risks in the database:
+  {{{existingRisks}}}
   
-  Return this improved text in the 'rephrasedDescription' field. Leave 'matchedRisk' empty.`,
+  Your task is to determine if the new risk is a potential duplicate of an existing one.
+  
+  - If you find a strong match (semantic similarity > 0.8), return the 'matchedRisk' object with the data from the existing risk. Do not rephrase the description.
+  - If you do not find a strong match, your task is to rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' empty.`,
   model: 'googleai/gemini-1.5-flash',
 });
 
