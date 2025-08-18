@@ -47,6 +47,8 @@ import type { Product, RiskIssue } from "@/lib/types";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Combobox } from "@/components/ui/combobox";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import {
   createIssue,
   suggestSimilarIssues,
@@ -81,7 +83,11 @@ type Suggestion = {
         resolution?: string | undefined;
     };
     rephrasedDescription?: string;
-    detailedSummary?: string;
+    detailedSummary?: {
+        analysis: string;
+        keyMetrics: { name: string; value: string }[];
+        recommendation: string;
+    };
 }
 
 export function IssueForm() {
@@ -369,13 +375,45 @@ export function IssueForm() {
                                 Checking for similar issues...
                                 </div>
                             )}
-                            {suggestion?.matchedIssue && (
+                            {suggestion?.matchedIssue && suggestion.detailedSummary && (
                                 <Alert>
                                 <Bot className="h-4 w-4" />
                                 <AlertTitle>Potential Duplicate Found: {suggestion.matchedIssue.title}</AlertTitle>
                                 <AlertDescription>
-                                    <p className="text-sm text-muted-foreground mt-2 mb-2 whitespace-pre-wrap">{suggestion.detailedSummary}</p>
-                                    <Button type="button" size="sm" onClick={() => handleUseMatchedIssue(suggestion.matchedIssue!)}>Use This Data</Button>
+                                    <div className="space-y-4 mt-2">
+                                        <Card>
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-sm">Match Analysis</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="text-xs">
+                                                <p>{suggestion.detailedSummary.analysis}</p>
+                                            </CardContent>
+                                        </Card>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Card>
+                                                <CardHeader className="pb-2">
+                                                    <CardTitle className="text-sm">Key Metrics</CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="text-xs space-y-1">
+                                                {suggestion.detailedSummary.keyMetrics.map(metric => (
+                                                    <div key={metric.name} className="flex justify-between">
+                                                        <span className="font-medium">{metric.name}:</span>
+                                                        <Badge variant="secondary">{metric.value}</Badge>
+                                                    </div>
+                                                ))}
+                                                </CardContent>
+                                            </Card>
+                                            <Card>
+                                                <CardHeader className="pb-2">
+                                                    <CardTitle className="text-sm">AI Recommendation</CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="text-xs">
+                                                    <p>{suggestion.detailedSummary.recommendation}</p>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    </div>
+                                    <Button type="button" size="sm" onClick={() => handleUseMatchedIssue(suggestion.matchedIssue!)} className="mt-4">Use This Data</Button>
                                 </AlertDescription>
                                 </Alert>
                             )}

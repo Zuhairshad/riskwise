@@ -55,6 +55,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import type { Product, RiskIssue } from "@/lib/types";
 import { Combobox } from "@/components/ui/combobox";
+import { Badge } from "@/components/ui/badge";
 import {
   createRisk,
   suggestSimilarRisks,
@@ -90,10 +91,14 @@ type Suggestion = {
         mitigationPlan?: string | undefined;
         contingencyPlan?: string | undefined;
         probability?: number | undefined;
-        "Imapct Rating (0.05-0.8)"?: number | undefined;
+        impactRating?: number | undefined;
     };
     rephrasedDescription?: string;
-    detailedSummary?: string;
+    detailedSummary?: {
+        analysis: string;
+        keyMetrics: { name: string; value: string }[];
+        recommendation: string;
+    };
 }
 
 export function RiskForm() {
@@ -303,7 +308,7 @@ export function RiskForm() {
     if (matchedRisk.mitigationPlan) form.setValue("MitigationPlan", matchedRisk.mitigationPlan);
     if (matchedRisk.contingencyPlan) form.setValue("ContingencyPlan", matchedRisk.contingencyPlan);
     if (matchedRisk.probability) form.setValue("Probability", matchedRisk.probability);
-    if (matchedRisk['Imapct Rating (0.05-0.8)']) form.setValue("Imapct Rating (0.05-0.8)", matchedRisk['Imapct Rating (0.05-0.8)']);
+    if (matchedRisk.impactRating) form.setValue("Imapct Rating (0.05-0.8)", matchedRisk.impactRating);
     setSuggestion(null);
     setRephrasedDescription(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched risk data." });
@@ -426,13 +431,45 @@ export function RiskForm() {
                       Checking for similar risks...
                     </div>
                   )}
-                  {suggestion?.matchedRisk && (
+                  {suggestion?.matchedRisk && suggestion.detailedSummary && (
                     <Alert>
                       <Bot className="h-4 w-4" />
                       <AlertTitle>Potential Duplicate Found: {suggestion.matchedRisk.title}</AlertTitle>
                       <AlertDescription>
-                          <p className="text-sm text-muted-foreground mt-2 mb-2 whitespace-pre-wrap">{suggestion.detailedSummary}</p>
-                          <Button type="button" size="sm" onClick={() => handleUseMatchedRisk(suggestion.matchedRisk!)}>Use This Data</Button>
+                        <div className="space-y-4 mt-2">
+                            <Card>
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm">Match Analysis</CardTitle>
+                                </CardHeader>
+                                <CardContent className="text-xs">
+                                    <p>{suggestion.detailedSummary.analysis}</p>
+                                </CardContent>
+                            </Card>
+                             <div className="grid grid-cols-2 gap-4">
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm">Key Metrics</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="text-xs space-y-1">
+                                    {suggestion.detailedSummary.keyMetrics.map(metric => (
+                                        <div key={metric.name} className="flex justify-between">
+                                            <span className="font-medium">{metric.name}:</span>
+                                            <Badge variant="secondary">{metric.value}</Badge>
+                                        </div>
+                                    ))}
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm">AI Recommendation</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="text-xs">
+                                        <p>{suggestion.detailedSummary.recommendation}</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+                        <Button type="button" size="sm" onClick={() => handleUseMatchedRisk(suggestion.matchedRisk!)} className="mt-4">Use This Data</Button>
                       </AlertDescription>
                     </Alert>
                   )}
