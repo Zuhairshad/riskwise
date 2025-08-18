@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -22,6 +23,18 @@ export function DashboardClient({ data }: DashboardClientProps) {
   const risks = data.filter((d) => d.type === 'Risk');
   const issues = data.filter((d) => d.type === 'Issue');
 
+  const [currentData, setCurrentData] = React.useState(data);
+
+  const onTabChange = (value: string) => {
+    if (value === 'risks') {
+      setCurrentData(risks);
+    } else if (value === 'issues') {
+      setCurrentData(issues);
+    } else {
+      setCurrentData(data);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -39,7 +52,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
         </Button>
       </div>
 
-      <StatsCards data={data} />
+      <StatsCards data={currentData} />
 
        <Card>
         <CardHeader>
@@ -49,7 +62,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all">
+          <Tabs defaultValue="all" onValueChange={onTabChange}>
             <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
               <TabsTrigger value="all">
                 <List className="mr-2 h-4 w-4" />

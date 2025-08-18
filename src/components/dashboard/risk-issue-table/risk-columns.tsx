@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import type { RiskIssue, Status } from "@/lib/types";
-import { statuses, products } from "@/lib/data";
+import { statuses } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -37,12 +37,13 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       <div className="w-[250px] truncate font-medium">{row.getValue("Description")}</div>
     ),
   },
-    {
+  {
     accessorKey: "Risk Status",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const status = statuses.find((s) => s.value === row.original["Risk Status"]);
+      const statusValue = row.original["Risk Status"] || 'Open';
+      const status = statuses.find((s) => s.value === statusValue);
 
       if (!status) return null;
       
@@ -76,7 +77,8 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.original["Risk Status"]);
+        const statusValue = row.original["Risk Status"] || 'Open';
+        return value.includes(statusValue);
     },
   },
   {

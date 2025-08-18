@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import type { RiskIssue, Status, Priority } from "@/lib/types";
-import { statuses, priorities, products, issueCategories } from "@/lib/data";
+import { statuses, priorities, issueCategories } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -34,8 +34,22 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-[250px] truncate font-medium">{row.getValue("Title")}</div>
+      <div className="w-[200px] truncate font-medium">{row.getValue("Title")}</div>
     ),
+  },
+  {
+    accessorKey: "Discussion",
+    header: "Discussion",
+    cell: ({ row }) => (
+      <div className="w-[250px] truncate">{row.getValue("Discussion")}</div>
+    )
+  },
+  {
+    accessorKey: "Resolution",
+    header: "Resolution",
+    cell: ({ row }) => (
+      <div className="w-[250px] truncate">{row.getValue("Resolution")}</div>
+    )
   },
   {
     accessorKey: "Status",
