@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { CalendarIcon, Bot, Loader2, Sparkles, ChevronsUpDown, Check } from "lucide-react";
 import { format } from "date-fns";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -76,10 +78,6 @@ const issueFormSchema = z.object({
     Status: z.enum(["Open", "Resolved", "Escalated", "Closed"], { required_error: "Status is required." }),
 });
 
-type IssueFormProps = {
-  products: Product[];
-};
-
 type Suggestion = {
     matchedIssue?: {
         id: string;
@@ -90,8 +88,9 @@ type Suggestion = {
     rephrasedDescription?: string;
 }
 
-export function IssueForm({ products }: IssueFormProps) {
+export function IssueForm() {
   const { toast } = useToast();
+  const [products, setProducts] = React.useState<Product[]>([]);
   const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
   const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
   const [resolutionSuggestions, setResolutionSuggestions] = React.useState<string[]>([]);
@@ -117,6 +116,59 @@ export function IssueForm({ products }: IssueFormProps) {
       Status: "Open",
     },
   });
+
+  React.useEffect(() => {
+    async function getPageData() {
+        const risksCollection = collection(db, 'risks');
+        const issuesCollection = collection(db, 'issues');
+        
+        const riskSnapshot = await getDocs(risksCollection);
+        const issueSnapshot = await getDocs(issuesCollection);
+      
+        const projectsMap = new Map<string, Product>();
+      
+        // Prioritize risks for more descriptive project names
+        riskSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const projectCode = data["Project Code"];
+          const projectName = data.ProjectName || data.Title; // Fallback to Title if ProjectName is generic
+      
+          if (projectCode && projectName) {
+            if (!projectsMap.has(projectCode) || (projectName && !projectsMap.get(projectCode)?.name)) {
+                projectsMap.set(projectCode, {
+                    id: doc.id,
+                    code: projectCode,
+                    name: projectName,
+                    paNumber: '', 
+                    value: 0, 
+                    currentStatus: '', 
+                });
+            }
+          }
+        });
+      
+        issueSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const projectCode = data.ProjectName;
+          if (projectCode) {
+              if (!projectsMap.has(projectCode)) {
+                  projectsMap.set(projectCode, {
+                      id: doc.id,
+                      code: projectCode, 
+                      name: data.Title || projectCode,
+                      paNumber: '',
+                      value: 0,
+                      currentStatus: '',
+                  });
+              }
+          }
+        });
+        
+        const products: Product[] = Array.from(projectsMap.values());
+        setProducts(products);
+      }
+      getPageData();
+  }, [])
 
   const discussionValue = form.watch("Discussion");
   const debouncedDiscussion = useDebounce(discussionValue, 500);
@@ -298,7 +350,7 @@ export function IssueForm({ products }: IssueFormProps) {
                                         >
                                         <span className="truncate">
                                         {field.value
-                                            ? products.find((p) => p.code === field.value)?.name
+                                            ? products.find((p) => p.code === field.value)?.name ?? field.value
                                             : "Select project"}
                                         </span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

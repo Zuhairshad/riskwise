@@ -14,6 +14,8 @@ import {
   Info,
   CalendarIcon,
 } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -86,10 +88,6 @@ const riskFormSchema = z.object({
   Title: z.string().min(5, "Title must be at least 5 characters."),
 });
 
-type RiskFormProps = {
-  products: Product[];
-};
-
 type AutoFillData = {
   projectName: string;
   projectCategorization: string;
@@ -115,8 +113,9 @@ type Suggestion = {
     rephrasedDescription?: string;
 }
 
-export function RiskForm({ products }: RiskFormProps) {
+export function RiskForm() {
   const { toast } = useToast();
+  const [products, setProducts] = React.useState<Product[]>([]);
   const [selectedProject, setSelectedProject] = React.useState<Product | null>(
     null
   );
@@ -135,6 +134,7 @@ export function RiskForm({ products }: RiskFormProps) {
   const [rephrasedDescription, setRephrasedDescription] = React.useState<string | null>(null);
   const [isRephrasing, setIsRephrasing] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
+  const [projectInput, setProjectInput] = React.useState("");
 
   const form = useForm<z.infer<typeof riskFormSchema>>({
     resolver: zodResolver(riskFormSchema),
@@ -153,6 +153,59 @@ export function RiskForm({ products }: RiskFormProps) {
       Title: "",
     },
   });
+
+  React.useEffect(() => {
+    async function getPageData() {
+        const risksCollection = collection(db, 'risks');
+        const issuesCollection = collection(db, 'issues');
+        
+        const riskSnapshot = await getDocs(risksCollection);
+        const issueSnapshot = await getDocs(issuesCollection);
+      
+        const projectsMap = new Map<string, Product>();
+      
+        // Prioritize risks for more descriptive project names
+        riskSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const projectCode = data["Project Code"];
+          const projectName = data.ProjectName || data.Title; // Fallback to Title if ProjectName is generic
+      
+          if (projectCode && projectName) {
+            if (!projectsMap.has(projectCode) || (projectName && !projectsMap.get(projectCode)?.name)) {
+                projectsMap.set(projectCode, {
+                    id: doc.id,
+                    code: projectCode,
+                    name: projectName,
+                    paNumber: '', 
+                    value: 0, 
+                    currentStatus: '', 
+                });
+            }
+          }
+        });
+      
+        issueSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const projectCode = data.ProjectName;
+          if (projectCode) {
+              if (!projectsMap.has(projectCode)) {
+                  projectsMap.set(projectCode, {
+                      id: doc.id,
+                      code: projectCode, 
+                      name: data.Title || projectCode,
+                      paNumber: '',
+                      value: 0,
+                      currentStatus: '',
+                  });
+              }
+          }
+        });
+        
+        const products: Product[] = Array.from(projectsMap.values());
+        setProducts(products);
+      }
+      getPageData();
+  }, [])
 
   const titleValue = form.watch("Title");
   const debouncedTitle = useDebounce(titleValue, 500);
@@ -271,6 +324,15 @@ export function RiskForm({ products }: RiskFormProps) {
   React.useEffect(() => {
     const project = products.find((p) => p.code === projectCode);
     setSelectedProject(project || null);
+    
+    // Update input only if the user hasn't typed a custom value
+    if (project && projectInput !== project.code) {
+        const projectLabel = project ? `${project.name} (${project.code})` : projectCode;
+        if(projectInput !== projectLabel) {
+            setProjectInput(projectLabel);
+        }
+    }
+
     if (project) {
       // In a real app, this data would be fetched from a database
       setAutoFillData({
@@ -288,7 +350,7 @@ export function RiskForm({ products }: RiskFormProps) {
     } else {
       setAutoFillData(null);
     }
-  }, [projectCode, products, form]);
+  }, [projectCode, products, form, projectInput]);
 
   const onSubmit = async (values: z.infer<typeof riskFormSchema>) => {
     const result = await createRisk(values as any); // Cast to any to avoid type issues with spaced keys
@@ -300,6 +362,7 @@ export function RiskForm({ products }: RiskFormProps) {
       setRephrasedDescription(null);
       setMitigationSuggestions([]);
       setContingencySuggestions([]);
+      setProjectInput("");
     } else {
       toast({
         variant: "destructive",
@@ -354,57 +417,67 @@ export function RiskForm({ products }: RiskFormProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "w-full justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              <span className="truncate">
-                                {field.value
-                                  ? products.find((p) => p.code === field.value)
-                                      ?.name
-                                  : "Select project"}
-                              </span>
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                          <Command>
-                            <CommandInput placeholder="Search project..." />
-                            <CommandList>
-                              <CommandEmpty>No project found.</CommandEmpty>
-                              <CommandGroup>
-                                {products.map((product) => (
-                                  <CommandItem
-                                    value={product.name}
-                                    key={product.id}
-                                    onSelect={() => {
-                                      form.setValue("Project Code", product.code);
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <FormControl>
+                                    <div className="relative">
+                                        <Input
+                                            placeholder="Select or enter project code"
+                                            value={projectInput}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                setProjectInput(value);
+                                                const matchingProject = products.find(p => `${p.name} (${p.code})`.toLowerCase() === value.toLowerCase() || p.code.toLowerCase() === value.toLowerCase());
+                                                if (matchingProject) {
+                                                    field.onChange(matchingProject.code);
+                                                } else {
+                                                    field.onChange(value);
+                                                }
+                                            }}
+                                            className="pr-10"
+                                        />
+                                        <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 shrink-0 opacity-50" />
+                                    </div>
+                                </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                <Command
+                                    filter={(value, search) => {
+                                        const project = products.find(p => p.id === value);
+                                        if (project) {
+                                          const textToSearch = `${project.name} ${project.code}`.toLowerCase();
+                                          if (textToSearch.includes(search.toLowerCase())) return 1;
+                                        }
+                                        return 0;
                                     }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        product.code === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                    <span className="truncate">{product.name} ({product.code})</span>
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                                >
+                                    <CommandInput placeholder="Search project..." />
+                                    <CommandList>
+                                        <CommandEmpty>No project found.</CommandEmpty>
+                                        <CommandGroup>
+                                            {products.map((product) => (
+                                                <CommandItem
+                                                    value={product.id}
+                                                    key={product.id}
+                                                    onSelect={() => {
+                                                        form.setValue("Project Code", product.code);
+                                                        setProjectInput(`${product.name} (${product.code})`);
+                                                    }}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            product.code === field.value ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    <span className="truncate">{product.name} ({product.code})</span>
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
