@@ -87,7 +87,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const statusValue = row.original["Risk Status"] || row.original.Status || 'Open';
+      const statusValue = row.getValue("Risk Status") || row.original.Status || 'Open';
       const status = statuses.find((s) => s.value === statusValue);
 
       if (!status) return null;
