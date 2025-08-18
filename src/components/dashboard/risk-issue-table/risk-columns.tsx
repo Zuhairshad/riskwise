@@ -5,8 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import type { RiskIssue, Status } from "@/lib/types";
-import { statuses } from "@/lib/data";
+import type { RiskIssue, Status, Priority } from "@/lib/types";
+import { statuses, priorities } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -107,6 +107,45 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     filterFn: (row, id, value) => {
         const statusValue = row.original["Risk Status"] || 'Open';
         return value.includes(statusValue);
+    },
+  },
+  {
+    accessorKey: "Priority",
+    header: "Priority",
+    cell: ({ row }) => {
+       const { toast } = useToast();
+      const priority = priorities.find((p) => p.value === row.getValue("Priority"));
+      if (!priority) return <div className="text-muted-foreground">N/A</div>;
+
+      const handlePriorityChange = async (newPriority: Priority) => {
+        const result = await updateRiskIssueField(row.original.id, 'Priority', newPriority);
+        if (result.success) {
+          toast({ title: "Priority Updated", description: `Priority for "${row.original.Title}" updated to ${newPriority}.`});
+        } else {
+          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
+        }
+      };
+
+      return (
+        <Select defaultValue={priority.value} onValueChange={handlePriorityChange}>
+          <SelectTrigger className="w-[120px] h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {priorities.map((p) => (
+              <SelectItem key={p.value} value={p.value}>
+                <div className="flex items-center">
+                   {p.icon && <p.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                   <span>{p.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
   {
