@@ -83,11 +83,11 @@ export const columns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "Risk Status",
+    accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const statusValue = row.getValue("Risk Status") || row.original.Status || 'Open';
+      const statusValue: Status = row.getValue("Status");
       const status = statuses.find((s) => s.value === statusValue);
 
       if (!status) return null;
@@ -121,8 +121,7 @@ export const columns: ColumnDef<RiskIssue>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      const statusValue = row.original["Risk Status"] || row.original.Status;
-      return value.includes(statusValue);
+      return value.includes(row.getValue(id));
     },
   },
   {
