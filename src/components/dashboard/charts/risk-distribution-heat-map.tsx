@@ -7,43 +7,42 @@ import type { RiskIssue } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { HeatMapFilter } from "../dashboard-client";
 
+const probabilityLevels = [
+    { label: "Very High", value: 0.9, range: [0.8, 1.0] },
+    { label: "High", value: 0.7, range: [0.6, 0.8] },
+    { label: "Medium", value: 0.5, range: [0.4, 0.6] },
+    { label: "Low", value: 0.3, range: [0.2, 0.4] },
+    { label: "Very Low", value: 0.1, range: [0, 0.2] },
+];
+  
+const impactLevels = [
+    { label: "Very Low", value: 0.05, range: [0, 0.05] },
+    { label: "Low", value: 0.1, range: [0.05, 0.1] },
+    { label: "Medium", value: 0.2, range: [0.1, 0.2] },
+    { label: "High", value: 0.4, range: [0.2, 0.4] },
+    { label: "Very High", value: 0.8, range: [0.4, 1.0] },
+];
+
+const getRiskColor = (score: number, count: number): string => {
+    if (count === 0) return "bg-muted/30";
+  
+    if (score >= 0.15) return `bg-red-500`; // Matches scores like 0.18, 0.20, etc.
+    if (score >= 0.03) return `bg-yellow-400`; // Matches scores from 0.03 to 0.14
+    return `bg-green-500`; // Matches scores below 0.03
+  };
+  
+const getTextColor = (score: number, count: number): string => {
+    if (count === 0) return "text-muted-foreground";
+    if (score >= 0.15) return "text-white";
+    return "text-gray-800";
+}
+
 interface RiskDistributionHeatMapProps {
   data: RiskIssue[];
   onCellClick: (filter: HeatMapFilter) => void;
   activeFilter: HeatMapFilter;
 }
 
-const probabilityLevels = [
-  { label: "Very High", value: 0.9, range: [0.8, 1.0] },
-  { label: "High", value: 0.7, range: [0.6, 0.8] },
-  { label: "Medium", value: 0.5, range: [0.4, 0.6] },
-  { label: "Low", value: 0.3, range: [0.2, 0.4] },
-  { label: "Very Low", value: 0.1, range: [0, 0.2] },
-];
-
-const impactLevels = [
-  { label: "Very Low", value: 0.05, range: [0, 0.1] },
-  { label: "Low", value: 0.1, range: [0.1, 0.2] },
-  { label: "Medium", value: 0.2, range: [0.2, 0.4] },
-  { label: "High", value: 0.4, range: [0.4, 0.8] },
-  { label: "Very High", value: 0.8, range: [0.8, 1.0] },
-];
-
-const getRiskColor = (score: number, count: number): string => {
-  if (count === 0) return "bg-muted/30";
-  const opacity = Math.min(1, 0.2 + count / 5).toPrecision(2); 
-
-  if (score >= 0.3) return `bg-red-500`; 
-  if (score >= 0.15) return `bg-orange-500`;
-  if (score >= 0.05) return `bg-yellow-400`;
-  return `bg-green-500`;
-};
-
-const getTextColor = (score: number, count: number): string => {
-    if (count === 0) return "text-muted-foreground";
-    if (score >= 0.15) return "text-white";
-    return "text-gray-800";
-}
 
 export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: RiskDistributionHeatMapProps) {
   const heatMapData = React.useMemo(() => {
@@ -56,11 +55,18 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
         const prob = risk.Probability ?? 0;
         const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
 
-        const probIndex = probabilityLevels.findIndex(p => prob >= p.range[0] && prob <= p.range[1]);
-        const impactIndex = impactLevels.findIndex(i => impact >= i.range[0] && impact <= i.range[1]);
+        const probIndex = probabilityLevels.findIndex(p => prob >= p.range[0] && prob < p.range[1]);
+        const impactIndex = impactLevels.findIndex(i => impact >= i.range[0] && impact < i.range[1]);
         
         if (probIndex !== -1 && impactIndex !== -1) {
             grid[probIndex][impactIndex]++;
+        } else {
+            // Handle edge case for max value
+            const maxProbIndex = probabilityLevels.findIndex(p => prob === p.range[1])
+            const maxImpactIndex = impactLevels.findIndex(i => impact === i.range[1])
+            if (maxProbIndex !== -1 && maxImpactIndex !== -1) {
+                grid[maxProbIndex][maxImpactIndex]++;
+            }
         }
     });
     return grid;
@@ -79,7 +85,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
                 key={level.value}
                 className="text-center font-medium text-muted-foreground truncate"
               >
-                {level.label}
+                {level.label} ({level.value})
               </div>
             ))}
           </div>
@@ -89,7 +95,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
           <div className="grid grid-rows-5 gap-1 text-xs text-right font-medium text-muted-foreground">
             {probabilityLevels.map((level) => (
               <div key={level.value} className="flex items-center justify-end">
-                {level.label}
+                {level.label} ({level.value})
               </div>
             ))}
           </div>
@@ -134,7 +140,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
           </div>
         </div>
         <div className="text-center font-medium text-muted-foreground text-xs pt-1">
-          Impact
+          Impact / Severity
         </div>
       </div>
     </TooltipProvider>

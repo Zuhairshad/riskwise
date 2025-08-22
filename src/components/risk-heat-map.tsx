@@ -25,11 +25,10 @@ const impactLevels = [
 ];
 
 const getRiskColor = (score: number): string => {
-  if (score >= 0.3) return "bg-red-500/80"; // Critical
-  if (score >= 0.15) return "bg-orange-500/80"; // High
-  if (score >= 0.05) return "bg-yellow-400/80"; // Medium
-  return "bg-green-500/80"; // Low
-};
+    if (score >= 0.15) return "bg-red-500/80"; // High/Critical
+    if (score >= 0.03) return "bg-yellow-400/80"; // Medium
+    return "bg-green-500/80"; // Low
+  };
 
 export function RiskHeatMap({ probability, impact }: RiskHeatMapProps) {
   return (
@@ -42,9 +41,9 @@ export function RiskHeatMap({ probability, impact }: RiskHeatMapProps) {
           {impactLevels.map((level) => (
             <div
               key={level.value}
-              className="text-center font-medium text-muted-foreground"
+              className="text-center font-medium text-muted-foreground truncate"
             >
-              {level.label}
+              {level.label} ({level.value})
             </div>
           ))}
         </div>
@@ -54,7 +53,7 @@ export function RiskHeatMap({ probability, impact }: RiskHeatMapProps) {
         <div className="grid grid-rows-5 gap-1 text-xs text-right font-medium text-muted-foreground">
           {probabilityLevels.map((level) => (
             <div key={level.value} className="flex items-center justify-end">
-              {level.label}
+              {level.label} ({level.value})
             </div>
           ))}
         </div>
@@ -79,12 +78,9 @@ export function RiskHeatMap({ probability, impact }: RiskHeatMapProps) {
           )}
         </div>
       </div>
-      <div className="text-center font-medium text-muted-foreground text-xs">
-        Impact
+      <div className="text-center font-medium text-muted-foreground text-xs pt-1">
+        Impact / Severity
       </div>
     </div>
   );
 }
-
-
-    

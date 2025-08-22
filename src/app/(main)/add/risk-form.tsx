@@ -277,10 +277,9 @@ export function RiskForm() {
   );
 
   const riskLevel = React.useMemo(() => {
-    if (riskScore < 0.1) return "Low";
-    if (riskScore < 0.3) return "Medium";
-    if (riskScore < 0.6) return "High";
-    return "Critical";
+    if (riskScore >= 0.15) return "High";
+    if (riskScore >= 0.03) return "Medium";
+    return "Low";
   }, [riskScore]);
 
   React.useEffect(() => {
@@ -855,5 +854,3 @@ export function RiskForm() {
     </Form>
   );
 }
-
-    
