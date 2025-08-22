@@ -34,7 +34,7 @@ const ComparisonCard = ({ title, value }: { title: string, value: string | numbe
 
 export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) {
   const productOptions = React.useMemo(() => 
-    products.map(p => ({ label: p.name, value: p.id })), 
+    products.map(p => ({ label: p.name, value: p.code })), 
     [products]
   );
   
@@ -42,15 +42,21 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
 
   const filteredData = React.useMemo(() => {
     if (selected.length === 0) return [];
-    const selectedProjectIds = selected.map(s => s.value);
-    return data.filter(item => item.product && selectedProjectIds.includes(item.product.id));
+    const selectedProjectCodes = selected.map(s => s.value);
+    return data.filter(item => {
+        const projectCode = item['Project Code'] || item.product?.code;
+        return projectCode && selectedProjectCodes.includes(projectCode);
+    });
   }, [data, selected]);
 
   const comparisonData = React.useMemo(() => {
     if (selected.length === 0) return [];
     
     return selected.map(projectOption => {
-      const projectData = data.filter(d => d.product?.id === projectOption.value);
+      const projectData = data.filter(d => {
+        const projectCode = d['Project Code'] || d.product?.code;
+        return projectCode === projectOption.value
+      });
       const risks = projectData.filter(d => d.type === "Risk");
       const issues = projectData.filter(d => d.type === "Issue");
 
