@@ -34,13 +34,13 @@ async function getDashboardData() {
       _id: doc.id,
       type: 'Issue',
       Title: data.Title,
-      DueDate: data["Due Date"] instanceof Timestamp ? data["Due Date"].toDate().toISOString() : data["Due Date"],
+      "Due Date": data["Due Date"] instanceof Timestamp ? data["Due Date"].toDate().toISOString() : data["Due Date"],
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
     } as unknown as RiskIssue;
   });
 
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
-    const status = item.Status || item["Risk Status"] || 'Open';
+    const status = item["Risk Status"] || item.Status || 'Open';
     return {
       ...item,
       Status: status,
