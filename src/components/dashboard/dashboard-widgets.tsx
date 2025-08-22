@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StatusDistributionChart } from "./charts/status-distribution-chart";
 import { RiskScoreBreakdownChart } from "./charts/risk-score-breakdown-chart";
 import { RiskDistributionHeatMap } from "./charts/risk-distribution-heat-map";
+import { TypeDistributionChart } from "./charts/type-distribution-chart";
 import type { HeatMapFilter, RiskLevelFilter } from "./dashboard-client";
 
 type DashboardWidgetsProps = {
@@ -30,7 +31,7 @@ export function DashboardWidgets({
 }: DashboardWidgetsProps) {
 
     const riskWidgets = (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 col-span-full">
+        <>
             <Card className="col-span-full lg:col-span-4">
                 <CardHeader>
                     <CardTitle>Risk Distribution Heat Map</CardTitle>
@@ -44,7 +45,7 @@ export function DashboardWidgets({
                     />
                 </CardContent>
             </Card>
-            <div className="col-span-full lg:col-span-3">
+            <div className="col-span-full lg:col-span-3 space-y-4">
                 <Card>
                     <CardHeader>
                         <CardTitle>Risk Score Breakdown</CardTitle>
@@ -59,29 +60,37 @@ export function DashboardWidgets({
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </>
     );
 
     const issueWidgets = (
-         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 col-span-full">
-            <Card className="col-span-full lg:col-span-4">
+         <>
+            <Card className="col-span-full lg:col-span-3">
                 <CardHeader>
                     <CardTitle>Status Distribution</CardTitle>
                     <CardDescription>A breakdown of all issues by their current status.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                <StatusDistributionChart data={data} />
+                <CardContent className="flex justify-center items-center">
+                    <StatusDistributionChart data={data} />
                 </CardContent>
             </Card>
-        </div>
+             <Card className="col-span-full lg:col-span-2">
+                <CardHeader>
+                    <CardTitle>Type Distribution</CardTitle>
+                    <CardDescription>Risks vs. Issues</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center items-center">
+                    <TypeDistributionChart data={data} />
+                </CardContent>
+            </Card>
+        </>
     );
 
     return (
         <div className="space-y-4 my-6">
             <StatsCards data={data} />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                {activeTab === 'risks' && riskWidgets}
-                {activeTab === 'issues' && issueWidgets}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                {activeTab === 'risks' ? riskWidgets : issueWidgets}
             </div>
         </div>
     )

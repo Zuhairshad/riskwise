@@ -6,6 +6,7 @@ import {
   Pie,
   PieChart,
   Cell,
+  ResponsiveContainer,
 } from "recharts"
 
 import {
@@ -50,29 +51,57 @@ export function StatusDistributionChart({ data }: StatusDistributionChartProps) 
     return (
         <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square h-[250px]"
+            className="mx-auto aspect-square h-[250px] w-full"
         >
-            <PieChart>
-                <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                />
-                <Pie
-                    data={chartData}
-                    dataKey="count"
-                    nameKey="status"
-                    innerRadius={60}
-                    strokeWidth={5}
-                >
-                    {chartData.map((entry) => (
-                        <Cell key={entry.status} fill={entry.fill} />
-                    ))}
-                </Pie>
-                 <ChartLegend
-                    content={<ChartLegendContent nameKey="status" />}
-                    className="-mt-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
-                />
-            </PieChart>
+            <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                        data={chartData}
+                        dataKey="count"
+                        nameKey="status"
+                        innerRadius={60}
+                        strokeWidth={5}
+                        labelLine={false}
+                        label={({
+                            cx,
+                            cy,
+                            midAngle,
+                            innerRadius,
+                            outerRadius,
+                            percent,
+                          }) => {
+                            const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                            const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180))
+                            const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180))
+                            if (percent < 0.05) return null;
+                            return (
+                              <text
+                                x={x}
+                                y={y}
+                                fill="white"
+                                textAnchor={x > cx ? "start" : "end"}
+                                dominantBaseline="central"
+                                className="text-xs font-medium"
+                              >
+                                {`${(percent * 100).toFixed(0)}%`}
+                              </text>
+                            )
+                          }}
+                    >
+                        {chartData.map((entry) => (
+                            <Cell key={entry.status} fill={entry.fill} />
+                        ))}
+                    </Pie>
+                    <ChartLegend
+                        content={<ChartLegendContent nameKey="status" />}
+                        className="-mt-4 flex-wrap gap-2 [&>*]:basis-1/3 [&>*]:justify-center"
+                    />
+                </PieChart>
+            </ResponsiveContainer>
         </ChartContainer>
     )
 }
