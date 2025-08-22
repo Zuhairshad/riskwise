@@ -9,7 +9,7 @@ const mockUsers: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     title: 'Senior Project Manager',
     badges: [badges[0], badges[1], badges[4]],
-    score: 150,
+    score: 1500,
   },
   { 
     id: 'user-2',
@@ -17,23 +17,23 @@ const mockUsers: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     title: 'Risk Analyst',
     badges: [badges[0], badges[2]],
-    score: 120,
+    score: 1250,
   },
   {
     id: 'user-3',
     name: 'David Smith',
     avatarUrl: 'https://placehold.co/100x100.png',
     title: 'Lead Developer',
-    badges: [badges[1]],
-    score: 90,
+    badges: [badges[1], badges[3]],
+    score: 950,
   },
     {
     id: 'user-4',
     name: 'Emily White',
     avatarUrl: 'https://placehold.co/100x100.png',
     title: 'QA Engineer',
-    badges: [badges[0], badges[3]],
-    score: 110,
+    badges: [badges[0]],
+    score: 700,
   },
   {
     id: 'user-5',
@@ -41,7 +41,7 @@ const mockUsers: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     title: 'Product Owner',
     badges: [],
-    score: 30,
+    score: 250,
   },
 ];
 

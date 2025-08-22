@@ -69,7 +69,7 @@ export default async function LeaderboardPage() {
                                         )}
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xl font-bold">{user.score}</p>
+                                        <p className="text-xl font-bold">{user.score.toLocaleString()}</p>
                                         <p className="text-xs text-muted-foreground">Points</p>
                                     </div>
                                 </div>
