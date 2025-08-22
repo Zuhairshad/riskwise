@@ -57,6 +57,7 @@ import type { Product, RiskIssue } from "@/lib/types";
 import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
 import { RiskHeatMap } from "@/components/risk-heat-map";
+import { Progress } from "@/components/ui/progress";
 import {
   createRisk,
   suggestSimilarRisks,
@@ -142,6 +143,17 @@ export function RiskForm() {
       Title: "",
     },
   });
+
+  const formValues = form.watch();
+
+  const completionPercentage = React.useMemo(() => {
+    const requiredFields = ["Month", "Project Code", "Title", "Description", "Impact Value ($)"];
+    const filledFields = requiredFields.filter(field => {
+        const value = formValues[field as keyof typeof formValues];
+        return value !== null && value !== undefined && value !== '';
+    });
+    return (filledFields.length / requiredFields.length) * 100;
+  }, [formValues]);
 
   React.useEffect(() => {
     async function getPageData() {
@@ -322,10 +334,19 @@ export function RiskForm() {
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Project & Risk Identification</CardTitle>
-                <CardDescription>
-                  Start by identifying the project and the risk.
-                </CardDescription>
+                <div className="space-y-2">
+                    <CardTitle>Project & Risk Identification</CardTitle>
+                    <CardDescription>
+                    Start by identifying the project and the risk.
+                    </CardDescription>
+                </div>
+                <div className="pt-2 space-y-1">
+                    <div className="flex justify-between text-xs font-medium text-muted-foreground">
+                        <span>Completion</span>
+                        <span>{Math.round(completionPercentage)}%</span>
+                    </div>
+                    <Progress value={completionPercentage} className="h-2" />
+                </div>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -538,7 +559,7 @@ export function RiskForm() {
                             Click to use a suggestion.
                             <ul className="list-disc pl-5 mt-2 space-y-1">
                                 {mitigationSuggestions.map((s, i) => (
-                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("MitigationPlan", s)}>
+                                <li key={i} className="cursor-pointer hover:underline" onClick={() => {form.setValue("MitigationPlan", s); setMitigationSuggestions([])}}>
                                     {s}
                                 </li>
                                 ))}
@@ -581,7 +602,7 @@ export function RiskForm() {
                             Click to use a suggestion.
                             <ul className="list-disc pl-5 mt-2 space-y-1">
                                 {contingencySuggestions.map((s, i) => (
-                                <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("ContingencyPlan", s)}>
+                                <li key={i} className="cursor-pointer hover:underline" onClick={() => {form.setValue("ContingencyPlan", s); setContingencySuggestions([])}}>
                                     {s}
                                 </li>
                                 ))}

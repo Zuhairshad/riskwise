@@ -49,6 +49,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Combobox } from "@/components/ui/combobox";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   createIssue,
   suggestSimilarIssues,
@@ -126,6 +127,14 @@ export function IssueForm() {
       Status: "Open",
     },
   });
+
+  const formValues = form.watch();
+
+  const completionPercentage = React.useMemo(() => {
+    const requiredFields = ["Month", "ProjectName", "Title", "Discussion", "Owner"];
+    const filledFields = requiredFields.filter(field => !!formValues[field as keyof typeof formValues]);
+    return (filledFields.length / requiredFields.length) * 100;
+  }, [formValues]);
 
   React.useEffect(() => {
     async function getPageData() {
@@ -254,8 +263,17 @@ export function IssueForm() {
             <div className="lg:col-span-2 space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Issue Details</CardTitle>
-                        <CardDescription>Provide the details for the new issue.</CardDescription>
+                        <div className="space-y-2">
+                           <CardTitle>Issue Details</CardTitle>
+                           <CardDescription>Provide the details for the new issue.</CardDescription>
+                        </div>
+                        <div className="pt-2 space-y-1">
+                            <div className="flex justify-between text-xs font-medium text-muted-foreground">
+                                <span>Completion</span>
+                                <span>{Math.round(completionPercentage)}%</span>
+                            </div>
+                            <Progress value={completionPercentage} className="h-2" />
+                        </div>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
@@ -508,7 +526,7 @@ export function IssueForm() {
                                     Click to use a suggestion.
                                     <ul className="list-disc pl-5 mt-2 space-y-1">
                                         {resolutionSuggestions.map((s, i) => (
-                                        <li key={i} className="cursor-pointer hover:underline" onClick={() => form.setValue("Resolution", s)}>
+                                        <li key={i} className="cursor-pointer hover:underline" onClick={() => {form.setValue("Resolution", s); setResolutionSuggestions([])}}>
                                             {s}
                                         </li>
                                         ))}
@@ -701,3 +719,5 @@ export function IssueForm() {
     </Form>
   );
 }
+
+    
