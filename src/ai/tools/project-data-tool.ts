@@ -1,45 +1,196 @@
+"use client";
 
-'use server';
-/**
- * @fileOverview A Genkit tool for retrieving project risk and issue data.
- * The data is stored in a simple in--memory variable, suitable for a single-user,
- * request-scoped context. In a real multi-user app, this would need a more
- * sophisticated state management solution (e.g., Redis, session storage) to
- * isolate data between different users' requests.
- */
+import * as React from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, XCircle } from "lucide-react";
+import { DashboardWidgets } from "./dashboard-widgets";
+import { DataTable } from "./risk-issue-table/data-table";
+import { riskColumns } from "./risk-issue-table/risk-columns";
+import { issueColumns } from "./risk-issue-table/issue-columns";
+import type { RiskIssue, Product } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Shield, AlertTriangle } from "lucide-react";
+import { AIDataAnalyst } from "./ai-data-analyst";
 
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import type { RiskIssue } from '@/lib/types';
+type DashboardClientProps = {
+  data: RiskIssue[];
+  products: Product[];
+};
 
-// In-memory store for the data. This works for a single request context.
-let requestScopedData: RiskIssue[] = [];
+export type HeatMapFilter = {
+  score: number;
+  probLabel: string;
+  impactLabel: string;
+} | null;
 
-/**
- * Sets the data for the current request context.
- * This should be called from a server action before invoking the flow.
- * @param data The array of risks and issues for the current request.
- */
-export async function setProjectData(data: RiskIssue[]) {
-  requestScopedData = data;
-}
+export type RiskLevelFilter = 'Low' | 'Medium' | 'High' | null;
 
-export const getProjectData = ai.defineTool(
-  {
-    name: 'getProjectData',
-    description: 'Returns risks and issues. If a project name is provided, it returns data for just that project. If no project name is given, it returns all risks and issues across all projects.',
-    inputSchema: z.object({
-      projectName: z.string().optional().describe('The name of the project to retrieve data for. Leave empty to get data for all projects.'),
-    }),
-    outputSchema: z.array(z.any()).describe('An array of risks and issues.'),
-  },
-  async ({ projectName }) => {
-    // If a project name is provided, filter the data.
-    if (projectName) {
-      const projectData = requestScopedData.filter(item => item.ProjectName === projectName);
-      return projectData;
+
+type ActiveTab = 'risks' | 'issues';
+
+export function DashboardClient({ data, products }: DashboardClientProps) {
+  const [activeTab, setActiveTab] = React.useState<ActiveTab>('risks');
+  const [heatMapFilter, setHeatMapFilter] = React.useState<HeatMapFilter>(null);
+  const [riskLevelFilter, setRiskLevelFilter] = React.useState<RiskLevelFilter>(null);
+
+  const risks = React.useMemo(() => data.filter((d) => d.type === 'Risk'), [data]);
+  const issues = React.useMemo(() => data.filter((d) => d.type === 'Issue'), [data]);
+
+  const handleHeatMapFilter = (filter: HeatMapFilter) => {
+    if (heatMapFilter && filter && heatMapFilter.score === filter.score) {
+      setHeatMapFilter(null); // Clear filter if the same cell is clicked again
+    } else {
+      setHeatMapFilter(filter);
+      setRiskLevelFilter(null); // Clear other filter
     }
-    // Otherwise, return all data.
-    return requestScopedData;
+    setActiveTab('risks'); // Switch to risks tab when a heat map cell is clicked
   }
-);
+  
+  const handleRiskLevelFilter = (level: RiskLevelFilter) => {
+    if (riskLevelFilter === level) {
+      setRiskLevelFilter(null); // Clear filter if same bar is clicked
+    } else {
+      setRiskLevelFilter(level);
+      setHeatMapFilter(null); // Clear other filter
+    }
+     setActiveTab('risks');
+  }
+
+  const clearFilter = () => {
+    setHeatMapFilter(null);
+    setRiskLevelFilter(null);
+  }
+
+  const activeFilter = heatMapFilter || riskLevelFilter;
+
+  const filteredRisks = React.useMemo(() => {
+    if (!activeFilter) return risks;
+
+    if (heatMapFilter) {
+      const { score } = heatMapFilter;
+      const tolerance = 0.0001; // Tolerance for floating point comparison
+      return risks.filter(risk => {
+          const riskScore = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
+          return Math.abs(riskScore - score) < tolerance;
+      });
+    }
+
+    if (riskLevelFilter) {
+      const riskLevelRanges = {
+        'Low': [0.01, 0.04],
+        'Medium': [0.05, 0.14],
+        'High': [0.18, 0.72]
+      };
+      const [min, max] = riskLevelRanges[riskLevelFilter];
+      return risks.filter(risk => {
+        const score = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
+        return score >= min && score <= max;
+      });
+    }
+
+    return risks;
+  }, [risks, heatMapFilter, riskLevelFilter, activeFilter]);
+
+  const dataForWidgets = activeTab === 'risks' ? filteredRisks : issues;
+  
+  const getFilterDescription = () => {
+    if (heatMapFilter) {
+      return (
+        <>
+            Risk Score: <span className="font-medium text-foreground">{heatMapFilter.score.toFixed(3)}</span>
+            <span className="mx-2">|</span>
+            Probability: <span className="font-medium text-foreground">{heatMapFilter.probLabel}</span>, 
+            Impact: <span className="font-medium text-foreground">{heatMapFilter.impactLabel}</span>
+        </>
+      )
+    }
+    if (riskLevelFilter) {
+      return (
+         <>
+            Risk Level: <span className="font-medium text-foreground">{riskLevelFilter}</span>
+        </>
+      )
+    }
+    return null;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+            <h1 className="text-3xl font-headline font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+                An overview of all risks and issues.
+            </p>
+        </div>
+        <Button asChild>
+          <Link href="/add">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Entry
+          </Link>
+        </Button>
+      </div>
+
+       {activeFilter && (
+        <Card className="bg-muted/50 border-dashed">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <div className="font-semibold">Active Filter:</div>
+                <div className="text-sm text-muted-foreground">
+                   {getFilterDescription()}
+                </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={clearFilter}>
+                <XCircle className="mr-2 h-4 w-4" />
+                Clear Filter
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <AIDataAnalyst />
+      
+      <Tabs defaultValue="risks" value={activeTab} onValueChange={(value) => setActiveTab(value as ActiveTab)}>
+        <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
+          <TabsTrigger value="risks">
+            <Shield className="mr-2 h-4 w-4" />
+            Risks
+          </TabsTrigger>
+          <TabsTrigger value="issues">
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            Issues
+          </TabsTrigger>
+        </TabsList>
+        
+        <DashboardWidgets 
+            data={dataForWidgets} 
+            allRisks={risks}
+            onHeatMapFilter={handleHeatMapFilter}
+            activeHeatMapFilter={heatMapFilter}
+            onRiskLevelFilter={handleRiskLevelFilter}
+            activeRiskLevelFilter={riskLevelFilter}
+            activeTab={activeTab}
+        />
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Register</CardTitle>
+                <CardDescription>
+                    Search, filter, and manage all recorded entries for the selected view.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <TabsContent value="risks" className="mt-4">
+                    <DataTable columns={riskColumns} data={filteredRisks} tableId="risks" />
+                </TabsContent>
+                <TabsContent value="issues" className="mt-4">
+                    <DataTable columns={issueColumns} data={issues} tableId="issues" />
+                </TabsContent>
+            </CardContent>
+        </Card>
+      </Tabs>
+    </div>
+  );
+}

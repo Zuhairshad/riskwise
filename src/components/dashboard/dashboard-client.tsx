@@ -31,7 +31,7 @@ export type RiskLevelFilter = 'Low' | 'Medium' | 'High' | null;
 
 type ActiveTab = 'risks' | 'issues';
 
-export function DashboardClient({ data, products: allProducts }: DashboardClientProps) {
+export function DashboardClient({ data, products }: DashboardClientProps) {
   const [activeTab, setActiveTab] = React.useState<ActiveTab>('risks');
   const [heatMapFilter, setHeatMapFilter] = React.useState<HeatMapFilter>(null);
   const [riskLevelFilter, setRiskLevelFilter] = React.useState<RiskLevelFilter>(null);
@@ -151,7 +151,7 @@ export function DashboardClient({ data, products: allProducts }: DashboardClient
         </Card>
       )}
 
-      <AIDataAnalyst data={data} products={allProducts} />
+      <AIDataAnalyst />
       
       <Tabs defaultValue="risks" value={activeTab} onValueChange={(value) => setActiveTab(value as ActiveTab)}>
         <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
