@@ -35,7 +35,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
 
     // Add projects from the main products list
     products.forEach(p => {
-        optionsMap.set(p.code, { label: `${p.name} (${p.code})`, value: p.code });
+        if (p.code) optionsMap.set(p.code, { label: `${p.name} (${p.code})`, value: p.code });
     });
 
     // Add projects from the risks/issues data
@@ -47,8 +47,8 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
             optionsMap.set(projectCode, { label, value: projectCode });
         }
     });
-
-    return Array.from(optionsMap.values()).sort((a, b) => a.label.localeCompare(b.label));
+    
+    return Array.from(optionsMap.values()).sort((a,b) => a.label.localeCompare(b.label));
 }, [products, data]);
   
   const [selected, setSelected] = React.useState<SelectedOption[]>([]);
@@ -75,7 +75,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
         id: projectOption.value,
         name: projectOption.label,
         totalRisks: risks.length,
-        openIssues: issues.filter(i => i.Status === "Open").length,
+        totalIssues: issues.length,
         avgRiskScore,
         financialImpact: financialImpact.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
       };
@@ -123,7 +123,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
                         <CardContent className="space-y-3">
                             <ComparisonStat title="Total Risks" value={project.totalRisks} />
                             <Separator />
-                            <ComparisonStat title="Open Issues" value={project.openIssues} />
+                            <ComparisonStat title="Total Issues" value={project.totalIssues} />
                              <Separator />
                             <ComparisonStat title="Avg. Risk Score" value={project.avgRiskScore} />
                              <Separator />
