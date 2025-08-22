@@ -46,6 +46,7 @@ export type RiskIssue = {
   Impact?: IssueImpact;
   Response?: IssueResponse | null;
   ProjectName?: string;
+  ProjectCode?: string | null;
 
 
   // Common fields

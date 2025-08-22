@@ -44,8 +44,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
     if (selected.length === 0) return [];
     const selectedProjectCodes = selected.map(s => s.value);
     return data.filter(item => {
-        const projectCode = item['Project Code'] || item.product?.code;
-        return projectCode && selectedProjectCodes.includes(projectCode);
+        return item.ProjectCode && selectedProjectCodes.includes(item.ProjectCode);
     });
   }, [data, selected]);
 
@@ -53,10 +52,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
     if (selected.length === 0) return [];
     
     return selected.map(projectOption => {
-      const projectData = data.filter(d => {
-        const projectCode = d['Project Code'] || d.product?.code;
-        return projectCode === projectOption.value
-      });
+      const projectData = data.filter(d => d.ProjectCode === projectOption.value);
       const risks = projectData.filter(d => d.type === "Risk");
       const issues = projectData.filter(d => d.type === "Issue");
 

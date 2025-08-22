@@ -29,6 +29,7 @@ async function getBenchmarkingData() {
       DueDate: data.DueDate instanceof Timestamp ? data.DueDate.toDate().toISOString() : data.DueDate,
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
       ProjectName: product?.name || data["Project Code"],
+      ProjectCode: data["Project Code"],
       product,
     } as unknown as RiskIssue;
   });
@@ -44,6 +45,7 @@ async function getBenchmarkingData() {
       Title: data.Title,
       "Due Date": data["Due Date"] instanceof Timestamp ? data["Due Date"].toDate().toISOString() : data["Due Date"],
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
+      ProjectCode: product?.code || null,
       product,
     } as unknown as RiskIssue;
   });
