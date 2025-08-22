@@ -30,11 +30,28 @@ export function AIDataAnalyst({ data, products }: AIDataAnalystProps) {
     setError(null);
 
     try {
-      // Pass the raw data directly to the server action.
+      // Simplify and stringify the data before sending it to the AI
+      const simplifiedRisksAndIssues = data.map(item => ({
+        type: item.type,
+        title: item.Title,
+        projectName: item.ProjectName,
+        status: item.Status,
+        priority: item.Priority,
+        financialImpact: item.type === 'Risk' ? item['Impact Value ($)'] : item['Impact ($)'],
+        dueDate: item.DueDate || item['Due Date'],
+      }));
+
+      const simplifiedProjects = products.map(p => ({
+        name: p.name,
+        code: p.code,
+        status: p.currentStatus,
+        value: p.value,
+      }));
+
       const result = await analyzeData({
         question,
-        projects: products,
-        risksAndIssues: data,
+        projects: JSON.stringify(simplifiedProjects),
+        risksAndIssues: JSON.stringify(simplifiedRisksAndIssues),
       });
 
       if (result.success) {
@@ -43,6 +60,7 @@ export function AIDataAnalyst({ data, products }: AIDataAnalystProps) {
         setError(result.message || "An unknown error occurred.");
       }
     } catch (err) {
+      console.error(err);
       setError("Failed to fetch analysis. Please try again.");
     } finally {
       setIsLoading(false);

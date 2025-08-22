@@ -13,8 +13,8 @@ import {z} from 'genkit';
 
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
-  projects: z.array(z.any()).describe('A list of all projects.'),
-  risksAndIssues: z.array(z.any()).describe('A list of all risks and issues.'),
+  projects: z.string().describe('A JSON string of all projects.'),
+  risksAndIssues: z.string().describe('A JSON string of all risks and issues.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
@@ -31,11 +31,13 @@ const prompt = ai.definePrompt({
   name: 'analyzeDataPrompt',
   input: { schema: AnalyzeDataInputSchema },
   output: { schema: AnalyzeDataOutputSchema },
-  system: `You are a helpful data analyst. Your task is to answer the user's question based on the provided data.
-The input contains two arrays: 'projects' and 'risksAndIssues'.
+  system: `You are a helpful data analyst. Your task is to answer the user's question based on the provided JSON data.
+The input contains two JSON strings: 'projects' and 'risksAndIssues'.
 - Use the 'projects' data for questions about project details.
 - Use the 'risksAndIssues' data for questions about risks or issues.
-When analyzing financial impact, look for the field "Impact Value ($)" for items of type 'Risk' and "Impact ($)" for items of type 'Issue'.
+When analyzing financial impact, look for the field "financialImpact".
+When looking for due dates, use the "dueDate" field.
+When looking for status, use the "status" field.
 Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
   prompt: `The user has asked the following question:
 "{{{question}}}"
@@ -43,10 +45,10 @@ Provide a concise, clear, and data-driven response. If the question cannot be an
 Analyze the data below to answer it.
 
 Projects Data:
-{{{json projects}}}
+{{{projects}}}
 
 Risks & Issues Data:
-{{{json risksAndIssues}}}
+{{{risksAndIssues}}}
 `,
   model: 'googleai/gemini-1.5-flash',
 });
