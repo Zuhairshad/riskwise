@@ -1,3 +1,5 @@
+
 'use server';
 import '@/ai/flows/suggest-similar-risks-issues.ts';
 import '@/ai/flows/analyze-data-flow.ts';
+import '@/ai/tools/firestore-data-tool.ts';

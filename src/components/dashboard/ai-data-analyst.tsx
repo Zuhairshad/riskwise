@@ -7,15 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Wand2, Bot, Loader2, AlertCircle } from "lucide-react";
 import { analyzeData } from "@/app/(main)/actions";
-import type { RiskIssue, Product } from "@/lib/types";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-type AIDataAnalystProps = {
-  data: RiskIssue[];
-  products: Product[];
-};
-
-export function AIDataAnalyst({ data, products }: AIDataAnalystProps) {
+export function AIDataAnalyst() {
   const [question, setQuestion] = React.useState("");
   const [analysis, setAnalysis] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -30,29 +24,7 @@ export function AIDataAnalyst({ data, products }: AIDataAnalystProps) {
     setError(null);
 
     try {
-      // Simplify and stringify the data before sending it to the AI
-      const simplifiedRisksAndIssues = data.map(item => ({
-        type: item.type,
-        title: item.Title,
-        projectName: item.ProjectName,
-        status: item.Status,
-        priority: item.Priority,
-        financialImpact: item.type === 'Risk' ? item['Impact Value ($)'] : item['Impact ($)'],
-        dueDate: item.DueDate || item['Due Date'],
-      }));
-
-      const simplifiedProjects = products.map(p => ({
-        name: p.name,
-        code: p.code,
-        status: p.currentStatus,
-        value: p.value,
-      }));
-
-      const result = await analyzeData({
-        question,
-        projects: JSON.stringify(simplifiedProjects),
-        risksAndIssues: JSON.stringify(simplifiedRisksAndIssues),
-      });
+      const result = await analyzeData({ question });
 
       if (result.success) {
         setAnalysis(result.analysis!);

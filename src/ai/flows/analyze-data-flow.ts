@@ -1,20 +1,19 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow for analyzing risk and issue data.
+ * @fileOverview A Genkit flow for analyzing risk and issue data by using a tool to query Firestore.
  *
- * - analyzeData - A function that takes a user's question and a dataset to return an analysis.
+ * - analyzeData - A function that takes a user's question and returns an analysis.
  * - AnalyzeDataInput - The input type for the analyzeData function.
  * - AnalyzeDataOutput - The return type for the analyzeData function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getProjectData } from '@/ai/tools/firestore-data-tool';
 
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
-  projects: z.string().describe('A JSON string of all projects.'),
-  risksAndIssues: z.string().describe('A JSON string of all risks and issues.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
@@ -31,25 +30,13 @@ const prompt = ai.definePrompt({
   name: 'analyzeDataPrompt',
   input: { schema: AnalyzeDataInputSchema },
   output: { schema: AnalyzeDataOutputSchema },
-  system: `You are a helpful data analyst. Your task is to answer the user's question based on the provided JSON data.
-The input contains two JSON strings: 'projects' and 'risksAndIssues'.
-- Use the 'projects' data for questions about project details.
-- Use the 'risksAndIssues' data for questions about risks or issues.
+  system: `You are a helpful data analyst. Your task is to answer the user's question.
+Use the 'getProjectData' tool to retrieve the necessary project, risk, and issue data from the database to answer the question.
 When analyzing financial impact, look for the field "financialImpact".
 When looking for due dates, use the "dueDate" field.
 When looking for status, use the "status" field.
 Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
-  prompt: `The user has asked the following question:
-"{{{question}}}"
-
-Analyze the data below to answer it.
-
-Projects Data:
-{{{projects}}}
-
-Risks & Issues Data:
-{{{risksAndIssues}}}
-`,
+  tools: [getProjectData],
   model: 'googleai/gemini-1.5-flash',
 });
 
@@ -61,7 +48,7 @@ const analyzeDataFlow = ai.defineFlow(
       outputSchema: AnalyzeDataOutputSchema,
     },
     async (input) => {
-      const { output } = await prompt(input);
-      return output!;
+        const { output } = await prompt(input);
+        return output!;
     }
 );
