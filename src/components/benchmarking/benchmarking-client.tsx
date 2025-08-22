@@ -30,10 +30,26 @@ const ComparisonStat = ({ title, value }: { title: string, value: string | numbe
 );
 
 export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) {
-  const productOptions = React.useMemo(() => 
-    products.map(p => ({ label: `${p.name} (${p.code})`, value: p.code })), 
-    [products]
-  );
+  const productOptions = React.useMemo(() => {
+    const optionsMap = new Map<string, { label: string; value: string }>();
+
+    // Add projects from the main products list
+    products.forEach(p => {
+        optionsMap.set(p.code, { label: `${p.name} (${p.code})`, value: p.code });
+    });
+
+    // Add projects from the risks/issues data
+    data.forEach(item => {
+        const projectCode = item.ProjectCode;
+        if (projectCode && !optionsMap.has(projectCode)) {
+            const product = products.find(p => p.code === projectCode);
+            const label = product ? `${product.name} (${product.code})` : projectCode;
+            optionsMap.set(projectCode, { label, value: projectCode });
+        }
+    });
+
+    return Array.from(optionsMap.values()).sort((a, b) => a.label.localeCompare(b.label));
+}, [products, data]);
   
   const [selected, setSelected] = React.useState<SelectedOption[]>([]);
 
