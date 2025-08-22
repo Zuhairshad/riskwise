@@ -2,7 +2,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import type { RiskIssue, Status, Priority } from "@/lib/types";
@@ -45,17 +44,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
   },
   {
     accessorKey: "Description",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Description
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Description",
     cell: ({ row }) => (
         <EditableCell
             initialValue={row.getValue("Description")}
@@ -109,75 +98,8 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     },
   },
   {
-    accessorKey: "Priority",
-    header: "Priority",
-    cell: ({ row }) => {
-       const { toast } = useToast();
-      const priority = priorities.find((p) => p.value === row.getValue("Priority"));
-      if (!priority) return <div className="text-muted-foreground">N/A</div>;
-
-      const handlePriorityChange = async (newPriority: Priority) => {
-        const result = await updateRiskIssueField(row.original.id, 'Priority', newPriority);
-        if (result.success) {
-          toast({ title: "Priority Updated", description: `Priority for "${row.original.Title}" updated to ${newPriority}.`});
-        } else {
-          toast({ variant: 'destructive', title: "Update Failed", description: result.message});
-        }
-      };
-
-      return (
-        <Select defaultValue={priority.value} onValueChange={handlePriorityChange}>
-          <SelectTrigger className="w-[120px] h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {priorities.map((p) => (
-              <SelectItem key={p.value} value={p.value}>
-                <div className="flex items-center">
-                   {p.icon && <p.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                   <span>{p.label}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: "Project Code",
-    header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Project Code
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-    cell: ({ row }) => (
-        <div className="w-[120px] truncate">{row.getValue("Project Code")}</div>
-    ),
-  },
-  {
     accessorKey: "ProjectName",
-    id: "product",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Product
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Project",
     cell: ({ row }) => {
       return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
     },
@@ -209,15 +131,15 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
   },
   {
     accessorKey: "Probability",
-    header: "Probability",
+    header: "P",
     cell: ({ row }) => {
       const prob = row.getValue("Probability") as number;
-      return prob ? `${(prob * 100).toFixed(0)}%` : 'N/A';
+      return prob ? `${(prob).toFixed(1)}` : 'N/A';
     },
   },
   {
     accessorKey: "Imapct Rating (0.05-0.8)",
-    header: "Impact",
+    header: "I",
     cell: ({ row }) => {
        const impact = row.getValue("Imapct Rating (0.05-0.8)") as number;
        return impact?.toFixed(2) ?? 'N/A';

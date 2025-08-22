@@ -2,11 +2,10 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import type { RiskIssue, Status, Priority } from "@/lib/types";
-import { statuses, priorities, issueCategories } from "@/lib/data";
+import { statuses, priorities } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -51,18 +50,6 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
             initialValue={row.getValue("Discussion")}
             rowId={row.original.id}
             columnId="Discussion"
-            isTextarea={true}
-        />
-    )
-  },
-  {
-    accessorKey: "Resolution",
-    header: "Resolution",
-    cell: ({ row }) => (
-        <EditableCell
-            initialValue={row.getValue("Resolution")}
-            rowId={row.original.id}
-            columnId="Resolution"
             isTextarea={true}
         />
     )
@@ -153,7 +140,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
   },
   {
     accessorKey: "ProjectName",
-    header: "Project Code",
+    header: "Project",
     cell: ({ row }) => {
         return <div className="w-[120px] truncate">{row.original.ProjectName}</div>;
       },
@@ -198,17 +185,6 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
             initialValue={row.getValue("Category")}
             rowId={row.original.id}
             columnId="Category"
-        />
-    ),
-  },
-  {
-    accessorKey: "SubCategory",
-    header: "Sub-category",
-    cell: ({ row }) => (
-        <EditableCell
-            initialValue={row.getValue("SubCategory")}
-            rowId={row.original.id}
-            columnId="SubCategory"
         />
     ),
   },

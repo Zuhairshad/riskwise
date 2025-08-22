@@ -14,45 +14,62 @@ type DashboardWidgetsProps = {
     allRisks: RiskIssue[];
     onHeatMapFilter: (filter: HeatMapFilter) => void;
     activeFilter: HeatMapFilter;
+    activeTab: 'all' | 'risks' | 'issues';
 }
 
-export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter }: DashboardWidgetsProps) {
+export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter, activeTab }: DashboardWidgetsProps) {
+
+    const riskWidgets = (
+        <Card className="col-span-full lg:col-span-4">
+            <CardHeader>
+                <CardTitle>Risk Distribution Heat Map</CardTitle>
+                <CardDescription>Click a cell to filter the risks table by probability and impact.</CardDescription>
+            </CardHeader>
+            <CardContent className="pl-2">
+                <RiskDistributionHeatMap 
+                    data={allRisks} 
+                    onCellClick={onHeatMapFilter}
+                    activeFilter={activeFilter}
+                />
+            </CardContent>
+        </Card>
+    );
+
+    const issueWidgets = (
+        <Card className="col-span-full lg:col-span-4">
+            <CardHeader>
+                <CardTitle>Status Distribution</CardTitle>
+                <CardDescription>A breakdown of all issues by their current status.</CardDescription>
+            </CardHeader>
+            <CardContent>
+               <StatusDistributionChart data={data} />
+            </CardContent>
+        </Card>
+    );
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 my-6">
             <StatsCards data={data} />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                 <Card className="col-span-full lg:col-span-4">
-                    <CardHeader>
-                        <CardTitle>Risk Distribution Heat Map</CardTitle>
-                        <CardDescription>Click a cell to filter the dashboard by probability and impact.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        <RiskDistributionHeatMap 
-                            data={allRisks} 
-                            onCellClick={onHeatMapFilter}
-                            activeFilter={activeFilter}
-                        />
-                    </CardContent>
-                </Card>
-                <Card className="col-span-full sm:col-span-1 lg:col-span-3">
-                    <CardHeader>
-                        <CardTitle>Status</CardTitle>
-                         <CardDescription>Distribution across all items.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <StatusDistributionChart data={data} />
-                    </CardContent>
-                </Card>
-                 <Card className="col-span-full">
-                    <CardHeader>
-                        <CardTitle>Priority Breakdown</CardTitle>
-                        <CardDescription>Number of items by priority level.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        <PriorityBreakdownChart data={data} />
-                    </CardContent>
-                </Card>
+                {activeTab === 'risks' && riskWidgets}
+                {activeTab === 'issues' && issueWidgets}
+                {activeTab === 'all' && (
+                    <>
+                        {riskWidgets}
+                    </>
+                )}
+                
+                <div className={`col-span-full lg:col-span-3 ${activeTab === 'all' ? '' : 'lg:col-start-5'}`}>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Priority Breakdown</CardTitle>
+                            <CardDescription>Number of items by priority level.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                            <PriorityBreakdownChart data={data} />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     )

@@ -26,33 +26,38 @@ export type HeatMapFilter = {
   impactLabel: string;
 } | null;
 
+type ActiveTab = 'all' | 'risks' | 'issues';
+
 export function DashboardClient({ data }: DashboardClientProps) {
-  const [displayedData, setDisplayedData] = React.useState<RiskIssue[]>(data);
+  const [activeTab, setActiveTab] = React.useState<ActiveTab>('all');
   const [activeFilter, setActiveFilter] = React.useState<HeatMapFilter>(null);
 
   const risks = React.useMemo(() => data.filter((d) => d.type === 'Risk'), [data]);
   const issues = React.useMemo(() => data.filter((d) => d.type === 'Issue'), [data]);
 
-  const displayedRisks = React.useMemo(() => displayedData.filter((d) => d.type === 'Risk'), [displayedData]);
-  const displayedIssues = React.useMemo(() => displayedData.filter((d) => d.type === 'Issue'), [displayedData]);
-
   const handleHeatMapFilter = (filter: HeatMapFilter) => {
     setActiveFilter(filter);
-    if (!filter) {
-      setDisplayedData(data);
-      return;
-    }
+  }
+  
+  const clearFilter = () => handleHeatMapFilter(null);
+
+  const filteredRisks = React.useMemo(() => {
+    if (!activeFilter) return risks;
     
-    const { probRange, impactRange } = filter;
-    const filteredRisks = risks.filter(risk => {
+    const { probRange, impactRange } = activeFilter;
+    return risks.filter(risk => {
         const prob = risk.Probability ?? 0;
         const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
-        return prob > probRange[0] && prob <= probRange[1] && impact > impactRange[0] && impact <= impactRange[1];
+        const isProbMatch = prob > probRange[0] ? prob <= probRange[1] : prob >= probRange[0] && prob <= probRange[1];
+        const isImpactMatch = impact > impactRange[0] ? impact <= impactRange[1] : impact >= impactRange[0] && impact <= impactRange[1];
+        // Handle edge case for 1.0 probability
+        if (prob === 1.0 && probRange[1] === 1.0) return isImpactMatch;
+        return isProbMatch && isImpactMatch;
     });
+  }, [risks, activeFilter]);
 
-    setDisplayedData([...filteredRisks, ...issues]); // Show all issues plus filtered risks
-  }
-
+  const dataForWidgets = activeTab === 'risks' ? filteredRisks : activeTab === 'issues' ? issues : data;
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -80,51 +85,58 @@ export function DashboardClient({ data }: DashboardClientProps) {
                     Impact: <span className="font-medium text-foreground">{activeFilter.impactLabel}</span>
                 </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => handleHeatMapFilter(null)}>
+            <Button variant="ghost" size="sm" onClick={clearFilter}>
                 <XCircle className="mr-2 h-4 w-4" />
                 Clear Filter
             </Button>
           </CardContent>
         </Card>
       )}
+      
+      <Tabs defaultValue="all" onValueChange={(value) => setActiveTab(value as ActiveTab)}>
+        <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+          <TabsTrigger value="all">
+            <List className="mr-2 h-4 w-4" />
+            All
+          </TabsTrigger>
+          <TabsTrigger value="risks">
+            <Shield className="mr-2 h-4 w-4" />
+            Risks
+          </TabsTrigger>
+          <TabsTrigger value="issues">
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            Issues
+          </TabsTrigger>
+        </TabsList>
+        
+        <DashboardWidgets 
+            data={dataForWidgets} 
+            allRisks={risks}
+            onHeatMapFilter={handleHeatMapFilter}
+            activeFilter={activeFilter}
+            activeTab={activeTab}
+        />
 
-      <DashboardWidgets data={displayedData} allRisks={risks} onHeatMapFilter={handleHeatMapFilter} activeFilter={activeFilter} />
-
-       <Card>
-        <CardHeader>
-          <CardTitle>Risk & Issue Register</CardTitle>
-          <CardDescription>
-            Search, filter, and manage all recorded risks and issues.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="all">
-            <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
-              <TabsTrigger value="all">
-                <List className="mr-2 h-4 w-4" />
-                All
-              </TabsTrigger>
-              <TabsTrigger value="risks">
-                <Shield className="mr-2 h-4 w-4" />
-                Risks
-              </TabsTrigger>
-              <TabsTrigger value="issues">
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                Issues
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="all" className="mt-4">
-              <DataTable columns={columns} data={displayedData} tableId="all" />
-            </TabsContent>
-            <TabsContent value="risks" className="mt-4">
-              <DataTable columns={riskColumns} data={displayedRisks} tableId="risks" />
-            </TabsContent>
-            <TabsContent value="issues" className="mt-4">
-              <DataTable columns={issueColumns} data={displayedIssues} tableId="issues" />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Register</CardTitle>
+                <CardDescription>
+                    Search, filter, and manage all recorded entries for the selected view.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <TabsContent value="all" className="mt-4">
+                    <DataTable columns={columns} data={activeFilter ? filteredRisks : data} tableId="all" />
+                </TabsContent>
+                <TabsContent value="risks" className="mt-4">
+                    <DataTable columns={riskColumns} data={filteredRisks} tableId="risks" />
+                </TabsContent>
+                <TabsContent value="issues" className="mt-4">
+                    <DataTable columns={issueColumns} data={issues} tableId="issues" />
+                </TabsContent>
+            </CardContent>
+        </Card>
+      </Tabs>
     </div>
   );
 }
