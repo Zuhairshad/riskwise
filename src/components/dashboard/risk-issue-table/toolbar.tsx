@@ -33,7 +33,7 @@ export function DataTableToolbar<TData>({
   const filterColumn = table.getColumn("Title") ? "Title" : "Description";
   const statusColumn = table.getColumn("Risk Status") || table.getColumn("Status");
   const priorityColumn = table.getColumn("Priority");
-  const productColumn = table.getColumn("ProjectName");
+  const productColumn = table.getColumn("ProjectName") || table.getColumn("Project Code");
 
 
   return (
