@@ -10,6 +10,7 @@ import { riskColumns } from "../dashboard/risk-issue-table/risk-columns";
 import { issueColumns } from "../dashboard/risk-issue-table/issue-columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, AlertTriangle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface BenchmarkingClientProps {
   data: RiskIssue[];
@@ -21,15 +22,11 @@ type SelectedOption = {
   value: string;
 };
 
-const ComparisonCard = ({ title, value }: { title: string, value: string | number }) => (
-  <Card>
-    <CardHeader className="pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-    </CardContent>
-  </Card>
+const ComparisonStat = ({ title, value }: { title: string, value: string | number }) => (
+    <div className="flex justify-between items-center text-sm">
+        <p className="text-muted-foreground">{title}</p>
+        <p className="font-semibold">{value}</p>
+    </div>
 );
 
 export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) {
@@ -47,7 +44,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
   }, [data, selected]);
 
   const comparisonData = React.useMemo(() => {
-    if (selected.length === 0) return [];
+    if (selected.length < 2) return [];
     
     return selected.map(projectOption => {
       const projectData = data.filter(d => d.ProjectCode === projectOption.value);
@@ -94,7 +91,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
         </CardContent>
       </Card>
 
-      {selected.length > 0 && (
+      {selected.length > 1 && (
         <>
             <Card>
                 <CardHeader>
@@ -107,11 +104,14 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
                         <CardHeader>
                             <CardTitle className="truncate">{project.name}</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <ComparisonCard title="Total Risks" value={project.totalRisks} />
-                            <ComparisonCard title="Open Issues" value={project.openIssues} />
-                            <ComparisonCard title="Avg. Risk Score" value={project.avgRiskScore} />
-                            <ComparisonCard title="Total Financial Impact" value={project.financialImpact} />
+                        <CardContent className="space-y-3">
+                            <ComparisonStat title="Total Risks" value={project.totalRisks} />
+                            <Separator />
+                            <ComparisonStat title="Open Issues" value={project.openIssues} />
+                             <Separator />
+                            <ComparisonStat title="Avg. Risk Score" value={project.avgRiskScore} />
+                             <Separator />
+                            <ComparisonStat title="Total Financial Impact" value={project.financialImpact} />
                         </CardContent>
                         </Card>
                     ))}
