@@ -3,19 +3,18 @@ import { collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { RiskIssue, Product } from "@/lib/types";
 import { BenchmarkingClient } from "@/components/benchmarking/benchmarking-client";
+import { products as mockProducts } from "@/lib/mock-data";
 
 async function getBenchmarkingData() {
   const risksCollection = collection(db, 'risks');
   const issuesCollection = collection(db, 'issues');
-  const productsCollection = collection(db, 'products');
-
-  const [riskSnapshot, issueSnapshot, productSnapshot] = await Promise.all([
+  
+  const [riskSnapshot, issueSnapshot] = await Promise.all([
     getDocs(risksCollection),
     getDocs(issuesCollection),
-    getDocs(productsCollection)
   ]);
 
-  const allProducts: Product[] = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  const allProducts: Product[] = mockProducts;
 
   const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
     const data = doc.data();

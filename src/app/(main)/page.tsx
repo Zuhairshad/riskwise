@@ -1,9 +1,9 @@
 
-import { products } from "@/lib/data";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import type { RiskIssue } from "@/lib/types";
+import type { RiskIssue, Product } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, Timestamp } from "firebase/firestore";
+import { products as mockProducts } from "@/lib/mock-data";
 
 // This is a server component, so we can use mock data directly.
 async function getDashboardData() {
@@ -39,9 +39,7 @@ async function getDashboardData() {
     } as unknown as RiskIssue;
   });
 
-  const allProducts = await getDocs(collection(db, 'products')).then(snapshot => 
-    snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any))
-  );
+  const allProducts: Product[] = mockProducts;
 
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
     const status = item["Risk Status"] || item.Status || 'Open';
