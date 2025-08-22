@@ -27,15 +27,19 @@ export async function setProjectData(data: RiskIssue[]) {
 export const getProjectData = ai.defineTool(
   {
     name: 'getProjectData',
-    description: 'Returns all risks and issues for a given project name. Use this to get the data needed to answer a user\'s question.',
+    description: 'Returns risks and issues. If a project name is provided, it returns data for just that project. If no project name is given, it returns all risks and issues across all projects.',
     inputSchema: z.object({
-      projectName: z.string().describe('The name of the project to retrieve data for.'),
+      projectName: z.string().optional().describe('The name of the project to retrieve data for. Leave empty to get data for all projects.'),
     }),
-    outputSchema: z.array(z.any()).describe('An array of risks and issues for the specified project.'),
+    outputSchema: z.array(z.any()).describe('An array of risks and issues.'),
   },
   async ({ projectName }) => {
-    // Filter the request-scoped data based on the provided project name.
-    const projectData = requestScopedData.filter(item => item.ProjectName === projectName);
-    return projectData;
+    // If a project name is provided, filter the data.
+    if (projectName) {
+      const projectData = requestScopedData.filter(item => item.ProjectName === projectName);
+      return projectData;
+    }
+    // Otherwise, return all data.
+    return requestScopedData;
   }
 );
