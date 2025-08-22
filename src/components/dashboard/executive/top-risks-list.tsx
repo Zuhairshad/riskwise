@@ -10,16 +10,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 interface TopRisksListProps {
-  risks: (RiskIssue & { riskScore: number })[];
+  risks: (RiskIssue & { riskScore: number; ProjectName: string })[];
 }
 
 const getRiskLevel = (score: number) => {
-    if (score > 0.3) return { label: "Critical", color: "bg-red-500" };
-    if (score > 0.15) return { label: "High", color: "bg-orange-500" };
-    if (score > 0.05) return { label: "Medium", color: "bg-yellow-400" };
+    if (score >= 0.3) return { label: "Critical", color: "bg-red-500" };
+    if (score >= 0.15) return { label: "High", color: "bg-orange-500" };
+    if (score >= 0.05) return { label: "Medium", color: "bg-yellow-400" };
     return { label: "Low", color: "bg-green-500" };
 };
 

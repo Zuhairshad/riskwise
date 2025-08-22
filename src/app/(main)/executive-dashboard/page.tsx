@@ -1,12 +1,19 @@
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { RiskIssue } from "@/lib/types";
-import { products } from "@/lib/data";
+import type { RiskIssue, Product } from "@/lib/types";
 import { TopRisksList } from "@/components/dashboard/executive/top-risks-list";
+
+async function getProducts() {
+    const productsCollection = collection(db, 'products');
+    const productSnapshot = await getDocs(productsCollection);
+    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+}
+
 
 async function getTopRisks() {
   const risksCollection = collection(db, "risks");
   const riskSnapshot = await getDocs(risksCollection);
+  const products = await getProducts();
 
   const risks: RiskIssue[] = riskSnapshot.docs.map((doc) => {
     const data = doc.data();
@@ -28,10 +35,13 @@ async function getTopRisks() {
       return {
         ...risk,
         riskScore: score,
-        ProjectName: project?.name || "Unknown Project",
+        ProjectName: project?.name || risk["Project Code"] || "Unknown Project",
       };
     })
-    .filter(risk => risk['Risk Status'] === 'Open'); // Only consider open risks
+    .filter(risk => {
+        const status = risk['Risk Status'];
+        return status && status !== 'Closed' && status !== 'Converted to Issue';
+    });
 
   scoredRisks.sort((a, b) => b.riskScore - a.riskScore);
 
