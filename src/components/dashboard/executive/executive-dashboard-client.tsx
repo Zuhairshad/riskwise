@@ -8,14 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RiskDistributionHeatMap } from "@/components/dashboard/charts/risk-distribution-heat-map";
 import { RiskScoreBreakdownChart } from "@/components/dashboard/charts/risk-score-breakdown-chart";
 import * as React from "react";
+import { TypeDistributionChart } from "../charts/type-distribution-chart";
+import { StatusDistributionChart } from "../charts/status-distribution-chart";
 
 type ExecutiveDashboardClientProps = {
     top10Risks: (RiskIssue & { riskScore: number; ProjectName: string })[];
     allOpenRisks: RiskIssue[];
     allRisks: RiskIssue[];
+    allData: RiskIssue[];
 };
 
-export function ExecutiveDashboardClient({ top10Risks, allOpenRisks, allRisks }: ExecutiveDashboardClientProps) {
+export function ExecutiveDashboardClient({ top10Risks, allOpenRisks, allRisks, allData }: ExecutiveDashboardClientProps) {
 
     // Calculate total EMV for the stats card
     const totalEMV = allOpenRisks.reduce((acc, risk) => {
@@ -39,7 +42,7 @@ export function ExecutiveDashboardClient({ top10Risks, allOpenRisks, allRisks }:
 
     return (
         <div className="space-y-6">
-            <StatsCards data={allOpenRisks} />
+            <StatsCards data={allData} />
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3 space-y-6">
@@ -56,19 +59,26 @@ export function ExecutiveDashboardClient({ top10Risks, allOpenRisks, allRisks }:
                             />
                         </CardContent>
                     </Card>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Risk Score Breakdown</CardTitle>
-                            <CardDescription>Distribution of risks by severity level.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pl-2">
-                            <RiskScoreBreakdownChart 
-                                data={allRisks}
-                                onBarClick={() => {}} // Read-only for exec dash
-                                activeFilter={null}
-                            />
-                        </CardContent>
-                    </Card>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Type Distribution</CardTitle>
+                                <CardDescription>Risks vs. Issues</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <TypeDistributionChart data={allData} />
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>Status Distribution</CardTitle>
+                                <CardDescription>Across all items</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <StatusDistributionChart data={allData} />
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
                 <div className="lg:col-span-2">
                     <TopRisksList risks={top10Risks} />

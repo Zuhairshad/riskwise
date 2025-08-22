@@ -14,7 +14,11 @@ function toISOString(date: any): string | undefined {
     if (date instanceof Date) {
       return date.toISOString();
     }
-    return date; // Return as is if not a Timestamp or Date
+    // Return as is if it's already a string or undefined
+    if (typeof date === 'string' || typeof date === 'undefined') {
+        return date;
+    }
+    return undefined;
 }
 
 async function getDashboardData(): Promise<{data: RiskIssue[], products: Product[]}> {

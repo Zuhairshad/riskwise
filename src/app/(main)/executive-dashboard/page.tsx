@@ -5,13 +5,31 @@ import { db } from "@/lib/firebase";
 import { products as mockProducts } from "@/lib/mock-data";
 import { ExecutiveDashboardClient } from "@/components/dashboard/executive/executive-dashboard-client";
 
+// Helper function to safely convert Firestore Timestamps to ISO strings
+function toISOString(date: any): string | undefined {
+    if (date && typeof date.toDate === 'function') {
+      return date.toDate().toISOString();
+    }
+    if (date instanceof Date) {
+      return date.toISOString();
+    }
+    if (typeof date === 'string' || typeof date === 'undefined') {
+        return date;
+    }
+    return undefined;
+}
+
+
 async function getExecutiveData() {
   const risksCollection = collection(db, 'risks');
   const productsCollection = collection(db, 'products');
+  const issuesCollection = collection(db, 'issues');
 
-  const [riskSnapshot, productSnapshot] = await Promise.all([
+
+  const [riskSnapshot, productSnapshot, issueSnapshot] = await Promise.all([
       getDocs(risksCollection),
-      getDocs(productsCollection)
+      getDocs(productsCollection),
+      getDocs(issuesCollection)
   ]);
 
   const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -23,12 +41,25 @@ async function getExecutiveData() {
       ...data,
       id: doc.id,
       type: "Risk",
+      DueDate: toISOString(data.DueDate),
+    } as unknown as RiskIssue;
+  });
+  
+  const allIssues: RiskIssue[] = issueSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+        ...data,
+        id: doc.id,
+        type: "Issue",
+        "Due Date": toISOString(data["Due Date"]),
     } as unknown as RiskIssue;
   });
 
-  const openRisks = allRisks.filter(risk => {
-    const status = risk['Risk Status'];
-    return status && status !== 'Closed' && status !== 'Converted to Issue';
+  const allData = [...allRisks, ...allIssues];
+
+  const openRisks = allData.filter(item => {
+    const status = item['Risk Status'] || item.Status;
+    return item.type === 'Risk' && status && status !== 'Closed' && status !== 'Converted to Issue';
   });
 
   const scoredRisks = openRisks
@@ -50,12 +81,13 @@ async function getExecutiveData() {
   return {
     top10Risks: scoredRisks.slice(0, 10),
     allOpenRisks: scoredRisks,
-    allRisks: allRisks,
+    allRisks: allRisks, // Pass all risks for charts
+    allData: allData,
   };
 }
 
 export default async function ExecutiveDashboardPage() {
-  const { top10Risks, allOpenRisks, allRisks } = await getExecutiveData();
+  const { top10Risks, allOpenRisks, allRisks, allData } = await getExecutiveData();
 
   return (
     <div className="space-y-6">
@@ -71,6 +103,7 @@ export default async function ExecutiveDashboardPage() {
         top10Risks={top10Risks} 
         allOpenRisks={allOpenRisks}
         allRisks={allRisks}
+        allData={allData}
       />
     </div>
   );

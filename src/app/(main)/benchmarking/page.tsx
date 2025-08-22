@@ -5,6 +5,19 @@ import type { RiskIssue, Product } from "@/lib/types";
 import { BenchmarkingClient } from "@/components/benchmarking/benchmarking-client";
 import { products as mockProducts } from "@/lib/mock-data";
 
+// Helper function to safely convert Firestore Timestamps to ISO strings
+function toISOString(date: any): string | undefined {
+    if (date && typeof date.toDate === 'function') {
+      return date.toDate().toISOString();
+    }
+    if (date instanceof Date) {
+      return date.toISOString();
+    }
+    if (typeof date === 'string' || typeof date === 'undefined') {
+        return date;
+    }
+    return undefined;
+}
 
 async function getBenchmarkingData() {
   const risksCollection = collection(db, "risks");
@@ -28,6 +41,7 @@ async function getBenchmarkingData() {
       Title: data.Title || data.Description,
       ProjectCode: data['Project Code'],
       Status: data["Risk Status"] || 'Open',
+      DueDate: toISOString(data.DueDate),
     } as unknown as RiskIssue;
   });
 
@@ -42,6 +56,7 @@ async function getBenchmarkingData() {
       ProjectName: data.ProjectName,
       ProjectCode: product?.code || data.ProjectName,
       Status: data.Status || 'Open',
+      "Due Date": toISOString(data["Due Date"]),
     } as unknown as RiskIssue;
   });
 
