@@ -4,10 +4,8 @@
 import type { RiskIssue } from "@/lib/types";
 import { StatsCards } from "./stats-cards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatusDistributionChart } from "./charts/status-distribution-chart";
 import { RiskScoreBreakdownChart } from "./charts/risk-score-breakdown-chart";
 import { RiskDistributionHeatMap } from "./charts/risk-distribution-heat-map";
-import { TypeDistributionChart } from "./charts/type-distribution-chart";
 import type { HeatMapFilter, RiskLevelFilter } from "./dashboard-client";
 
 type DashboardWidgetsProps = {
@@ -30,67 +28,38 @@ export function DashboardWidgets({
     activeTab 
 }: DashboardWidgetsProps) {
 
-    const riskWidgets = (
-        <>
-            <Card className="col-span-full lg:col-span-4">
-                <CardHeader>
-                    <CardTitle>Risk Distribution Heat Map</CardTitle>
-                    <CardDescription>Click a cell to filter the risks table by score.</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                    <RiskDistributionHeatMap 
-                        data={allRisks} 
-                        onCellClick={onHeatMapFilter}
-                        activeFilter={activeHeatMapFilter}
-                    />
-                </CardContent>
-            </Card>
-            <div className="col-span-full lg:col-span-3 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Risk Score Breakdown</CardTitle>
-                        <CardDescription>Click a bar to filter by risk level.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        <RiskScoreBreakdownChart 
-                            data={allRisks}
-                            onBarClick={onRiskLevelFilter}
-                            activeFilter={activeRiskLevelFilter}
-                        />
-                    </CardContent>
-                </Card>
-            </div>
-        </>
-    );
-
-    const issueWidgets = (
-         <>
-            <Card className="col-span-full lg:col-span-3">
-                <CardHeader>
-                    <CardTitle>Status Distribution</CardTitle>
-                    <CardDescription>A breakdown of all issues by their current status.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center items-center">
-                    <StatusDistributionChart data={data} />
-                </CardContent>
-            </Card>
-             <Card className="col-span-full lg:col-span-2">
-                <CardHeader>
-                    <CardTitle>Type Distribution</CardTitle>
-                    <CardDescription>Risks vs. Issues</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center items-center">
-                    <TypeDistributionChart data={data} />
-                </CardContent>
-            </Card>
-        </>
-    );
-
     return (
         <div className="space-y-4 my-6">
             <StatsCards data={data} />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                {activeTab === 'risks' ? riskWidgets : issueWidgets}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                 <Card className="col-span-full lg:col-span-4">
+                    <CardHeader>
+                        <CardTitle>Risk Distribution Heat Map</CardTitle>
+                        <CardDescription>Click a cell to filter the risks table by score.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <RiskDistributionHeatMap 
+                            data={allRisks} 
+                            onCellClick={onHeatMapFilter}
+                            activeFilter={activeHeatMapFilter}
+                        />
+                    </CardContent>
+                </Card>
+                <div className="col-span-full lg:col-span-3 space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Risk Score Breakdown</CardTitle>
+                            <CardDescription>Click a bar to filter by risk level.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                            <RiskScoreBreakdownChart 
+                                data={allRisks}
+                                onBarClick={onRiskLevelFilter}
+                                activeFilter={activeRiskLevelFilter}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     )
