@@ -13,6 +13,7 @@ import type { RiskIssue } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, AlertTriangle } from "lucide-react";
+import { AIDataAnalyst } from "./ai-data-analyst";
 
 type DashboardClientProps = {
   data: RiskIssue[];
@@ -149,6 +150,8 @@ export function DashboardClient({ data }: DashboardClientProps) {
           </CardContent>
         </Card>
       )}
+
+      <AIDataAnalyst data={data} />
       
       <Tabs defaultValue="risks" value={activeTab} onValueChange={(value) => setActiveTab(value as ActiveTab)}>
         <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
