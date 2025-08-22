@@ -25,14 +25,14 @@ const impactLevels = [
 
 const getRiskColor = (score: number, count: number): string => {
     if (count === 0) return "bg-muted/30";
-    if (score >= 0.18) return `bg-red-500`;
-    if (score >= 0.06) return `bg-yellow-400`;
+    if (score >= 0.15) return `bg-red-500`;
+    if (score >= 0.03) return `bg-yellow-400`;
     return `bg-green-500`;
   };
   
 const getTextColor = (score: number, count: number): string => {
     if (count === 0) return "text-muted-foreground";
-    if (score >= 0.18) return "text-white";
+    if (score >= 0.15) return "text-white";
     return "text-gray-800";
 }
 
@@ -75,9 +75,9 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
     <TooltipProvider>
       <div className="space-y-2">
         <div className="grid grid-cols-[auto_1fr] text-xs">
-          <div className="flex items-center justify-center -rotate-90">
-            <span className="font-medium text-muted-foreground whitespace-nowrap">Probability</span>
-          </div>
+           <div className="flex items-center justify-center -rotate-90">
+             <span className="font-medium text-muted-foreground whitespace-nowrap">Probability</span>
+           </div>
           <div className="grid grid-cols-5 gap-1">
             {impactLevels.map((level) => (
               <div

@@ -35,7 +35,11 @@ export function DashboardClient({ data }: DashboardClientProps) {
   const issues = React.useMemo(() => data.filter((d) => d.type === 'Issue'), [data]);
 
   const handleHeatMapFilter = (filter: HeatMapFilter) => {
-    setActiveFilter(filter);
+    if (activeFilter && filter && activeFilter.probRange[0] === filter.probRange[0] && activeFilter.impactRange[0] === filter.impactRange[0]) {
+      setActiveFilter(null); // Clear filter if the same cell is clicked again
+    } else {
+      setActiveFilter(filter);
+    }
     setActiveTab('risks'); // Switch to risks tab when a heat map cell is clicked
   }
   
@@ -48,10 +52,10 @@ export function DashboardClient({ data }: DashboardClientProps) {
     return risks.filter(risk => {
         const prob = risk.Probability ?? 0;
         const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
-        const isProbMatch = prob > probRange[0] ? prob <= probRange[1] : prob >= probRange[0] && prob <= probRange[1];
-        const isImpactMatch = impact > impactRange[0] ? impact <= impactRange[1] : impact >= impactRange[0] && impact <= impactRange[1];
-        // Handle edge case for 1.0 probability
-        if (prob === 1.0 && probRange[1] === 1.0) return isImpactMatch;
+        
+        const isProbMatch = prob >= probRange[0] && prob <= probRange[1];
+        const isImpactMatch = impact >= impactRange[0] && impact <= impactRange[1];
+       
         return isProbMatch && isImpactMatch;
     });
   }, [risks, activeFilter]);
