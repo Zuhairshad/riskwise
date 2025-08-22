@@ -2,9 +2,9 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut, Auth } from 'firebase/auth';
-import { db } from '@/lib/firebase'; // This line initializes firebase
+import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { db } from '@/lib/firebase'; // Ensure Firebase is initialized
 
 interface AuthContextType {
   user: User | null;
@@ -17,14 +17,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [auth, setAuth] = useState<Auth | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const authInstance = getAuth();
-    setAuth(authInstance);
-
-    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
@@ -33,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const logout = async () => {
-    if (!auth) return;
+    const auth = getAuth();
     try {
         await firebaseSignOut(auth);
         router.push('/login');
@@ -55,17 +52,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-export const useRequireAuth = () => {
-  const auth = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!auth.loading && !auth.user) {
-      router.push('/login');
-    }
-  }, [auth, router]);
-
-  return auth;
 };

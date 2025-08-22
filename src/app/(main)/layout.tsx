@@ -18,7 +18,13 @@ export default function MainLayout({
     const { user, loading, logout } = useAuth();
     const router = useRouter();
 
-    if (loading) {
+    React.useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login');
+        }
+    }, [loading, user, router]);
+
+    if (loading || !user) {
         return (
              <div className="flex min-h-screen">
                 <div className="w-64 hidden md:block border-r p-4 space-y-4">
@@ -33,7 +39,26 @@ export default function MainLayout({
                         <Skeleton className="h-10 w-20" />
                         <Skeleton className="h-10 w-10 rounded-full" />
                     </header>
-                    <main className="flex-1 p-4 sm:p-6">{children}</main>
+                    <main className="flex-1 p-4 sm:p-6">
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Skeleton className="h-8 w-48 mb-2" />
+                                    <Skeleton className="h-4 w-64" />
+                                </div>
+                                <Skeleton className="h-10 w-36" />
+                            </div>
+                            
+                            <Skeleton className="h-36 w-full" />
+                            
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                <Skeleton className="h-28" />
+                                <Skeleton className="h-28" />
+                                <Skeleton className="h-28" />
+                                <Skeleton className="h-28" />
+                            </div>
+                        </div>
+                    </main>
                 </div>
             </div>
         )
