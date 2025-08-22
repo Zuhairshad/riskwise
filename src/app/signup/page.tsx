@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -23,7 +22,7 @@ import {
     FormLabel,
     FormMessage,
   } from "@/components/ui/form";
-
+import Image from 'next/image';
 
 const signupSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -80,52 +79,27 @@ export default function SignupPage() {
     };
     
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <Card className="w-full max-w-md">
-                <CardHeader className="text-center space-y-2">
-                    <div className="flex justify-center">
-                        <CheckSquare className="h-10 w-10 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl">Create an Account</CardTitle>
-                    <CardDescription>Enter your details below to get started.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleSignup)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Your full name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="name@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+        <div className="w-full lg:grid lg:min-h-[100vh] lg:grid-cols-2 xl:min-h-[100vh]">
+             <div className="flex items-center justify-center py-12">
+                <Card className="w-full max-w-md mx-auto">
+                    <CardHeader className="text-center space-y-2">
+                        <div className="flex justify-center">
+                            <CheckSquare className="h-10 w-10 text-primary" />
+                        </div>
+                        <CardTitle className="text-2xl">Create an Account</CardTitle>
+                        <CardDescription>Enter your details below to get started.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(handleSignup)} className="space-y-4">
                             <FormField
                                 control={form.control}
-                                name="password"
+                                name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="••••••••" {...field} />
+                                        <Input placeholder="Your full name" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
@@ -133,35 +107,72 @@ export default function SignupPage() {
                             />
                             <FormField
                                 control={form.control}
-                                name="confirmPassword"
+                                name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="••••••••" {...field} />
+                                        <Input placeholder="name@example.com" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Create Account
-                            </Button>
-                        </form>
-                    </Form>
-                </CardContent>
-                <CardFooter className="flex-col items-center justify-center space-y-4">
-                    <p className="text-center text-sm text-muted-foreground">
-                        Already have an account? <Link href="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
-                    </p>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                         <CheckSquare className="h-4 w-4 mr-1 text-primary/80" />
-                        Proactify+
-                    </div>
-                     <p className="text-xs text-muted-foreground">Design by Uzair Ahmad</p>
-                </CardFooter>
-            </Card>
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="••••••••" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Confirm Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="••••••••" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit" className="w-full" disabled={loading}>
+                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Create Account
+                                </Button>
+                            </form>
+                        </Form>
+                    </CardContent>
+                    <CardFooter className="flex-col items-center justify-center space-y-4">
+                        <p className="text-center text-sm text-muted-foreground">
+                            Already have an account? <Link href="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
+                        </p>
+                        <div className="flex items-center text-xs text-muted-foreground">
+                             <CheckSquare className="h-4 w-4 mr-1 text-primary/80" />
+                            Proactify+
+                        </div>
+                         <p className="text-xs text-muted-foreground">Design by Uzair Ahmad</p>
+                    </CardFooter>
+                </Card>
+            </div>
+             <div className="hidden bg-muted lg:block">
+                <Image
+                    src="https://placehold.co/1000x1200.png"
+                    alt="Image"
+                    width="1000"
+                    height="1200"
+                    data-ai-hint="abstract chess"
+                    className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                />
+            </div>
         </div>
     );
 }
