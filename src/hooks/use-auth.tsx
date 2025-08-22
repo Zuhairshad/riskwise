@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut, Auth } from 'firebase/auth';
-import { db } from '@/lib/firebase';
+import { db } from '@/lib/firebase'; // This line initializes firebase
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
