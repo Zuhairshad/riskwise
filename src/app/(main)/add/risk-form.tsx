@@ -56,6 +56,7 @@ import { format } from "date-fns";
 import type { Product, RiskIssue } from "@/lib/types";
 import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
+import { RiskHeatMap } from "@/components/risk-heat-map";
 import {
   createRisk,
   suggestSimilarRisks,
@@ -346,18 +347,21 @@ export function RiskForm() {
                   name="Project Code"
                   render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Project Code</FormLabel>
-                        <FormControl>
+                      <FormLabel>Project Code</FormLabel>
+                      <FormControl>
                         <Combobox
-                            options={products.map(p => ({ value: p.code, label: `${p.code} (${p.name})` }))}
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="Select or add project..."
-                            searchPlaceholder="Search projects..."
-                            notFoundText="No project found. You can add a new one."
+                          options={products.map((p) => ({
+                            value: p.code,
+                            label: `${p.code} (${p.name})`,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select or add project..."
+                          searchPlaceholder="Search projects..."
+                          notFoundText="No project found. You can add a new one."
                         />
-                        </FormControl>
-                        <FormMessage />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -700,8 +704,13 @@ export function RiskForm() {
             <Card>
               <CardHeader>
                 <CardTitle>Scoring & Financials</CardTitle>
+                <CardDescription>
+                  Visually assess risk using the heat map below.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <RiskHeatMap probability={probability} impact={impactRating} />
+                <Separator />
                 <FormField
                   control={form.control}
                   name="Probability"
@@ -825,3 +834,5 @@ export function RiskForm() {
     </Form>
   );
 }
+
+    
