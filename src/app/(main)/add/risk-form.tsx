@@ -346,20 +346,18 @@ export function RiskForm() {
                   name="Project Code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project Code</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a project" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((p) => (
-                                <SelectItem key={p.id} value={p.code}>{p.code} ({p.name})</SelectItem>
-                            ))}
-                          </SelectContent>
-                      </Select>
-                      <FormMessage />
+                        <FormLabel>Project Code</FormLabel>
+                        <FormControl>
+                        <Combobox
+                            options={products.map(p => ({ value: p.code, label: `${p.code} (${p.name})` }))}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Select or add project..."
+                            searchPlaceholder="Search projects..."
+                            notFoundText="No project found. You can add a new one."
+                        />
+                        </FormControl>
+                        <FormMessage />
                     </FormItem>
                   )}
                 />
