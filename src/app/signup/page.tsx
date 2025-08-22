@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,7 +45,6 @@ export default function SignupPage() {
 
     const handleSignup = async (values: z.infer<typeof signupSchema>) => {
         setLoading(true);
-        const auth = getAuth();
         try {
             await createUserWithEmailAndPassword(auth, values.email, values.password);
             toast({ title: 'Signup Successful', description: "Your account has been created." });

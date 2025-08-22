@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, OAuthProvider } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, OAuthProvider } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useForm } from 'react-hook-form';
 import { zodResolver }from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -46,7 +47,6 @@ export default function LoginPage() {
 
     const handleLogin = async (values: z.infer<typeof loginSchema>) => {
         setLoading(true);
-        const auth = getAuth();
         try {
             await signInWithEmailAndPassword(auth, values.email, values.password);
             toast({ title: 'Login Successful', description: "Welcome back!" });
@@ -60,7 +60,6 @@ export default function LoginPage() {
 
     const handleAzureSignIn = async () => {
         setProviderLoading('azure');
-        const auth = getAuth();
         const provider = new OAuthProvider('microsoft.com');
         try {
             await signInWithPopup(auth, provider);
