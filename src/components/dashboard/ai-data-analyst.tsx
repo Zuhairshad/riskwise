@@ -7,14 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Wand2, Bot, Loader2, AlertCircle } from "lucide-react";
 import { analyzeData } from "@/app/(main)/actions";
-import type { RiskIssue } from "@/lib/types";
+import type { RiskIssue, Product } from "@/lib/types";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type AIDataAnalystProps = {
   data: RiskIssue[];
+  products: Product[];
 };
 
-export function AIDataAnalyst({ data }: AIDataAnalystProps) {
+export function AIDataAnalyst({ data, products }: AIDataAnalystProps) {
   const [question, setQuestion] = React.useState("");
   const [analysis, setAnalysis] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -32,7 +33,8 @@ export function AIDataAnalyst({ data }: AIDataAnalystProps) {
       // The action now takes the raw data directly.
       const result = await analyzeData({
         question,
-        data: data,
+        projects: products,
+        risksAndIssues: data,
       });
 
       if (result.success) {

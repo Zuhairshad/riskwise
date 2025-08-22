@@ -9,7 +9,7 @@ import { DashboardWidgets } from "./dashboard-widgets";
 import { DataTable } from "./risk-issue-table/data-table";
 import { riskColumns } from "./risk-issue-table/risk-columns";
 import { issueColumns } from "./risk-issue-table/issue-columns";
-import type { RiskIssue } from "@/lib/types";
+import type { RiskIssue, Product } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, AlertTriangle } from "lucide-react";
@@ -17,6 +17,7 @@ import { AIDataAnalyst } from "./ai-data-analyst";
 
 type DashboardClientProps = {
   data: RiskIssue[];
+  products: Product[];
 };
 
 export type HeatMapFilter = {
@@ -30,7 +31,7 @@ export type RiskLevelFilter = 'Low' | 'Medium' | 'High' | null;
 
 type ActiveTab = 'risks' | 'issues';
 
-export function DashboardClient({ data }: DashboardClientProps) {
+export function DashboardClient({ data, products: allProducts }: DashboardClientProps) {
   const [activeTab, setActiveTab] = React.useState<ActiveTab>('risks');
   const [heatMapFilter, setHeatMapFilter] = React.useState<HeatMapFilter>(null);
   const [riskLevelFilter, setRiskLevelFilter] = React.useState<RiskLevelFilter>(null);
@@ -151,7 +152,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
         </Card>
       )}
 
-      <AIDataAnalyst data={data} />
+      <AIDataAnalyst data={data} products={allProducts} />
       
       <Tabs defaultValue="risks" value={activeTab} onValueChange={(value) => setActiveTab(value as ActiveTab)}>
         <TabsList className="grid w-full grid-cols-2 md:w-[300px]">

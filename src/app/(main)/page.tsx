@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import type { RiskIssue } from "@/lib/types";
+import type { RiskIssue, Product } from "@/lib/types";
 import { collection, getDocs, type Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,14 +19,18 @@ function toISOString(date: any): string | undefined {
     return date; // Return as is if not a Timestamp or Date
 }
 
-async function getDashboardData(): Promise<RiskIssue[]> {
+async function getDashboardData(): Promise<{data: RiskIssue[], products: Product[]}> {
   const risksCollection = collection(db, "risks");
   const issuesCollection = collection(db, "issues");
+  const productsCollection = collection(db, "products");
 
-  const [riskSnapshot, issueSnapshot] = await Promise.all([
+  const [riskSnapshot, issueSnapshot, productSnapshot] = await Promise.all([
     getDocs(risksCollection),
     getDocs(issuesCollection),
+    getDocs(productsCollection),
   ]);
+
+  const products: Product[] = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
 
   const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
     const data = doc.data();
@@ -52,25 +56,28 @@ async function getDashboardData(): Promise<RiskIssue[]> {
 
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
     const status = item["Risk Status"] || item.Status || 'Open';
+    const product = products.find(p => p.code === item['Project Code'] || p.name === item.ProjectName);
     return {
       ...item,
       Status: status,
       "Risk Status": status,
-      ProjectName: item.ProjectName || item['Project Code'],
+      ProjectName: product?.name || item.ProjectName || item['Project Code'],
     }
   });
 
-  return combinedData;
+  return { data: combinedData, products };
 }
 
 export default function DashboardPage() {
   const [data, setData] = React.useState<RiskIssue[] | null>(null);
+  const [products, setProducts] = React.useState<Product[] | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     getDashboardData()
         .then(fetchedData => {
-            setData(fetchedData);
+            setData(fetchedData.data);
+            setProducts(fetchedData.products);
             setIsLoading(false);
         })
         .catch(error => {
@@ -79,7 +86,7 @@ export default function DashboardPage() {
         });
   }, []);
 
-  if (isLoading || !data) {
+  if (isLoading || !data || !products) {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -96,5 +103,5 @@ export default function DashboardPage() {
     )
   }
 
-  return <DashboardClient data={data} />;
+  return <DashboardClient data={data} products={products} />;
 }

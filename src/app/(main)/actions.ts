@@ -5,7 +5,6 @@ import { db } from "@/lib/firebase";
 import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 import { analyzeData as analyzeDataFlow, type AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
-import { setProjectData } from "@/ai/tools/project-data-tool";
 import type { RiskIssue, Product } from "@/lib/types";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any, data: any } | null> {
@@ -141,19 +140,9 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
 }
 
 
-export async function analyzeData(input: { question: string, data: RiskIssue[] }) {
+export async function analyzeData(input: AnalyzeDataInput) {
     try {
-      // Set the data for the tool to use in this request context.
-      // This makes the full dataset available to the 'getProjectData' tool.
-      await setProjectData(input.data);
-      
-      // Call the flow with just the user's question.
-      // The flow will use the tool to get data as needed.
-      const result = await analyzeDataFlow({ 
-        question: input.question, 
-        projects: [], // No longer needed here
-        risksAndIssues: [] // No longer needed here
-      });
+      const result = await analyzeDataFlow(input);
       return { success: true, analysis: result.analysis };
     } catch (error) {
       console.error("Error analyzing data:", error);
