@@ -180,6 +180,20 @@ export function RiskForm() {
 
   const debouncedDescription = useDebounce(descriptionValue, 500);
 
+  const projectOptions = React.useMemo(() => {
+    const productCodes = products.map(p => ({ value: p.code, label: `${p.name} (${p.code})` }));
+    const riskProjectCodes = Array.from(new Set(risks.map(r => r['Project Code']).filter(Boolean)));
+    
+    const combinedCodes = [...productCodes];
+    riskProjectCodes.forEach(code => {
+        if (!combinedCodes.some(c => c.value === code)) {
+            combinedCodes.push({ value: code!, label: code! });
+        }
+    });
+    
+    return combinedCodes;
+  }, [products, risks]);
+
   React.useEffect(() => {
     if (debouncedDescription.length > 10) {
       setIsFetchingSuggestion(true);
@@ -368,22 +382,16 @@ export function RiskForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project Code</FormLabel>
-                      <FormControl>
-                        <>
-                          <Input
-                            list="project-codes"
-                            placeholder="Select or add project..."
-                            {...field}
-                          />
-                          <datalist id="project-codes">
-                            {products.map((p) => (
-                              <option key={p.id} value={p.code}>
-                                {p.name}
-                              </option>
-                            ))}
-                          </datalist>
-                        </>
-                      </FormControl>
+                        <FormControl>
+                            <Combobox
+                                options={projectOptions}
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Select or add project..."
+                                searchPlaceholder="Search projects..."
+                                notFoundText="No project found. You can add a new one."
+                            />
+                        </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
