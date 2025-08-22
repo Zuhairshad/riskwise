@@ -143,10 +143,14 @@ export default function LoginPage() {
                         Sign in with Microsoft
                     </Button>
                 </CardContent>
-                <CardFooter className="text-center text-sm">
-                    <p className="w-full">
+                <CardFooter className="flex-col items-center justify-center space-y-4">
+                    <p className="text-center text-sm text-muted-foreground">
                         Don't have an account? <Link href="/signup" className="font-semibold text-primary hover:underline">Sign up</Link>
                     </p>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                         <CheckSquare className="h-4 w-4 mr-1 text-primary/80" />
+                        Proactify+
+                    </div>
                 </CardFooter>
             </Card>
         </div>
