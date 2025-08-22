@@ -19,7 +19,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Input } from "./input"
 
 interface ComboboxProps {
   options: { label: string; value: string }[];
@@ -41,73 +40,33 @@ export function Combobox({
   className,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const [inputValue, setInputValue] = React.useState(value || "")
-  const [filteredOptions, setFilteredOptions] = React.useState(options);
 
-  React.useEffect(() => {
-    // When the form value changes externally, update the input
-    const displayLabel = options.find(option => option.value === value)?.label || value;
-    setInputValue(displayLabel)
-  }, [value, options])
-
-  React.useEffect(() => {
-    setFilteredOptions(options);
-  }, [options])
-
-
-  const handleSelect = (currentValue: string) => {
-    const selectedOption = options.find(option => option.value.toLowerCase() === currentValue.toLowerCase());
-    const newValue = selectedOption ? selectedOption.value : currentValue;
-    onChange(newValue)
-    const displayLabel = selectedOption ? selectedOption.label : newValue;
-    setInputValue(displayLabel);
-    setOpen(false)
-  }
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const manualInput = event.target.value
-    setInputValue(manualInput) // Display what user types
-    
-    const matchedOption = options.find(option => option.label.toLowerCase() === manualInput.toLowerCase());
-    if (matchedOption) {
-        onChange(matchedOption.value);
-    } else {
-        onChange(manualInput); // Allow free text entry
-    }
-  }
-
-  const getDisplayLabel = () => {
-    const option = options.find(option => option.value === value);
-    return option ? option.label : value;
-  }
-  
-  const onCommandFilter = (val: string, search: string) => {
-    const option = options.find(o => o.value === val);
-    if (option) {
-        if (option.label.toLowerCase().includes(search.toLowerCase())) return 1;
-        if (option.value.toLowerCase().includes(search.toLowerCase())) return 1;
-    }
-    return 0;
-  }
+  const displayValue = options.find((option) => option.value === value)?.label || value || placeholder
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="relative w-full">
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className={cn("w-full justify-between font-normal", !value && "text-muted-foreground", className)}
-            >
-              <span className="truncate">{value ? getDisplayLabel() : placeholder}</span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-        </div>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn("w-full justify-between font-normal", !value && "text-muted-foreground", className)}
+        >
+          <span className="truncate">{displayValue}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command filter={onCommandFilter}>
-          <CommandInput placeholder={searchPlaceholder} />
+        <Command>
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            onValueChange={(search) => {
+                const matchedOption = options.find(option => option.label.toLowerCase() === search.toLowerCase());
+                if (!matchedOption) {
+                    onChange(search);
+                }
+            }}
+          />
           <CommandList>
             <CommandEmpty>{notFoundText}</CommandEmpty>
             <CommandGroup>
@@ -115,7 +74,13 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
-                  onSelect={handleSelect}
+                  onSelect={(currentValue) => {
+                    // Check if selected value is different from current value
+                    const newValue = currentValue === value ? "" : currentValue;
+                    const optionToSetValue = options.find(opt => opt.value === newValue);
+                    onChange(optionToSetValue?.value || newValue);
+                    setOpen(false)
+                  }}
                 >
                   <Check
                     className={cn(
