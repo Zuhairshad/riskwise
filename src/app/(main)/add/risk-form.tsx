@@ -369,17 +369,20 @@ export function RiskForm() {
                     <FormItem>
                       <FormLabel>Project Code</FormLabel>
                       <FormControl>
-                        <Combobox
-                          options={products.map((p) => ({
-                            value: p.code,
-                            label: `${p.code} (${p.name})`,
-                          }))}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Select or add project..."
-                          searchPlaceholder="Search projects..."
-                          notFoundText="No project found. You can add a new one."
-                        />
+                        <>
+                          <Input
+                            list="project-codes"
+                            placeholder="Select or add project..."
+                            {...field}
+                          />
+                          <datalist id="project-codes">
+                            {products.map((p) => (
+                              <option key={p.id} value={p.code}>
+                                {p.name}
+                              </option>
+                            ))}
+                          </datalist>
+                        </>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
