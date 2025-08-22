@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut, Auth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
@@ -17,19 +17,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
+  const [auth, setAuth] = useState<Auth | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const authInstance = getAuth();
+    setAuth(authInstance);
+
+    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
       setUser(user);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   const logout = async () => {
+    if (!auth) return;
     try {
         await firebaseSignOut(auth);
         router.push('/login');

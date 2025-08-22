@@ -3,7 +3,6 @@ import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import type { RiskIssue, Product } from "@/lib/types";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { withAuth } from "@/components/layout/with-auth";
 
 // Helper function to safely convert Firestore Timestamps to ISO strings
 function toISOString(date: any): string | undefined {
@@ -70,10 +69,8 @@ async function getDashboardData() {
 }
 
 
-async function DashboardPage() {
+export default async function DashboardPage() {
   const { data, products } = await getDashboardData();
   
   return <DashboardClient data={data} products={products} />;
 }
-
-export default withAuth(DashboardPage);
