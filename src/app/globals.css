@@ -83,3 +83,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+    .card {
+        @apply transition-all duration-200;
+    }
+    .card:hover {
+        @apply shadow-lg;
+    }
+    .alert.border-accent {
+        @apply border-accent/50 dark:border-accent/30;
+    }
+}

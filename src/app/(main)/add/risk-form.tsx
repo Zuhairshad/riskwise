@@ -385,7 +385,7 @@ export function RiskForm() {
                         Suggest Title with AI
                     </Button>
                     {titleSuggestion && (
-                        <Alert>
+                        <Alert className="border-accent">
                         <Bot className="h-4 w-4" />
                         <AlertTitle>AI Suggested Title</AlertTitle>
                         <AlertDescription>
@@ -432,7 +432,7 @@ export function RiskForm() {
                     </div>
                   )}
                   {suggestion?.matchedRisk && suggestion.detailedSummary && (
-                    <Alert>
+                    <Alert className="border-accent">
                       <Bot className="h-4 w-4" />
                       <AlertTitle>Potential Duplicate Found: {suggestion.matchedRisk.title}</AlertTitle>
                       <AlertDescription>
@@ -474,7 +474,7 @@ export function RiskForm() {
                     </Alert>
                   )}
                    {(suggestion?.rephrasedDescription || rephrasedDescription) && (
-                    <Alert>
+                    <Alert className="border-accent">
                         <Bot className="h-4 w-4" />
                         <AlertTitle>AI Suggestion</AlertTitle>
                         <AlertDescription>
@@ -527,7 +527,7 @@ export function RiskForm() {
                         Suggest with AI
                     </Button>
                     {mitigationSuggestions.length > 0 && (
-                    <Alert>
+                    <Alert className="border-accent">
                         <Bot className="h-4 w-4" />
                         <AlertTitle>AI Suggested Mitigation Strategies</AlertTitle>
                         <AlertDescription>
@@ -570,7 +570,7 @@ export function RiskForm() {
                         Suggest with AI
                     </Button>
                      {contingencySuggestions.length > 0 && (
-                    <Alert>
+                    <Alert className="border-accent">
                         <Bot className="h-4 w-4" />
                         <AlertTitle>AI Suggested Contingency Plans</AlertTitle>
                         <AlertDescription>
@@ -817,10 +817,7 @@ export function RiskForm() {
               className="w-full"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Create Risk
+              {form.formState.isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</> : "Create Risk"}
             </Button>
           </div>
         </div>

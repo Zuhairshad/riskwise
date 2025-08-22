@@ -10,7 +10,7 @@ export default function AddPage() {
   return (
     <div className="space-y-6">
        <div>
-            <h1 className="text-2xl font-headline font-bold">Add New Entry</h1>
+            <h1 className="text-3xl font-headline font-bold">Add New Entry</h1>
             <p className="text-muted-foreground">
                 Fill out the form below to create a new risk or issue.
             </p>

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, AlertTriangle, CheckCircle2, CircleDot } from "lucide-react";
 import type { RiskIssue } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type StatsCardsProps = {
   data: RiskIssue[];
@@ -27,7 +28,7 @@ export function StatsCards({ data }: StatsCardsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
+      <Card className="hover:scale-105 hover:shadow-xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Entries</CardTitle>
           <CircleDot className="h-4 w-4 text-muted-foreground" />
@@ -37,7 +38,7 @@ export function StatsCards({ data }: StatsCardsProps) {
           <p className="text-xs text-muted-foreground">All risks and issues</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="hover:scale-105 hover:shadow-xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Open Items</CardTitle>
           <Shield className="h-4 w-4 text-muted-foreground" />
@@ -47,7 +48,7 @@ export function StatsCards({ data }: StatsCardsProps) {
           <p className="text-xs text-muted-foreground">Currently active risks and issues</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="hover:scale-105 hover:shadow-xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">High Priority</CardTitle>
           <AlertTriangle className="h-4 w-4 text-muted-foreground" />
@@ -57,7 +58,7 @@ export function StatsCards({ data }: StatsCardsProps) {
           <p className="text-xs text-muted-foreground">High & Critical priority items</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="hover:scale-105 hover:shadow-xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Resolved Items</CardTitle>
           <CheckCircle2 className="h-4 w-4 text-muted-foreground" />

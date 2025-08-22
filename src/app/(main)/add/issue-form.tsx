@@ -327,7 +327,7 @@ export function IssueForm() {
                                 Suggest Title with AI
                             </Button>
                              {titleSuggestion && (
-                                <Alert>
+                                <Alert className="border-accent">
                                 <Bot className="h-4 w-4" />
                                 <AlertTitle>AI Suggested Title</AlertTitle>
                                 <AlertDescription>
@@ -370,7 +370,7 @@ export function IssueForm() {
                                 </div>
                             )}
                             {suggestion?.matchedIssue && suggestion.detailedSummary && (
-                                <Alert>
+                                <Alert className="border-accent">
                                 <Bot className="h-4 w-4" />
                                 <AlertTitle>Potential Duplicate Found: {suggestion.matchedIssue.title}</AlertTitle>
                                 <AlertDescription>
@@ -412,7 +412,7 @@ export function IssueForm() {
                                 </Alert>
                             )}
                             {(suggestion?.rephrasedDescription || rephrasedDiscussion) && (
-                                <Alert>
+                                <Alert className="border-accent">
                                     <Bot className="h-4 w-4" />
                                     <AlertTitle>AI Suggestion</AlertTitle>
                                     <AlertDescription>
@@ -460,7 +460,7 @@ export function IssueForm() {
                                     Suggest Category with AI
                                 </Button>
                                 {categorySuggestion && (
-                                <Alert>
+                                <Alert className="border-accent">
                                     <Bot className="h-4 w-4" />
                                     <AlertTitle>AI Suggested Category</AlertTitle>
                                     <AlertDescription>
@@ -501,7 +501,7 @@ export function IssueForm() {
                                 Suggest with AI
                             </Button>
                             {resolutionSuggestions.length > 0 && (
-                            <Alert>
+                            <Alert className="border-accent">
                                 <Bot className="h-4 w-4" />
                                 <AlertTitle>AI Suggested Resolutions</AlertTitle>
                                 <AlertDescription>
@@ -701,5 +701,3 @@ export function IssueForm() {
     </Form>
   );
 }
-
-    
