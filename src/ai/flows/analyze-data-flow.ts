@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for analyzing risk and issue data.
@@ -33,6 +34,8 @@ const prompt = ai.definePrompt({
 
   Analyze the data provided in the 'dataJson' field to answer the following question. Provide a concise, clear, and data-driven response.
   If the question cannot be answered with the given data, state that clearly.
+
+  IMPORTANT: The financial impact of an item can be found in either the "Impact Value ($)" field (for risks) or the "Impact ($)" field (for issues). Please consider both fields when analyzing cost or financial impact.
 
   JSON Data:
   {{{dataJson}}}
