@@ -30,7 +30,7 @@ export function AIDataAnalyst({ data, products }: AIDataAnalystProps) {
     setError(null);
 
     try {
-      // The action now takes the raw data directly.
+      // Pass the raw data directly to the server action.
       const result = await analyzeData({
         question,
         projects: products,

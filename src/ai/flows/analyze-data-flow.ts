@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { RiskIssue, Product } from '@/lib/types';
 
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
@@ -38,7 +37,17 @@ The input contains two arrays: 'projects' and 'risksAndIssues'.
 - Use the 'risksAndIssues' data for questions about risks or issues.
 When analyzing financial impact, look for the field "Impact Value ($)" for items of type 'Risk' and "Impact ($)" for items of type 'Issue'.
 Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
-  prompt: `Question: {{{question}}}`,
+  prompt: `The user has asked the following question:
+"{{{question}}}"
+
+Analyze the data below to answer it.
+
+Projects Data:
+{{{json projects}}}
+
+Risks & Issues Data:
+{{{json risksAndIssues}}}
+`,
   model: 'googleai/gemini-1.5-flash',
 });
 
