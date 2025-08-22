@@ -32,23 +32,13 @@ const prompt = ai.definePrompt({
   name: 'analyzeDataPrompt',
   input: { schema: AnalyzeDataInputSchema },
   output: { schema: AnalyzeDataOutputSchema },
-  system: `You are a helpful data analyst. Your task is to answer a user's question based on the provided JSON data for projects, risks, and issues.
-  
-  When analyzing financial impact, look for the fields "Impact Value ($)" for risks and "Impact ($)" for issues.
-
-  When answering questions about projects, use the 'projects' data which contains a list of all available projects.
-  When answering questions about risks or issues, use the 'risksAndIssues' data.
-
-  Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
-  prompt: `
-  Projects Data:
-  {{{json projects}}}
-
-  Risks and Issues Data:
-  {{{json risksAndIssues}}}
-
-  Question: {{{question}}}
-  `,
+  system: `You are a helpful data analyst. Your task is to answer the user's question based on the provided data.
+The input contains two arrays: 'projects' and 'risksAndIssues'.
+- Use the 'projects' data for questions about project details.
+- Use the 'risksAndIssues' data for questions about risks or issues.
+When analyzing financial impact, look for the field "Impact Value ($)" for items of type 'Risk' and "Impact ($)" for items of type 'Issue'.
+Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
+  prompt: `Question: {{{question}}}`,
   model: 'googleai/gemini-1.5-flash',
 });
 
