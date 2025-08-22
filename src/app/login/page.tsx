@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, OAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useForm } from 'react-hook-form';
-import { zodResolver }from '@hookform/resolvers/zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -80,7 +80,7 @@ export default function LoginPage() {
                         <CheckSquare className="h-10 w-10 text-primary" />
                     </div>
                     <CardTitle className="text-2xl">Welcome Back</CardTitle>
-                    <CardDescription>Sign in to continue to RiskWise</CardDescription>
+                    <CardDescription>Sign in to continue to Proactify+</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <Form {...form}>

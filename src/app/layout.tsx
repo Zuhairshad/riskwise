@@ -21,8 +21,8 @@ const spaceGrotesk = Space_Grotesk({
 
 
 export const metadata: Metadata = {
-  title: "RiskWise",
-  description: "A Full-Stack Risk & Issue Management System",
+  title: "Proactify+",
+  description: "RISK & ISSUE MANAGEMENT",
 };
 
 export default function RootLayout({

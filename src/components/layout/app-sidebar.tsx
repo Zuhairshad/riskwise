@@ -27,7 +27,7 @@ export function AppSidebar() {
             className="flex items-center gap-2 font-headline text-lg font-semibold text-primary"
           >
             <CheckSquare className="h-7 w-7 text-primary" />
-            <span className="text-sidebar-foreground">RiskWise</span>
+            <span className="text-sidebar-foreground">Proactify+</span>
           </Link>
         </div>
       </SidebarHeader>
