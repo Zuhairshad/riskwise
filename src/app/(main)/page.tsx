@@ -39,17 +39,22 @@ async function getDashboardData() {
     } as unknown as RiskIssue;
   });
 
+  const allProducts = await getDocs(collection(db, 'products')).then(snapshot => 
+    snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any))
+  );
+
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
     const status = item["Risk Status"] || item.Status || 'Open';
+    const product = 
+        (item.type === 'Risk' && allProducts.find((p) => p.code === item["Project Code"])) ||
+        (item.type === 'Issue' && allProducts.find((p) => p.name === item.ProjectName)) ||
+        null;
     return {
       ...item,
       Status: status,
       "Risk Status": status,
-      product: 
-        (item.type === 'Risk' && products.find((p) => p.code === item["Project Code"])) ||
-        (item.type === 'Issue' && products.find((p) => p.name === item.ProjectName)) ||
-        products[0],
-      ProjectName: item.ProjectName || (products.find((p) => p.code === item["Project Code"])?.name)
+      product: product,
+      ProjectName: item.ProjectName || product?.name,
     }
   });
 

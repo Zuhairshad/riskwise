@@ -7,14 +7,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StatusDistributionChart } from "./charts/status-distribution-chart";
 import { PriorityBreakdownChart } from "./charts/priority-breakdown-chart";
 import { RiskDistributionHeatMap } from "./charts/risk-distribution-heat-map";
+import type { HeatMapFilter } from "./dashboard-client";
 
 type DashboardWidgetsProps = {
     data: RiskIssue[];
+    allRisks: RiskIssue[];
+    onHeatMapFilter: (filter: HeatMapFilter) => void;
+    activeFilter: HeatMapFilter;
 }
 
-export function DashboardWidgets({ data }: DashboardWidgetsProps) {
-    const risks = data.filter((d) => d.type === 'Risk');
-    const issues = data.filter((d) => d.type === 'Issue');
+export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter }: DashboardWidgetsProps) {
 
     return (
         <div className="space-y-4">
@@ -23,10 +25,14 @@ export function DashboardWidgets({ data }: DashboardWidgetsProps) {
                  <Card className="col-span-full lg:col-span-4">
                     <CardHeader>
                         <CardTitle>Risk Distribution Heat Map</CardTitle>
-                        <CardDescription>Aggregated view of risks by probability and impact.</CardDescription>
+                        <CardDescription>Click a cell to filter the dashboard by probability and impact.</CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
-                        <RiskDistributionHeatMap data={risks} />
+                        <RiskDistributionHeatMap 
+                            data={allRisks} 
+                            onCellClick={onHeatMapFilter}
+                            activeFilter={activeFilter}
+                        />
                     </CardContent>
                 </Card>
                 <Card className="col-span-full sm:col-span-1 lg:col-span-3">

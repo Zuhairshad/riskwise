@@ -5,9 +5,12 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import type { RiskIssue } from "@/lib/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { HeatMapFilter } from "../dashboard-client";
 
 interface RiskDistributionHeatMapProps {
   data: RiskIssue[];
+  onCellClick: (filter: HeatMapFilter) => void;
+  activeFilter: HeatMapFilter;
 }
 
 const probabilityLevels = [
@@ -28,7 +31,7 @@ const impactLevels = [
 
 const getRiskColor = (score: number, count: number): string => {
   if (count === 0) return "bg-muted/30";
-  const opacity = Math.min(1, 0.2 + count / 5).toPrecision(2); // Increase opacity based on count
+  const opacity = Math.min(1, 0.2 + count / 5).toPrecision(2); 
 
   if (score >= 0.3) return `bg-red-500`; 
   if (score >= 0.15) return `bg-orange-500`;
@@ -42,26 +45,22 @@ const getTextColor = (score: number, count: number): string => {
     return "text-gray-800";
 }
 
-export function RiskDistributionHeatMap({ data }: RiskDistributionHeatMapProps) {
+export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: RiskDistributionHeatMapProps) {
   const heatMapData = React.useMemo(() => {
     const grid: number[][] = Array(5)
       .fill(0)
       .map(() => Array(5).fill(0));
 
     data.forEach((risk) => {
+        if (risk.type !== 'Risk') return;
         const prob = risk.Probability ?? 0;
         const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
 
-        const probIndex = probabilityLevels.findIndex(p => prob > p.range[0] && prob <= p.range[1]);
-        const impactIndex = impactLevels.findIndex(i => impact > i.range[0] && impact <= i.range[1]);
+        const probIndex = probabilityLevels.findIndex(p => prob >= p.range[0] && prob <= p.range[1]);
+        const impactIndex = impactLevels.findIndex(i => impact >= i.range[0] && impact <= i.range[1]);
         
-        // Find the closest bucket if it's on the boundary
-        const finalProbIndex = probIndex === -1 ? probabilityLevels.findIndex(p => prob >= p.range[0] && prob <= p.range[1]) : probIndex;
-        const finalImpactIndex = impactIndex === -1 ? impactLevels.findIndex(i => impact >= i.range[0] && impact <= i.range[1]) : impactIndex;
-
-
-        if (finalProbIndex !== -1 && finalImpactIndex !== -1) {
-            grid[finalProbIndex][finalImpactIndex]++;
+        if (probIndex !== -1 && impactIndex !== -1) {
+            grid[probIndex][impactIndex]++;
         }
     });
     return grid;
@@ -99,18 +98,25 @@ export function RiskDistributionHeatMap({ data }: RiskDistributionHeatMapProps) 
               impactLevels.map((imp, impIndex) => {
                 const count = heatMapData[probIndex][impIndex];
                 const score = prob.value * imp.value;
+                const isSelected = activeFilter?.probRange[0] === prob.range[0] && activeFilter?.impactRange[0] === imp.range[0];
+
                 return (
                   <Tooltip key={`${prob.value}-${imp.value}`}>
                     <TooltipTrigger asChild>
-                      <div
+                      <button
+                        onClick={() => onCellClick({ probRange: prob.range, impactRange: imp.range, probLabel: prob.label, impactLabel: imp.label })}
+                        disabled={count === 0}
                         className={cn(
-                          "h-10 w-full rounded-md flex items-center justify-center font-bold text-lg",
+                          "h-10 w-full rounded-md flex items-center justify-center font-bold text-lg transition-all",
                           getRiskColor(score, count),
                           getTextColor(score, count),
+                          "disabled:opacity-50 disabled:cursor-not-allowed",
+                          isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                          !isSelected && "hover:opacity-80"
                         )}
                       >
                         {count > 0 ? count : ''}
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{count} risk(s)</p>
