@@ -144,10 +144,16 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
 export async function analyzeData(input: { question: string, data: RiskIssue[] }) {
     try {
       // Set the data for the tool to use in this request context.
-      // In a real multi-user app, you would scope this data to the current user.
-      setProjectData(input.data);
+      // This makes the full dataset available to the 'getProjectData' tool.
+      await setProjectData(input.data);
       
-      const result = await analyzeDataFlow({ question: input.question, projects: [], risksAndIssues: [] });
+      // Call the flow with just the user's question.
+      // The flow will use the tool to get data as needed.
+      const result = await analyzeDataFlow({ 
+        question: input.question, 
+        projects: [], // No longer needed here
+        risksAndIssues: [] // No longer needed here
+      });
       return { success: true, analysis: result.analysis };
     } catch (error) {
       console.error("Error analyzing data:", error);

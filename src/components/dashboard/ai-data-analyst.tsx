@@ -55,7 +55,7 @@ export function AIDataAnalyst({ data }: AIDataAnalystProps) {
           <span>AI Data Analyst</span>
         </CardTitle>
         <CardDescription>
-          Ask a question about your current dataset to get AI-powered insights.
+          Ask a question about your current dataset to get AI-powered insights. Example: "Which project has the highest financial impact from open risks?"
         </CardDescription>
       </CardHeader>
       <CardContent>

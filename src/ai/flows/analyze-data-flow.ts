@@ -15,6 +15,8 @@ import type { RiskIssue, Product } from '@/lib/types';
 
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe('The user\'s question about the data.'),
+  // We no longer pass the full dataset in the prompt input.
+  // The tool will access it from the request-scoped context.
   projects: z.array(z.any()).describe('A list of all projects.'),
   risksAndIssues: z.array(z.any()).describe('A list of all risks and issues.'),
 });
@@ -52,6 +54,7 @@ const analyzeDataFlow = ai.defineFlow(
       outputSchema: AnalyzeDataOutputSchema,
     },
     async (input) => {
+      // The flow now only needs to call the prompt. The prompt itself will use the tool.
       const { output } = await prompt(input);
       return output!;
     }
