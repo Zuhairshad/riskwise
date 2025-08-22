@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
@@ -18,7 +19,7 @@ const spaceGrotesk = Space_Grotesk({
 
 
 export const metadata: Metadata = {
-  title: "Proactify+",
+  title: "RiskWise",
   description: "A Full-Stack Risk & Issue Management System",
 };
 

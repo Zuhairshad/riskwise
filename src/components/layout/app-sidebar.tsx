@@ -10,8 +10,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, PlusCircle, BarChart, CheckSquare, ClipboardList } from "lucide-react";
+import { LayoutDashboard, PlusCircle, BarChart, CheckSquare, ClipboardList, Trophy, User } from "lucide-react";
+import { ThemeToggle } from "../theme-toggle";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -25,7 +27,7 @@ export function AppSidebar() {
             className="flex items-center gap-2 font-headline text-lg font-semibold text-primary"
           >
             <CheckSquare className="h-7 w-7 text-primary" />
-            <span className="text-sidebar-foreground">Proactify+</span>
+            <span className="text-sidebar-foreground">RiskWise</span>
           </Link>
         </div>
       </SidebarHeader>
@@ -79,8 +81,39 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/leaderboard"}
+              tooltip="Leaderboard"
+            >
+              <Link href="/leaderboard">
+                <Trophy />
+                <span>Leaderboard</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
+       <SidebarFooter>
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/profile"}
+                    tooltip="My Profile"
+                >
+                    <Link href="/profile">
+                        <User />
+                        <span>My Profile</span>
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+            <div className="px-2">
+                <ThemeToggle />
+            </div>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

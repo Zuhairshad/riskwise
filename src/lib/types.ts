@@ -65,4 +65,19 @@ export type Option = {
   color?: string;
 };
 
-    
+export type Badge = {
+    id: string;
+    name: string;
+    description: string;
+    icon: LucideIcon;
+    color: string;
+};
+  
+export type User = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+    title: string;
+    badges: Badge[];
+    score: number;
+};
