@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -10,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, PlusCircle, ShieldHalf, Bot } from "lucide-react";
+import { LayoutDashboard, PlusCircle, BarChart, Bot } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -39,6 +40,18 @@ export function AppSidebar() {
               <Link href="/">
                 <LayoutDashboard />
                 <span>Dashboard</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/executive-dashboard"}
+              tooltip="Executive Dashboard"
+            >
+              <Link href="/executive-dashboard">
+                <BarChart />
+                <span>Executive View</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
