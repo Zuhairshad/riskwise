@@ -63,15 +63,17 @@ export function DashboardWidgets({
     );
 
     const issueWidgets = (
-        <Card className="col-span-full lg:col-span-4">
-            <CardHeader>
-                <CardTitle>Status Distribution</CardTitle>
-                <CardDescription>A breakdown of all issues by their current status.</CardDescription>
-            </CardHeader>
-            <CardContent>
-               <StatusDistributionChart data={data} />
-            </CardContent>
-        </Card>
+         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 col-span-full">
+            <Card className="col-span-full lg:col-span-4">
+                <CardHeader>
+                    <CardTitle>Status Distribution</CardTitle>
+                    <CardDescription>A breakdown of all issues by their current status.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                <StatusDistributionChart data={data} />
+                </CardContent>
+            </Card>
+        </div>
     );
 
     return (

@@ -78,12 +78,15 @@ export function DashboardClient({ data }: DashboardClientProps) {
     }
 
     if (riskLevelFilter) {
+      const riskLevelRanges = {
+        'Low': [0.01, 0.04],
+        'Medium': [0.05, 0.14],
+        'High': [0.18, 0.72]
+      };
+      const [min, max] = riskLevelRanges[riskLevelFilter];
       return risks.filter(risk => {
         const score = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
-        if (riskLevelFilter === 'Low') return score >= 0.01 && score <= 0.04;
-        if (riskLevelFilter === 'Medium') return score >= 0.05 && score <= 0.14;
-        if (riskLevelFilter === 'High') return score >= 0.18 && score <= 0.72;
-        return false;
+        return score >= min && score <= max;
       });
     }
 

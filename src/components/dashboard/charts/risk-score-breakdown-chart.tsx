@@ -88,7 +88,7 @@ export function RiskScoreBreakdownChart({ data, onBarClick, activeFilter }: Risk
                 axisLine={false}
                 tickFormatter={(value) => value}
             />
-            <YAxis />
+            <YAxis allowDecimals={false} />
             <ChartTooltip
                 cursor={{ fill: 'hsl(var(--muted))' }}
                 content={<ChartTooltipContent indicator="dot" />}

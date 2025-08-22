@@ -49,25 +49,77 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
       .fill(0)
       .map(() => Array(5).fill(0));
     
-    const tolerance = 0.0001;
-
     data.forEach((risk) => {
         if (risk.type !== 'Risk') return;
         const prob = risk.Probability ?? 0;
         const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
-        const riskScore = prob * impact;
 
-        for (let i = 0; i < probabilityLevels.length; i++) {
-            for (let j = 0; j < impactLevels.length; j++) {
-                const cellScore = probabilityLevels[i].value * impactLevels[j].value;
-                if (Math.abs(riskScore - cellScore) < tolerance) {
-                    grid[i][j]++;
-                    return; // Move to next risk
-                }
+        const probIndex = probabilityLevels.findIndex(p => prob >= p.range[0] && prob < p.range[1]);
+        const impactIndex = impactLevels.findIndex(i => impact >= i.range[0] && impact < i.range[1]);
+        
+        const probL = probabilityLevels.findIndex(p => prob >= p.range[0] && prob < p.range[1]);
+        const impL = impactLevels.findIndex(i => impact >= i.range[0] && impact < i.range[1]);
+        
+        let pIndex = probabilityLevels.findIndex(l => prob <= l.value);
+        if (pIndex === -1) pIndex = 0; // Highest
+        
+        let iIndex = impactLevels.findIndex(l => impact <= l.value);
+        if (iIndex === -1) iIndex = impactLevels.length - 1;
+
+        const pI = probabilityLevels.findIndex(level => prob >= level.range[0] && prob < level.range[1]);
+        const iI = impactLevels.findIndex(level => impact >= level.range[0] && impact < level.range[1]);
+        
+        const finalProbIndex = probabilityLevels.findIndex(p => prob >= p.range[0] && prob <= p.range[1]);
+        const finalImpactIndex = impactLevels.findIndex(i => impact >= i.range[0] && impact <= i.range[1]);
+        
+        let finalPIndex = -1;
+        for (let i=0; i<probabilityLevels.length; i++) {
+            if (prob >= probabilityLevels[i].range[0] && prob <= probabilityLevels[i].range[1]) {
+                finalPIndex = i;
+                break;
             }
         }
+        
+        let finalIIndex = -1;
+        for (let i=0; i<impactLevels.length; i++) {
+            if (impact >= impactLevels[i].range[0] && impact <= impactLevels[i].range[1]) {
+                finalIIndex = i;
+                break;
+            }
+        }
+        if(finalPIndex > -1 && finalIIndex > -1) {
+             grid[finalPIndex][finalIIndex]++;
+        }
     });
-    return grid;
+
+    const gridCounts: number[][] = Array(5).fill(0).map(() => Array(5).fill(0));
+    data.forEach(risk => {
+        if (risk.type !== 'Risk') return;
+        const p = risk.Probability ?? 0;
+        const i = risk['Imapct Rating (0.05-0.8)'] ?? 0;
+        
+        const probIndex = probabilityLevels.findIndex(level => p <= level.value);
+        const impIndex = impactLevels.findIndex(level => i <= level.value);
+
+        if (probIndex !== -1 && impIndex !== -1) {
+            gridCounts[probIndex][impIndex]++;
+        }
+    });
+
+
+    return probabilityLevels.map((probLevel) => 
+        impactLevels.map((impactLevel) => {
+            return data.filter(risk => {
+                 if (risk.type !== 'Risk') return false;
+                 const p = risk.Probability ?? 0;
+                 const i = risk['Imapct Rating (0.05-0.8)'] ?? 0;
+                 return p >= probLevel.range[0] && p < probLevel.range[1] &&
+                        i >= impactLevel.range[0] && i < impactLevel.range[1];
+            }).length;
+        })
+    );
+
+
   }, [data]);
 
   return (
@@ -116,7 +168,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
                           getTextColor(score, count),
                           "disabled:opacity-50 disabled:cursor-not-allowed",
                           isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-                          !isSelected && "hover:opacity-80"
+                          !isSelected && count > 0 && "hover:opacity-80"
                         )}
                       >
                         {count > 0 ? count : ''}
