@@ -33,7 +33,6 @@ export default function LoginPage() {
     const [providerLoading, setProviderLoading] = useState<string | null>(null);
 
     const router = useRouter();
-    const auth = getAuth();
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof loginSchema>>({
@@ -46,6 +45,7 @@ export default function LoginPage() {
 
     const handleLogin = async (values: z.infer<typeof loginSchema>) => {
         setLoading(true);
+        const auth = getAuth();
         try {
             await signInWithEmailAndPassword(auth, values.email, values.password);
             toast({ title: 'Login Successful', description: "Welcome back!" });
@@ -59,6 +59,7 @@ export default function LoginPage() {
 
     const handleAzureSignIn = async () => {
         setProviderLoading('azure');
+        const auth = getAuth();
         const provider = new OAuthProvider('microsoft.com');
         try {
             await signInWithPopup(auth, provider);

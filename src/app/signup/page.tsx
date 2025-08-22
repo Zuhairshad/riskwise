@@ -32,7 +32,6 @@ const signupSchema = z.object({
 export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const auth = getAuth();
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof signupSchema>>({
@@ -45,6 +44,7 @@ export default function SignupPage() {
 
     const handleSignup = async (values: z.infer<typeof signupSchema>) => {
         setLoading(true);
+        const auth = getAuth();
         try {
             await createUserWithEmailAndPassword(auth, values.email, values.password);
             toast({ title: 'Signup Successful', description: "Your account has been created." });
