@@ -19,8 +19,7 @@ type DashboardClientProps = {
 };
 
 export type HeatMapFilter = {
-  probRange: [number, number];
-  impactRange: [number, number];
+  score: number;
   probLabel: string;
   impactLabel: string;
 } | null;
@@ -35,7 +34,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
   const issues = React.useMemo(() => data.filter((d) => d.type === 'Issue'), [data]);
 
   const handleHeatMapFilter = (filter: HeatMapFilter) => {
-    if (activeFilter && filter && activeFilter.probRange[0] === filter.probRange[0] && activeFilter.impactRange[0] === filter.impactRange[0]) {
+    if (activeFilter && filter && activeFilter.score === filter.score) {
       setActiveFilter(null); // Clear filter if the same cell is clicked again
     } else {
       setActiveFilter(filter);
@@ -43,20 +42,17 @@ export function DashboardClient({ data }: DashboardClientProps) {
     setActiveTab('risks'); // Switch to risks tab when a heat map cell is clicked
   }
   
-  const clearFilter = () => handleHeatMapFilter(null);
+  const clearFilter = () => setActiveFilter(null);
 
   const filteredRisks = React.useMemo(() => {
     if (!activeFilter) return risks;
     
-    const { probRange, impactRange } = activeFilter;
+    const { score } = activeFilter;
+    const tolerance = 0.0001; // Tolerance for floating point comparison
+
     return risks.filter(risk => {
-        const prob = risk.Probability ?? 0;
-        const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
-        
-        const isProbMatch = prob >= probRange[0] && prob <= probRange[1];
-        const isImpactMatch = impact >= impactRange[0] && impact <= impactRange[1];
-       
-        return isProbMatch && isImpactMatch;
+        const riskScore = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
+        return Math.abs(riskScore - score) < tolerance;
     });
   }, [risks, activeFilter]);
 
@@ -85,6 +81,8 @@ export function DashboardClient({ data }: DashboardClientProps) {
             <div className="flex items-center gap-2">
                 <div className="font-semibold">Active Filter:</div>
                 <div className="text-sm text-muted-foreground">
+                    Risk Score: <span className="font-medium text-foreground">{activeFilter.score.toFixed(3)}</span>
+                    <span className="mx-2">|</span>
                     Probability: <span className="font-medium text-foreground">{activeFilter.probLabel}</span>, 
                     Impact: <span className="font-medium text-foreground">{activeFilter.impactLabel}</span>
                 </div>
