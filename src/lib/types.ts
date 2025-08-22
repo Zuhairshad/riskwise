@@ -1,5 +1,6 @@
 
 import type { LucideIcon } from "lucide-react";
+import type { User as FirebaseUser } from 'firebase/auth';
 
 export type Product = {
   id: string;
@@ -73,10 +74,12 @@ export type Badge = {
     color: string;
 };
   
-export type User = {
+export type UserProfile = {
     id: string;
-    name: string;
-    avatarUrl: string;
+    uid: string;
+    displayName: string;
+    email: string;
+    photoURL: string;
     title: string;
     badges: Badge[];
     score: number;

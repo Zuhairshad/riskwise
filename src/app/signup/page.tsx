@@ -4,7 +4,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,7 +55,20 @@ export default function SignupPage() {
         setLoading(true);
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-            await updateProfile(userCredential.user, { displayName: values.name });
+            const user = userCredential.user;
+
+            await updateProfile(user, { displayName: values.name });
+
+            // Create user profile in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                displayName: values.name,
+                email: values.email,
+                photoURL: `https://placehold.co/100x100.png`,
+                title: "New User",
+                score: 0,
+                badges: [],
+            });
             
             toast({ title: 'Signup Successful', description: "Your account has been created." });
             router.push('/');

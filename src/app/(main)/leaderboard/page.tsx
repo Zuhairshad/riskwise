@@ -45,15 +45,15 @@ export default async function LeaderboardPage() {
                                         {getRankIcon(index)}
                                     </div>
                                     <Avatar className="h-12 w-12">
-                                        <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="user avatar" />
-                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                        <AvatarImage src={user.photoURL} alt={user.displayName} data-ai-hint="user avatar" />
+                                        <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1">
-                                        <p className="font-semibold text-lg">{user.name}</p>
+                                        <p className="font-semibold text-lg">{user.displayName}</p>
                                         <p className="text-sm text-muted-foreground">{user.title}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        {user.badges.slice(0, 3).map(badge => (
+                                        {user.badges?.slice(0, 3).map(badge => (
                                              <Tooltip key={badge.id}>
                                                 <TooltipTrigger>
                                                     <badge.icon className={`h-6 w-6 ${badge.color}`} />
@@ -64,7 +64,7 @@ export default async function LeaderboardPage() {
                                                 </TooltipContent>
                                             </Tooltip>
                                         ))}
-                                        {user.badges.length > 3 && (
+                                        {user.badges && user.badges.length > 3 && (
                                             <UiBadge variant="secondary">+{user.badges.length - 3}</UiBadge>
                                         )}
                                     </div>
