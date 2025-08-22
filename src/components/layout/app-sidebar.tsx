@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, PlusCircle, BarChart, CheckSquare } from "lucide-react";
+import { LayoutDashboard, PlusCircle, BarChart, CheckSquare, ClipboardList } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -64,6 +64,18 @@ export function AppSidebar() {
               <Link href="/add">
                 <PlusCircle />
                 <span>Add Risk/Issue</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/benchmarking"}
+              tooltip="Benchmarking"
+            >
+              <Link href="/benchmarking">
+                <ClipboardList />
+                <span>Benchmarking</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
