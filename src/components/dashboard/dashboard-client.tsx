@@ -24,40 +24,95 @@ export type HeatMapFilter = {
   impactLabel: string;
 } | null;
 
+export type RiskLevelFilter = 'Low' | 'Medium' | 'High' | null;
+
+
 type ActiveTab = 'risks' | 'issues';
 
 export function DashboardClient({ data }: DashboardClientProps) {
   const [activeTab, setActiveTab] = React.useState<ActiveTab>('risks');
-  const [activeFilter, setActiveFilter] = React.useState<HeatMapFilter>(null);
+  const [heatMapFilter, setHeatMapFilter] = React.useState<HeatMapFilter>(null);
+  const [riskLevelFilter, setRiskLevelFilter] = React.useState<RiskLevelFilter>(null);
+
 
   const risks = React.useMemo(() => data.filter((d) => d.type === 'Risk'), [data]);
   const issues = React.useMemo(() => data.filter((d) => d.type === 'Issue'), [data]);
 
   const handleHeatMapFilter = (filter: HeatMapFilter) => {
-    if (activeFilter && filter && activeFilter.score === filter.score) {
-      setActiveFilter(null); // Clear filter if the same cell is clicked again
+    if (heatMapFilter && filter && heatMapFilter.score === filter.score) {
+      setHeatMapFilter(null); // Clear filter if the same cell is clicked again
     } else {
-      setActiveFilter(filter);
+      setHeatMapFilter(filter);
+      setRiskLevelFilter(null); // Clear other filter
     }
     setActiveTab('risks'); // Switch to risks tab when a heat map cell is clicked
   }
   
-  const clearFilter = () => setActiveFilter(null);
+  const handleRiskLevelFilter = (level: RiskLevelFilter) => {
+    if (riskLevelFilter === level) {
+      setRiskLevelFilter(null); // Clear filter if same bar is clicked
+    } else {
+      setRiskLevelFilter(level);
+      setHeatMapFilter(null); // Clear other filter
+    }
+     setActiveTab('risks');
+  }
+
+  const clearFilter = () => {
+    setHeatMapFilter(null);
+    setRiskLevelFilter(null);
+  }
+
+  const activeFilter = heatMapFilter || riskLevelFilter;
 
   const filteredRisks = React.useMemo(() => {
     if (!activeFilter) return risks;
-    
-    const { score } = activeFilter;
-    const tolerance = 0.0001; // Tolerance for floating point comparison
 
-    return risks.filter(risk => {
-        const riskScore = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
-        return Math.abs(riskScore - score) < tolerance;
-    });
-  }, [risks, activeFilter]);
+    if (heatMapFilter) {
+      const { score } = heatMapFilter;
+      const tolerance = 0.0001; // Tolerance for floating point comparison
+      return risks.filter(risk => {
+          const riskScore = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
+          return Math.abs(riskScore - score) < tolerance;
+      });
+    }
+
+    if (riskLevelFilter) {
+      return risks.filter(risk => {
+        const score = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
+        if (riskLevelFilter === 'Low') return score >= 0.01 && score <= 0.04;
+        if (riskLevelFilter === 'Medium') return score >= 0.05 && score <= 0.14;
+        if (riskLevelFilter === 'High') return score >= 0.18 && score <= 0.72;
+        return false;
+      });
+    }
+
+    return risks;
+  }, [risks, heatMapFilter, riskLevelFilter, activeFilter]);
 
   const dataForWidgets = activeTab === 'risks' ? filteredRisks : issues;
   
+  const getFilterDescription = () => {
+    if (heatMapFilter) {
+      return (
+        <>
+            Risk Score: <span className="font-medium text-foreground">{heatMapFilter.score.toFixed(3)}</span>
+            <span className="mx-2">|</span>
+            Probability: <span className="font-medium text-foreground">{heatMapFilter.probLabel}</span>, 
+            Impact: <span className="font-medium text-foreground">{heatMapFilter.impactLabel}</span>
+        </>
+      )
+    }
+    if (riskLevelFilter) {
+      return (
+         <>
+            Risk Level: <span className="font-medium text-foreground">{riskLevelFilter}</span>
+        </>
+      )
+    }
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -81,10 +136,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
             <div className="flex items-center gap-2">
                 <div className="font-semibold">Active Filter:</div>
                 <div className="text-sm text-muted-foreground">
-                    Risk Score: <span className="font-medium text-foreground">{activeFilter.score.toFixed(3)}</span>
-                    <span className="mx-2">|</span>
-                    Probability: <span className="font-medium text-foreground">{activeFilter.probLabel}</span>, 
-                    Impact: <span className="font-medium text-foreground">{activeFilter.impactLabel}</span>
+                   {getFilterDescription()}
                 </div>
             </div>
             <Button variant="ghost" size="sm" onClick={clearFilter}>
@@ -111,7 +163,9 @@ export function DashboardClient({ data }: DashboardClientProps) {
             data={dataForWidgets} 
             allRisks={risks}
             onHeatMapFilter={handleHeatMapFilter}
-            activeFilter={activeFilter}
+            activeHeatMapFilter={heatMapFilter}
+            onRiskLevelFilter={handleRiskLevelFilter}
+            activeRiskLevelFilter={riskLevelFilter}
             activeTab={activeTab}
         />
 

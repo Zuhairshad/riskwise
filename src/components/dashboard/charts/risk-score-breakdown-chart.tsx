@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Cell } from "recharts"
 import { cn } from "@/lib/utils"
 
 import {
@@ -15,9 +15,9 @@ import type { RiskIssue } from "@/lib/types"
 import type { RiskLevelFilter } from "../dashboard-client"
 
 const riskLevels = [
-    { name: 'Low', range: [0.01, 0.04], color: 'hsl(var(--chart-2))' },
-    { name: 'Medium', range: [0.05, 0.14], color: 'hsl(var(--chart-4))' },
-    { name: 'High', range: [0.18, 0.72], color: 'hsl(var(--chart-1))' },
+    { name: 'Low', range: [0.01, 0.04], color: 'hsl(var(--chart-2))' }, // Green
+    { name: 'Medium', range: [0.05, 0.14], color: 'hsl(var(--chart-4))' }, // Yellow
+    { name: 'High', range: [0.18, 0.72], color: 'hsl(var(--chart-1))' }, // Red
 ] as const;
 
 const chartConfig = {
@@ -68,46 +68,46 @@ export function RiskScoreBreakdownChart({ data, onBarClick, activeFilter }: Risk
         <BarChart 
             accessibilityLayer 
             data={chartData}
-            margin={{
-                top: 20,
-                right: 20,
-                bottom: 20,
-                left: 20,
+             onClick={(e) => {
+                if (e && e.activePayload && e.activePayload.length > 0) {
+                    onBarClick(e.activePayload[0].payload.name as RiskLevelFilter);
+                }
+            }}
+             margin={{
+                top: 5,
+                right: 5,
+                bottom: 5,
+                left: -20,
             }}
         >
             <CartesianGrid vertical={false} />
             <XAxis
-            dataKey="name"
-            tickLine={false}
-            tickMargin={10}
-            axisLine={false}
-            tickFormatter={(value) => value}
+                dataKey="name"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(value) => value}
             />
             <YAxis />
             <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent indicator="line" />}
+                cursor={{ fill: 'hsl(var(--muted))' }}
+                content={<ChartTooltipContent indicator="dot" />}
             />
             <Bar dataKey="count" radius={4}>
-            {chartData.map((entry) => (
-                <Cell
-                    key={`cell-${entry.name}`}
-                    fill={entry.fill}
-                    onClick={() => onBarClick(entry.name as RiskLevelFilter)}
-                    className={cn(
-                        "cursor-pointer transition-opacity",
-                        activeFilter && activeFilter !== entry.name ? "opacity-50" : "opacity-100",
-                        activeFilter === entry.name && "stroke-primary stroke-2 ring-2 ring-primary"
-                    )}
-                />
-            ))}
+                 {chartData.map((entry) => (
+                    <Cell
+                        key={`cell-${entry.name}`}
+                        fill={entry.fill}
+                        className={cn(
+                            "cursor-pointer transition-opacity",
+                            activeFilter && activeFilter !== entry.name ? "opacity-30" : "opacity-100",
+                            activeFilter === entry.name && "stroke-primary stroke-2"
+                        )}
+                    />
+                ))}
             </Bar>
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>
   )
 }
-
-const Cell = (props: any) => {
-    return <rect {...props} />;
-};

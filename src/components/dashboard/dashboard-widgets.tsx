@@ -5,34 +5,61 @@ import type { RiskIssue } from "@/lib/types";
 import { StatsCards } from "./stats-cards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusDistributionChart } from "./charts/status-distribution-chart";
-import { PriorityBreakdownChart } from "./charts/priority-breakdown-chart";
+import { RiskScoreBreakdownChart } from "./charts/risk-score-breakdown-chart";
 import { RiskDistributionHeatMap } from "./charts/risk-distribution-heat-map";
-import type { HeatMapFilter } from "./dashboard-client";
+import type { HeatMapFilter, RiskLevelFilter } from "./dashboard-client";
 
 type DashboardWidgetsProps = {
     data: RiskIssue[];
     allRisks: RiskIssue[];
     onHeatMapFilter: (filter: HeatMapFilter) => void;
-    activeFilter: HeatMapFilter;
+    activeHeatMapFilter: HeatMapFilter;
+    onRiskLevelFilter: (filter: RiskLevelFilter) => void;
+    activeRiskLevelFilter: RiskLevelFilter;
     activeTab: 'risks' | 'issues';
 }
 
-export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter, activeTab }: DashboardWidgetsProps) {
+export function DashboardWidgets({ 
+    data, 
+    allRisks, 
+    onHeatMapFilter, 
+    activeHeatMapFilter,
+    onRiskLevelFilter,
+    activeRiskLevelFilter,
+    activeTab 
+}: DashboardWidgetsProps) {
 
     const riskWidgets = (
-        <Card className="col-span-full lg:col-span-4">
-            <CardHeader>
-                <CardTitle>Risk Distribution Heat Map</CardTitle>
-                <CardDescription>Click a cell to filter the risks table by probability and impact.</CardDescription>
-            </CardHeader>
-            <CardContent className="pl-2">
-                <RiskDistributionHeatMap 
-                    data={allRisks} 
-                    onCellClick={onHeatMapFilter}
-                    activeFilter={activeFilter}
-                />
-            </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 col-span-full">
+            <Card className="col-span-full lg:col-span-4">
+                <CardHeader>
+                    <CardTitle>Risk Distribution Heat Map</CardTitle>
+                    <CardDescription>Click a cell to filter the risks table by score.</CardDescription>
+                </CardHeader>
+                <CardContent className="pl-2">
+                    <RiskDistributionHeatMap 
+                        data={allRisks} 
+                        onCellClick={onHeatMapFilter}
+                        activeFilter={activeHeatMapFilter}
+                    />
+                </CardContent>
+            </Card>
+            <div className="col-span-full lg:col-span-3">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Risk Score Breakdown</CardTitle>
+                        <CardDescription>Click a bar to filter by risk level.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <RiskScoreBreakdownChart 
+                            data={allRisks}
+                            onBarClick={onRiskLevelFilter}
+                            activeFilter={activeRiskLevelFilter}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     );
 
     const issueWidgets = (
@@ -53,18 +80,6 @@ export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 {activeTab === 'risks' && riskWidgets}
                 {activeTab === 'issues' && issueWidgets}
-                
-                <div className="col-span-full lg:col-span-3">
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Priority Breakdown</CardTitle>
-                            <CardDescription>Number of items by priority level.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pl-2">
-                            <PriorityBreakdownChart data={data} />
-                        </CardContent>
-                    </Card>
-                </div>
             </div>
         </div>
     )
