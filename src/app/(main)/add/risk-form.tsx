@@ -191,7 +191,7 @@ export function RiskForm() {
         }
     });
     
-    return combinedCodes;
+    return combinedCodes.sort((a, b) => a.label.localeCompare(b.label));
   }, [products, risks]);
 
   React.useEffect(() => {
