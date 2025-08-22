@@ -34,7 +34,7 @@ const ComparisonCard = ({ title, value }: { title: string, value: string | numbe
 
 export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) {
   const productOptions = React.useMemo(() => 
-    products.map(p => ({ label: p.name, value: p.code })), 
+    products.map(p => ({ label: `${p.name} (${p.code})`, value: p.code })), 
     [products]
   );
   
@@ -43,9 +43,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
   const filteredData = React.useMemo(() => {
     if (selected.length === 0) return [];
     const selectedProjectCodes = selected.map(s => s.value);
-    return data.filter(item => {
-        return item.ProjectCode && selectedProjectCodes.includes(item.ProjectCode);
-    });
+    return data.filter(item => item.ProjectCode && selectedProjectCodes.includes(item.ProjectCode));
   }, [data, selected]);
 
   const comparisonData = React.useMemo(() => {
@@ -58,7 +56,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
 
       const totalRiskScore = risks.reduce((acc, r) => acc + ((r.Probability ?? 0) * (r["Imapct Rating (0.05-0.8)"] ?? 0)), 0);
       const avgRiskScore = risks.length > 0 ? (totalRiskScore / risks.length).toFixed(3) : "N/A";
-      const financialImpact = projectData.reduce((acc, item) => acc + (item["Impact Value ($)"] ?? 0), 0);
+      const financialImpact = projectData.reduce((acc, item) => acc + (item["Impact Value ($)"] ?? item["Impact ($)"] ?? 0), 0);
 
       return {
         id: projectOption.value,
