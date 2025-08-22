@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import type { RiskIssue, Product } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MultiSelect } from "react-multi-select-component";
 import { DataTable } from "../dashboard/risk-issue-table/data-table";
 import { riskColumns } from "../dashboard/risk-issue-table/risk-columns";
@@ -77,6 +77,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
       <Card>
         <CardHeader>
           <CardTitle>Project Selection</CardTitle>
+          <CardDescription>Choose two or more projects from the list below to start comparing their performance metrics.</CardDescription>
         </CardHeader>
         <CardContent>
           <MultiSelect
@@ -98,6 +99,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
             <Card>
                 <CardHeader>
                     <CardTitle>Side-by-Side Comparison</CardTitle>
+                    <CardDescription>Key performance indicators for the selected projects.</CardDescription>
                 </CardHeader>
                 <CardContent className={`grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-${Math.min(selected.length, 4)}`}>
                     {comparisonData.map(project => (
@@ -119,7 +121,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
             <Card>
                 <CardHeader>
                     <CardTitle>Detailed Data</CardTitle>
-                    <CardDescription>All risks and issues for the selected projects.</CardDescription>
+                    <CardDescription>All risks and issues for the selected projects. Use the toolbar to filter and export data.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="risks" className="w-full">
