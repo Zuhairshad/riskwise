@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, PlusCircle, BarChart, Bot } from "lucide-react";
+import { LayoutDashboard, PlusCircle, BarChart, CheckSquare } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -24,8 +24,8 @@ export function AppSidebar() {
             href="/"
             className="flex items-center gap-2 font-headline text-lg font-semibold text-primary"
           >
-            <Bot className="h-7 w-7 text-primary" />
-            <span className="text-sidebar-foreground">RiskWise</span>
+            <CheckSquare className="h-7 w-7 text-primary" />
+            <span className="text-sidebar-foreground">Proactify+</span>
           </Link>
         </div>
       </SidebarHeader>
