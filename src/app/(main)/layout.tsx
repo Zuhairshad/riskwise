@@ -21,16 +21,19 @@ export default function MainLayout({
     if (loading) {
         return (
              <div className="flex min-h-screen">
-                <div className="w-64 border-r p-4">
-                    <Skeleton className="h-8 w-32 mb-8" />
-                    <div className="space-y-4">
-                        <Skeleton className="h-8 w-full" />
-                        <Skeleton className="h-8 w-full" />
-                        <Skeleton className="h-8 w-full" />
-                    </div>
+                <div className="w-64 hidden md:block border-r p-4 space-y-4">
+                    <Skeleton className="h-8 w-32 mb-4" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
                 </div>
-                <div className="flex-1 p-6">
-                    <Skeleton className="h-full w-full" />
+                <div className="flex-1">
+                    <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                        <Skeleton className="h-10 w-20" />
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                    </header>
+                    <main className="flex-1 p-4 sm:p-6">{children}</main>
                 </div>
             </div>
         )

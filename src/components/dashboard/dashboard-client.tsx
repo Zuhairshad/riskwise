@@ -170,9 +170,9 @@ export function DashboardClient({ data, products: allProducts }: DashboardClient
             data={dataForWidgets} 
             allRisks={risks}
             onHeatMapFilter={handleHeatMapFilter}
-            activeHeatMapFilter={heatMapFilter}
+            activeHeatMapFilter={activeHeatMapFilter}
             onRiskLevelFilter={handleRiskLevelFilter}
-            activeRiskLevelFilter={riskLevelFilter}
+            activeRiskLevelFilter={activeRiskLevelFilter}
             activeTab={activeTab}
         />
 
