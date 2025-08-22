@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RiskDistributionHeatMap } from "@/components/dashboard/charts/risk-distribution-heat-map";
 import { RiskScoreBreakdownChart } from "@/components/dashboard/charts/risk-score-breakdown-chart";
 import * as React from "react";
-import { TypeDistributionChart } from "../charts/type-distribution-chart";
-import { StatusDistributionChart } from "../charts/status-distribution-chart";
+import { RiskStatusChart } from "../charts/risk-status-chart";
+import { OverdueRiskChart } from "../charts/overdue-risk-chart";
 
 type ExecutiveDashboardClientProps = {
     top10Risks: (RiskIssue & { riskScore: number; ProjectName: string })[];
@@ -46,36 +46,51 @@ export function ExecutiveDashboardClient({ top10Risks, allOpenRisks, allRisks, a
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Risk Distribution Heat Map</CardTitle>
-                            <CardDescription>Overall risk concentration across probability and impact.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pl-2">
-                             <RiskDistributionHeatMap 
-                                data={allRisks} 
-                                onCellClick={() => {}} // Read-only for exec dash
-                                activeFilter={null}
-                            />
-                        </CardContent>
-                    </Card>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Type Distribution</CardTitle>
-                                <CardDescription>Risks vs. Issues</CardDescription>
+                                <CardTitle>Risk Status</CardTitle>
+                                <CardDescription>Count of risks by their current status.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <TypeDistributionChart data={allData} />
+                                <RiskStatusChart data={allRisks} />
                             </CardContent>
                         </Card>
                          <Card>
                             <CardHeader>
-                                <CardTitle>Status Distribution</CardTitle>
-                                <CardDescription>Across all items</CardDescription>
+                                <CardTitle>Risk Rating</CardTitle>
+                                <CardDescription>Distribution of risks by calculated score.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <StatusDistributionChart data={allData} />
+                                <RiskScoreBreakdownChart 
+                                    data={allRisks}
+                                    onBarClick={() => {}}
+                                    activeFilter={null}
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Overdue Risk</CardTitle>
+                                <CardDescription>Breakdown of open risks past their due date.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <OverdueRiskChart data={allRisks} />
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Risk Distribution Heat Map</CardTitle>
+                                <CardDescription>Overall risk concentration.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pl-2">
+                                 <RiskDistributionHeatMap 
+                                    data={allRisks} 
+                                    onCellClick={() => {}} // Read-only for exec dash
+                                    activeFilter={null}
+                                />
                             </CardContent>
                         </Card>
                     </div>
