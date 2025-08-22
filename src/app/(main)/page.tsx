@@ -1,58 +1,45 @@
 
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
-import type { RiskIssue, Product } from "@/lib/types";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, Timestamp } from "firebase/firestore";
-import { products as mockProducts } from "@/lib/mock-data";
+import type { RiskIssue } from "@/lib/types";
+import dbConnect from "@/lib/db";
+import Risk from "@/models/Risk";
+import Issue from "@/models/Issue";
 
-// This is a server component, so we can use mock data directly.
 async function getDashboardData() {
-  const risksCollection = collection(db, 'risks');
-  const issuesCollection = collection(db, 'issues');
+  await dbConnect();
 
-  const riskSnapshot = await getDocs(risksCollection);
-  const issueSnapshot = await getDocs(issuesCollection);
+  const riskData = await Risk.find({}).lean();
+  const issueData = await Issue.find({}).lean();
 
-  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      ...data,
-      id: doc.id,
-      _id: doc.id,
-      type: 'Risk',
-      Title: data.Title || data.Description,
-      DueDate: data.DueDate instanceof Timestamp ? data.DueDate.toDate().toISOString() : data.DueDate,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
-    } as unknown as RiskIssue;
-  });
+  const risks: RiskIssue[] = riskData.map(doc => ({
+    ...doc,
+    id: doc._id.toString(),
+    _id: doc._id.toString(),
+    type: 'Risk',
+    Title: doc.title || doc.description,
+    Status: doc.riskStatus,
+    "Risk Status": doc.riskStatus,
+    DueDate: doc.dueDate?.toISOString(),
+    createdAt: doc.createdAt?.toISOString(),
+  })) as unknown as RiskIssue[];
 
-  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      ...data,
-      id: doc.id,
-      _id: doc.id,
-      type: 'Issue',
-      Title: data.Title,
-      "Due Date": data["Due Date"] instanceof Timestamp ? data["Due Date"].toDate().toISOString() : data["Due Date"],
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
-    } as unknown as RiskIssue;
-  });
-
-  const allProducts: Product[] = mockProducts;
+  const issues: RiskIssue[] = issueData.map(doc => ({
+    ...doc,
+    id: doc._id.toString(),
+    _id: doc._id.toString(),
+    type: 'Issue',
+    Title: doc.title,
+    "Due Date": doc.dueDate?.toISOString(),
+    createdAt: doc.createdAt?.toISOString(),
+  })) as unknown as RiskIssue[];
 
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
     const status = item["Risk Status"] || item.Status || 'Open';
-    const product = 
-        (item.type === 'Risk' && allProducts.find((p) => p.code === item["Project Code"])) ||
-        (item.type === 'Issue' && allProducts.find((p) => p.name === item.ProjectName)) ||
-        null;
     return {
       ...item,
       Status: status,
       "Risk Status": status,
-      product: product,
-      ProjectName: item.ProjectName || product?.name,
+      ProjectName: item.ProjectName || item['Project Code'],
     }
   });
 
