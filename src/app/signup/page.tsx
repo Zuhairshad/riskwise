@@ -137,10 +137,15 @@ export default function SignupPage() {
                         </form>
                     </Form>
                 </CardContent>
-                <CardFooter className="text-center text-sm">
-                    <p className="w-full">
+                <CardFooter className="flex-col items-center justify-center space-y-4">
+                    <p className="text-center text-sm text-muted-foreground">
                         Already have an account? <Link href="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
                     </p>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                         <CheckSquare className="h-4 w-4 mr-1 text-primary/80" />
+                        Proactify+
+                    </div>
+                     <p className="text-xs text-muted-foreground">Design by Uzair Ahmad</p>
                 </CardFooter>
             </Card>
         </div>

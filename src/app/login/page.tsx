@@ -151,6 +151,7 @@ export default function LoginPage() {
                          <CheckSquare className="h-4 w-4 mr-1 text-primary/80" />
                         Proactify+
                     </div>
+                    <p className="text-xs text-muted-foreground">Design by Uzair Ahmad</p>
                 </CardFooter>
             </Card>
         </div>
