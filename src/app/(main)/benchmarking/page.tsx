@@ -1,84 +1,58 @@
 
-import dbConnect from "@/lib/db";
-import Risk from "@/models/Risk";
-import Issue from "@/models/Issue";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import type { RiskIssue, Product } from "@/lib/types";
 import { BenchmarkingClient } from "@/components/benchmarking/benchmarking-client";
-
-async function getProducts() {
-    await dbConnect();
-
-    const risks = await Risk.find({}).distinct('projectCode').lean();
-    const issues = await Issue.find({}).distinct('projectName').lean();
-    
-    // In a real app, you'd likely have a separate 'Projects' collection.
-    // For now, we derive projects from risks and issues.
-    // We'll assume projectName in issues corresponds to a projectCode in risks,
-    // or we'd need a lookup collection.
-    
-    const projectCodes = [...new Set([...risks, ...issues])];
-    
-    // Create a simple product list. We'll use the code as the name for simplicity.
-    return projectCodes.map((code, index) => ({
-        id: `proj-${index}`,
-        code: code,
-        name: code, // Assuming name is the same as code for now
-        paNumber: '',
-        value: 0,
-        currentStatus: 'On Track'
-    })) as Product[];
-}
+import { products as mockProducts } from "@/lib/mock-data";
 
 
 async function getBenchmarkingData() {
-  await dbConnect();
-  
-  const [riskDocs, issueDocs, products] = await Promise.all([
-    Risk.find({}).lean(),
-    Issue.find({}).lean(),
-    getProducts()
+  const risksCollection = collection(db, "risks");
+  const issuesCollection = collection(db, "issues");
+  const productsCollection = collection(db, 'products');
+
+  const [riskSnapshot, issueSnapshot, productSnapshot] = await Promise.all([
+    getDocs(risksCollection),
+    getDocs(issuesCollection),
+    getDocs(productsCollection)
   ]);
+  
+  const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
 
-  const risks: RiskIssue[] = riskDocs.map(doc => {
-    const data = doc as any;
+  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
+    const data = doc.data();
     return {
       ...data,
-      id: data._id.toString(),
-      _id: data._id.toString(),
+      id: doc.id,
       type: 'Risk',
-      Title: data.title || data.description,
-      DueDate: data.dueDate?.toISOString(),
-      createdAt: data.createdAt?.toISOString(),
-      ProjectName: data.projectCode,
-      ProjectCode: data.projectCode,
+      Title: data.Title || data.Description,
+      ProjectCode: data['Project Code'],
+      Status: data["Risk Status"] || 'Open',
     } as unknown as RiskIssue;
   });
 
-  const issues: RiskIssue[] = issueDocs.map(doc => {
-    const data = doc as any;
-    // Attempt to find a matching project code if possible
-    const product = products.find(p => p.name === data.projectName);
+  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
+    const data = doc.data();
+    const product = products.find(p => p.name === data.ProjectName);
     return {
       ...data,
-      id: data._id.toString(),
-      _id: data._id.toString(),
+      id: doc.id,
       type: 'Issue',
-      Title: data.title,
-      "Due Date": data.dueDate?.toISOString(),
-      createdAt: data.createdAt?.toISOString(),
-      ProjectName: data.projectName,
-      ProjectCode: data.projectName, // Assuming the name is the code for issues
+      Title: data.Title,
+      ProjectName: data.ProjectName,
+      ProjectCode: product?.code || data.ProjectName,
+      Status: data.Status || 'Open',
     } as unknown as RiskIssue;
   });
 
-  const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => ({
-    ...item,
-    Status: item["riskStatus"] || item.status || 'Open',
-  }));
+  const combinedData: RiskIssue[] = [...risks, ...issues];
+
+  // Use mockProducts if Firestore `products` is empty. This ensures the component always has project data to render.
+  const finalProducts = products.length > 0 ? products : mockProducts;
 
   return {
     data: combinedData,
-    products: products,
+    products: finalProducts,
   };
 }
 

@@ -1,40 +1,28 @@
 
-import dbConnect from "@/lib/db";
-import Risk from "@/models/Risk";
-import Issue from "@/models/Issue";
 import type { RiskIssue, Product } from "@/lib/types";
 import { TopRisksList } from "@/components/dashboard/executive/top-risks-list";
-
-
-async function getProducts() {
-    await dbConnect();
-
-    const risks = await Risk.find({}).distinct('projectCode').lean();
-    const issues = await Issue.find({}).distinct('projectName').lean();
-    const projectCodes = [...new Set([...risks, ...issues])];
-    
-    return projectCodes.map((code, index) => ({
-        id: `proj-${index}`,
-        code: code,
-        name: code,
-        paNumber: '',
-        value: 0,
-        currentStatus: 'On Track'
-    })) as Product[];
-}
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { products as mockProducts } from "@/lib/mock-data";
 
 
 async function getTopRisks() {
-  await dbConnect();
-  const riskDocs = await Risk.find({}).lean();
-  const products = await getProducts();
+  const risksCollection = collection(db, 'risks');
+  const productsCollection = collection(db, 'products');
 
-  const risks: RiskIssue[] = riskDocs.map((doc) => {
-    const data = doc as any;
+  const [riskSnapshot, productSnapshot] = await Promise.all([
+      getDocs(risksCollection),
+      getDocs(productsCollection)
+  ]);
+
+  const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  const finalProducts = products.length > 0 ? products : mockProducts;
+
+  const risks: RiskIssue[] = riskSnapshot.docs.map((doc) => {
+    const data = doc.data();
     return {
       ...data,
-      id: data._id.toString(),
-      _id: data._id.toString(),
+      id: doc.id,
       type: "Risk",
     } as unknown as RiskIssue;
   });
@@ -44,7 +32,7 @@ async function getTopRisks() {
       const probability = risk.Probability ?? 0;
       const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
       const score = probability * impact;
-      const project = products.find((p) => p.code === risk["Project Code"]);
+      const project = finalProducts.find((p) => p.code === risk["Project Code"]);
 
       return {
         ...risk,

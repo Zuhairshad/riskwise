@@ -1,37 +1,34 @@
 
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import type { RiskIssue } from "@/lib/types";
-import dbConnect from "@/lib/db";
-import Risk from "@/models/Risk";
-import Issue from "@/models/Issue";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 async function getDashboardData() {
-  await dbConnect();
 
-  const riskData = await Risk.find({}).lean();
-  const issueData = await Issue.find({}).lean();
+  const risksCollection = collection(db, "risks");
+  const issuesCollection = collection(db, "issues");
 
-  const risks: RiskIssue[] = riskData.map(doc => ({
-    ...doc,
-    id: doc._id.toString(),
-    _id: doc._id.toString(),
+  const [riskSnapshot, issueSnapshot] = await Promise.all([
+    getDocs(risksCollection),
+    getDocs(issuesCollection),
+  ]);
+
+  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
     type: 'Risk',
-    Title: doc.title || doc.description,
-    Status: doc.riskStatus,
-    "Risk Status": doc.riskStatus,
-    DueDate: doc.dueDate?.toISOString(),
-    createdAt: doc.createdAt?.toISOString(),
+    Title: doc.data().Title || doc.data().Description,
+    Status: doc.data()["Risk Status"],
   })) as unknown as RiskIssue[];
 
-  const issues: RiskIssue[] = issueData.map(doc => ({
-    ...doc,
-    id: doc._id.toString(),
-    _id: doc._id.toString(),
+  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
     type: 'Issue',
-    Title: doc.title,
-    "Due Date": doc.dueDate?.toISOString(),
-    createdAt: doc.createdAt?.toISOString(),
+    Title: doc.data().Title,
   })) as unknown as RiskIssue[];
+
 
   const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
     const status = item["Risk Status"] || item.Status || 'Open';
