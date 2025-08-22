@@ -75,8 +75,8 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
     <TooltipProvider>
       <div className="space-y-2">
         <div className="grid grid-cols-[auto_1fr] text-xs">
-          <div className="flex items-center justify-center rotate-[-60deg] translate-y-4">
-            <span className="font-medium text-muted-foreground">Probability</span>
+          <div className="flex items-center justify-center -rotate-90">
+            <span className="font-medium text-muted-foreground whitespace-nowrap">Probability</span>
           </div>
           <div className="grid grid-cols-5 gap-1">
             {impactLevels.map((level) => (
