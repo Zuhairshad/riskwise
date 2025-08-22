@@ -14,7 +14,7 @@ type DashboardWidgetsProps = {
     allRisks: RiskIssue[];
     onHeatMapFilter: (filter: HeatMapFilter) => void;
     activeFilter: HeatMapFilter;
-    activeTab: 'all' | 'risks' | 'issues';
+    activeTab: 'risks' | 'issues';
 }
 
 export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter, activeTab }: DashboardWidgetsProps) {
@@ -53,13 +53,8 @@ export function DashboardWidgets({ data, allRisks, onHeatMapFilter, activeFilter
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 {activeTab === 'risks' && riskWidgets}
                 {activeTab === 'issues' && issueWidgets}
-                {activeTab === 'all' && (
-                    <>
-                        {riskWidgets}
-                    </>
-                )}
                 
-                <div className={`col-span-full lg:col-span-3 ${activeTab === 'all' ? '' : 'lg:col-start-5'}`}>
+                <div className="col-span-full lg:col-span-3">
                      <Card>
                         <CardHeader>
                             <CardTitle>Priority Breakdown</CardTitle>

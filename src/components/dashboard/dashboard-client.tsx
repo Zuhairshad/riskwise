@@ -7,13 +7,12 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
 import { DashboardWidgets } from "./dashboard-widgets";
 import { DataTable } from "./risk-issue-table/data-table";
-import { columns } from "./risk-issue-table/columns";
 import { riskColumns } from "./risk-issue-table/risk-columns";
 import { issueColumns } from "./risk-issue-table/issue-columns";
 import type { RiskIssue } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, AlertTriangle, List } from "lucide-react";
+import { Shield, AlertTriangle } from "lucide-react";
 
 type DashboardClientProps = {
   data: RiskIssue[];
@@ -26,10 +25,10 @@ export type HeatMapFilter = {
   impactLabel: string;
 } | null;
 
-type ActiveTab = 'all' | 'risks' | 'issues';
+type ActiveTab = 'risks' | 'issues';
 
 export function DashboardClient({ data }: DashboardClientProps) {
-  const [activeTab, setActiveTab] = React.useState<ActiveTab>('all');
+  const [activeTab, setActiveTab] = React.useState<ActiveTab>('risks');
   const [activeFilter, setActiveFilter] = React.useState<HeatMapFilter>(null);
 
   const risks = React.useMemo(() => data.filter((d) => d.type === 'Risk'), [data]);
@@ -37,6 +36,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
 
   const handleHeatMapFilter = (filter: HeatMapFilter) => {
     setActiveFilter(filter);
+    setActiveTab('risks'); // Switch to risks tab when a heat map cell is clicked
   }
   
   const clearFilter = () => handleHeatMapFilter(null);
@@ -56,7 +56,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
     });
   }, [risks, activeFilter]);
 
-  const dataForWidgets = activeTab === 'risks' ? filteredRisks : activeTab === 'issues' ? issues : data;
+  const dataForWidgets = activeTab === 'risks' ? filteredRisks : issues;
   
   return (
     <div className="space-y-6">
@@ -93,12 +93,8 @@ export function DashboardClient({ data }: DashboardClientProps) {
         </Card>
       )}
       
-      <Tabs defaultValue="all" onValueChange={(value) => setActiveTab(value as ActiveTab)}>
-        <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
-          <TabsTrigger value="all">
-            <List className="mr-2 h-4 w-4" />
-            All
-          </TabsTrigger>
+      <Tabs defaultValue="risks" value={activeTab} onValueChange={(value) => setActiveTab(value as ActiveTab)}>
+        <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
           <TabsTrigger value="risks">
             <Shield className="mr-2 h-4 w-4" />
             Risks
@@ -125,9 +121,6 @@ export function DashboardClient({ data }: DashboardClientProps) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <TabsContent value="all" className="mt-4">
-                    <DataTable columns={columns} data={activeFilter ? filteredRisks : data} tableId="all" />
-                </TabsContent>
                 <TabsContent value="risks" className="mt-4">
                     <DataTable columns={riskColumns} data={filteredRisks} tableId="risks" />
                 </TabsContent>
