@@ -104,7 +104,7 @@ export function BenchmarkingClient({ data, products }: BenchmarkingClientProps) 
                     <CardDescription>Key performance indicators for the selected projects.</CardDescription>
                 </CardHeader>
                 <CardContent className={`grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-${Math.min(selected.length, 4)}`}>
-                    {comparisonData.map(project => (
+                    {comparisonData?.map(project => (
                         <Card key={project.id} className="flex-1">
                         <CardHeader>
                             <CardTitle className="truncate">{project.name}</CardTitle>
