@@ -61,6 +61,7 @@ export type Option = {
   value: string;
   label: string;
   icon?: LucideIcon;
+  color?: string;
 };
 
     

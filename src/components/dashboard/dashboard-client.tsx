@@ -5,7 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { StatsCards } from "./stats-cards";
+import { DashboardWidgets } from "./dashboard-widgets";
 import { DataTable } from "./risk-issue-table/data-table";
 import { columns } from "./risk-issue-table/columns";
 import { riskColumns } from "./risk-issue-table/risk-columns";
@@ -23,23 +23,11 @@ export function DashboardClient({ data }: DashboardClientProps) {
   const risks = data.filter((d) => d.type === 'Risk');
   const issues = data.filter((d) => d.type === 'Issue');
 
-  const [currentData, setCurrentData] = React.useState(data);
-
-  const onTabChange = (value: string) => {
-    if (value === 'risks') {
-      setCurrentData(risks);
-    } else if (value === 'issues') {
-      setCurrentData(issues);
-    } else {
-      setCurrentData(data);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-            <h1 className="text-3xl font-headline font-bold">Dashboard</h1>
+            <h1 className="text-3xl font-headline font-bold tracking-tight">Dashboard</h1>
             <p className="text-muted-foreground">
                 An overview of all risks and issues.
             </p>
@@ -52,7 +40,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
         </Button>
       </div>
 
-      <StatsCards data={currentData} />
+      <DashboardWidgets data={data} />
 
        <Card>
         <CardHeader>
@@ -62,7 +50,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all" onValueChange={onTabChange}>
+          <Tabs defaultValue="all">
             <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
               <TabsTrigger value="all">
                 <List className="mr-2 h-4 w-4" />

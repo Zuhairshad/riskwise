@@ -1,31 +1,26 @@
-import type { Product, Option } from "@/lib/types";
+import type { Option } from "@/lib/types";
 import { ShieldCheck, AlertTriangle, CircleDashed, CircleX, Timer, CheckCircle2, Shield, TriangleAlert, Thermometer, Waves, GanttChartSquare, FileText, Users, Calendar, BarChart } from "lucide-react";
+import { products as mockProducts } from './mock-data';
 
-export const products: Product[] = [
-  { id: "prod-001", code: "P-12345", name: "Project Phoenix", paNumber: "PA-2024-01", value: 1500000, currentStatus: "On Track" },
-  { id: "prod-002", code: "P-67890", name: "Quantum Leap Initiative", paNumber: "PA-2024-02", value: 3200000, currentStatus: "Delayed" },
-  { id: "prod-003", code: "P-13579", name: "DataStream Integration", paNumber: "PA-2024-03", value: 750000, currentStatus: "Completed" },
-  { id: "prod-004", code: "P-24680", name: "NextGen UI Framework", paNumber: "PA-2024-04", value: 500000, currentStatus: "On Hold" },
-  { id: "prod-005", code: "P-97531", name: "Cloud Migration Phase 2", paNumber: "PA-2024-05", value: 2100000, currentStatus: "On Track" },
-];
-
+export const products = mockProducts;
 export const risksAndIssues: any[] = [];
 
 export const statuses: Option[] = [
-  { value: "Open", label: "Open", icon: Shield },
-  { value: "In Progress", label: "In Progress", icon: Timer },
-  { value: "Resolved", label: "Resolved", icon: ShieldCheck },
-  { value: "Closed", label: "Closed", icon: CircleX },
-  { value: "Mitigated", label: "Mitigated", icon: CheckCircle2 },
-  { value: "Transferred", label: "Transferred", icon: GanttChartSquare },
-  { value: "Escalated", label: "Escalated", icon: TriangleAlert },
+  { value: "Open", label: "Open", icon: Shield, color: "hsl(var(--chart-2))" },
+  { value: "In Progress", label: "In Progress", icon: Timer, color: "hsl(var(--chart-3))" },
+  { value: "Resolved", label: "Resolved", icon: ShieldCheck, color: "hsl(var(--chart-1))" },
+  { value: "Closed", label: "Closed", icon: CircleX, color: "hsl(var(--muted-foreground))" },
+  { value: "Mitigated", label: "Mitigated", icon: CheckCircle2, color: "hsl(var(--chart-4))" },
+  { value: "Transferred", label: "Transferred", icon: GanttChartSquare, color: "hsl(var(--chart-5))" },
+  { value: "Escalated", label: "Escalated", icon: TriangleAlert, color: "hsl(var(--destructive))" },
 ];
 
 export const priorities: Option[] = [
-  { value: "Low", label: "Low", icon: Thermometer },
-  { value: "Medium", label: "Medium", icon: Waves },
-  { value: "High", label: "High", icon: TriangleAlert },
-  { value: "Critical", label: "Critical", icon: AlertTriangle },
+  { value: "Low", label: "Low", icon: Thermometer, color: "hsl(var(--chart-1))" },
+  { value: "Medium", label: "Medium", icon: Waves, color: "hsl(var(--chart-2))" },
+  { value: "High", label: "High", icon: TriangleAlert, color: "hsl(var(--chart-4))" },
+  { value: "Critical", label: "Critical", icon: AlertTriangle, color: "hsl(var(--destructive))" },
+  { value: "(1) High", label: "High", icon: TriangleAlert, color: "hsl(var(--chart-4))" },
 ];
 
 export const riskTypes: Option[] = [
@@ -39,3 +34,6 @@ export const issueCategories: Option[] = [
   { value: "Resource", label: "Resource", icon: Users },
   { value: "Schedule", label: "Schedule", icon: Calendar },
 ]
+
+// Add mock-data.ts to avoid cluttering this file
+export { products as mockProducts } from './mock-data';
