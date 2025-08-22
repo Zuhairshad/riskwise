@@ -17,18 +17,29 @@ interface EditableDateCellProps {
   columnId: string;
 }
 
+// Helper to parse date string as UTC
+const parseDateAsUTC = (dateString: string) => {
+    if (!dateString) return undefined;
+    const date = new Date(dateString);
+    // getTimezoneOffset returns the difference in minutes between UTC and local time.
+    // We add this offset to the date to get the UTC date.
+    return new Date(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
+};
+
 export function EditableDateCell({ initialValue, rowId, columnId }: EditableDateCellProps) {
-  const [date, setDate] = useState<Date | undefined>(initialValue ? new Date(initialValue) : undefined);
+  const [date, setDate] = useState<Date | undefined>(() => parseDateAsUTC(initialValue));
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    setDate(initialValue ? new Date(initialValue) : undefined);
+    setDate(parseDateAsUTC(initialValue));
   }, [initialValue]);
 
   const handleSave = async (newDate: Date | undefined) => {
-    if (newDate?.toISOString() === (initialValue ? new Date(initialValue).toISOString() : undefined)) {
-        return;
+    // Check against the original ISO string to see if the date actually changed
+    const originalDate = initialValue ? new Date(initialValue) : undefined;
+    if (newDate?.getTime() === originalDate?.getTime()) {
+      return;
     }
     
     setDate(newDate);
@@ -40,7 +51,7 @@ export function EditableDateCell({ initialValue, rowId, columnId }: EditableDate
       toast({ title: "Update Successful", description: `${columnId} has been updated.` });
     } else {
       toast({ variant: 'destructive', title: "Update Failed", description: result.message });
-      setDate(initialValue ? new Date(initialValue) : undefined); // Revert on failure
+      setDate(parseDateAsUTC(initialValue)); // Revert on failure
     }
   };
 
