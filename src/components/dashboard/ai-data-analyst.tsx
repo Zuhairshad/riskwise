@@ -29,9 +29,10 @@ export function AIDataAnalyst({ data }: AIDataAnalystProps) {
     setError(null);
 
     try {
+      // The action now takes the raw data directly.
       const result = await analyzeData({
         question,
-        dataJson: JSON.stringify(data),
+        data: data,
       });
 
       if (result.success) {

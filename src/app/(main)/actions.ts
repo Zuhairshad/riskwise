@@ -5,6 +5,8 @@ import { db } from "@/lib/firebase";
 import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 import { analyzeData as analyzeDataFlow, type AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
+import { setProjectData } from "@/ai/tools/project-data-tool";
+import type { RiskIssue, Product } from "@/lib/types";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any, data: any } | null> {
     const collections = ['risks', 'issues'];
@@ -139,9 +141,13 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
 }
 
 
-export async function analyzeData(input: AnalyzeDataInput) {
+export async function analyzeData(input: { question: string, data: RiskIssue[] }) {
     try {
-      const result = await analyzeDataFlow(input);
+      // Set the data for the tool to use in this request context.
+      // In a real multi-user app, you would scope this data to the current user.
+      setProjectData(input.data);
+      
+      const result = await analyzeDataFlow({ question: input.question, projects: [], risksAndIssues: [] });
       return { success: true, analysis: result.analysis };
     } catch (error) {
       console.error("Error analyzing data:", error);
