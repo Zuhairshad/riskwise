@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for suggesting a title based on a description.
@@ -32,7 +33,7 @@ const suggestTitlePrompt = ai.definePrompt({
     Only return the suggested title in the 'title' field.
 
     Description: {{{description}}}`,
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-1.5-pro-preview',
 });
 
 const suggestTitleFlow = ai.defineFlow(

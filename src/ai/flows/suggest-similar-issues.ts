@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for suggesting similar issues to avoid duplicates.
@@ -59,7 +60,7 @@ const suggestOrRephraseIssuePrompt = ai.definePrompt({
         - In 'keyMetrics', extract the most important metrics from the matched issue, like 'Priority' and 'Impact'. Format them clearly.
         - In 'recommendation', provide a clear, actionable recommendation for the user. For example, if a resolution was particularly effective, highlight it.
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' and 'detailedSummary' empty.`,
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-1.5-pro-preview',
 });
 
 const suggestSimilarIssuesFlow = ai.defineFlow(

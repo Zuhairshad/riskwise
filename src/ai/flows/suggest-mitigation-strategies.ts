@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for suggesting mitigation strategies for a risk or issue.
@@ -32,7 +33,7 @@ const suggestMitigationStrategiesPrompt = ai.definePrompt({
   Based on the description of the risk or issue, suggest 3 to 5 potential mitigation strategies.
   Description: {{{riskOrIssueDescription}}}
   Suggest mitigation strategies that are relevant and effective in addressing the described risk or issue.`,
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-1.5-pro-preview',
 });
 
 const suggestMitigationStrategiesFlow = ai.defineFlow(

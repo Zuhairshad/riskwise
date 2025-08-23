@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for suggesting a category and sub-category for an issue.
@@ -31,7 +32,7 @@ const suggestCategoryPrompt = ai.definePrompt({
   The categories should be concise and professional.
   
   Description: {{{description}}}`,
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-1.5-pro-preview',
 });
 
 const suggestCategoryFlow = ai.defineFlow(
