@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -50,14 +49,12 @@ import { Combobox } from "@/components/ui/combobox";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  createIssue,
-  suggestSimilarIssues,
-  suggestMitigationStrategies,
-  rephraseDescription,
-  suggestTitle,
-  suggestCategory,
-} from "./actions";
+import { createIssue } from "./actions";
+import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
+import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
+import { rephraseDescription } from "@/ai/flows/rephrase-description";
+import { suggestTitle } from "@/ai/flows/suggest-title";
+import { suggestCategory } from "@/ai/flows/suggest-category";
 
 
 const issueFormSchema = z.object({
@@ -719,5 +716,3 @@ export function IssueForm() {
     </Form>
   );
 }
-
-    

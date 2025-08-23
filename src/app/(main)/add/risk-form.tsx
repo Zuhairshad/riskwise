@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,13 +57,11 @@ import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
 import { RiskHeatMap } from "@/components/risk-heat-map";
 import { Progress } from "@/components/ui/progress";
-import {
-  createRisk,
-  suggestSimilarRisks,
-  suggestMitigationStrategies,
-  rephraseDescription,
-  suggestTitle
-} from "./actions";
+import { createRisk } from "./actions";
+import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
+import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
+import { rephraseDescription } from "@/ai/flows/rephrase-description";
+import { suggestTitle } from "@/ai/flows/suggest-title";
 
 const riskFormSchema = z.object({
   Month: z.string().min(1, "Month is required"),

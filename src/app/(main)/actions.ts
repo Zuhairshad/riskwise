@@ -1,11 +1,10 @@
-
-"use server";
+'use server';
 
 import { db } from "@/lib/firebase";
 import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
-import { analyzeData as analyzeDataFlow, type AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
-import type { RiskIssue, Product } from "@/lib/types";
+import { analyzeData as analyzeDataFlow } from "@/ai/flows/analyze-data-flow";
+import type { AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any, data: any } | null> {
     const collections = ['risks', 'issues'];
@@ -146,6 +145,6 @@ export async function analyzeData(input: AnalyzeDataInput) {
       return { success: true, analysis: result.analysis };
     } catch (error) {
       console.error("Error analyzing data:", error);
-      return { success: false, message: "Failed to get analysis from AI." };
+      return { success: false, message: "Failed to get analysis from AI. Please try again." };
     }
   }
