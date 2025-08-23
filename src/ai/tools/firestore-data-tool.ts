@@ -26,7 +26,7 @@ function toISOString(date: any): string | undefined {
 }
 
 
-async function getRisksAndIssues(): Promise<RiskIssue[]> {
+async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
     const risksCollection = collection(db, "risks");
     const issuesCollection = collection(db, "issues");
 
@@ -49,11 +49,13 @@ async function getRisksAndIssues(): Promise<RiskIssue[]> {
 
     const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
         const data = doc.data();
+        const product = products.find(p => p.name === data.ProjectName);
         return {
           ...data,
           id: doc.id,
           type: 'Issue',
           Title: data.Title,
+          ProjectCode: product?.code || data.ProjectName,
           "Due Date": toISOString(data["Due Date"]),
         } as unknown as RiskIssue;
     });
@@ -83,8 +85,8 @@ export const getProjectData = ai.defineTool(
     }),
   },
   async ({ projectName, type, status }) => {
-    let risksAndIssues = await getRisksAndIssues();
     const projects = await getProducts();
+    let risksAndIssues = await getRisksAndIssues(projects);
 
     if (projectName) {
         risksAndIssues = risksAndIssues.filter(item => {
