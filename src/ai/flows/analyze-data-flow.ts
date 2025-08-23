@@ -32,9 +32,15 @@ const prompt = ai.definePrompt({
   output: { schema: AnalyzeDataOutputSchema },
   system: `You are a helpful data analyst. Your task is to answer the user's question.
 Use the 'getProjectData' tool to retrieve the necessary project, risk, and issue data from the database to answer the question.
-When analyzing financial impact, look for the field "financialImpact".
-When looking for due dates, use the "dueDate" field.
-When looking for status, use the "status" field.
+
+When analyzing financial impact for risks, look for the field "Impact Value ($)".
+When analyzing financial impact for issues, look for the field "Impact ($)".
+When looking for due dates for risks, use the "DueDate" field.
+When looking for due dates for issues, use the "Due Date" field.
+When looking for status for risks, use the "Risk Status" field.
+When looking for status for issues, use the "Status" field.
+The 'Probability' and 'Imapct Rating (0.05-0.8)' fields are only available for risks.
+
 Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
   tools: [getProjectData],
   model: 'googleai/gemini-1.5-flash',
