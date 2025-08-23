@@ -26,13 +26,11 @@ export type RiskIssue = {
   Title: string;
   Description?: string; // From Risk
   Discussion?: string; // From Issue
-  product: Product;
   Status: Status;
   "Risk Status"?: Status;
   Priority: Priority;
   
   // Risk-specific fields
-  "Project Code"?: string;
   Probability?: number;
   "Imapct Rating (0.05-0.8)"?: number;
   MitigationPlan?: string;
@@ -46,15 +44,14 @@ export type RiskIssue = {
   Resolution?: string;
   Impact?: IssueImpact;
   Response?: IssueResponse | null;
-  ProjectName?: string;
-  ProjectCode?: string | null;
-
-
-  // Common fields
+  
+  // Standardized fields
+  ProjectName: string;
+  ProjectCode: string | null;
   Owner?: string;
-  DueDate?: string; // Using string for simplicity, can be Date
-  "Due Date"?: string;
-  createdAt: string;
+  DueDate?: string; // Standardized ISO String date
+  "Due Date"?: any; // Original field, can be string, date, or timestamp
+  createdAt?: string; // Standardized ISO String date
   createdBy?: string;
 };
 

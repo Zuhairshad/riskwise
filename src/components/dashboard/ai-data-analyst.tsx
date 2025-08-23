@@ -2,20 +2,48 @@
 "use client";
 
 import * as React from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Wand2, Bot, Loader2, AlertCircle } from "lucide-react";
+import { Wand2, Bot, Loader2, AlertCircle, Table2 } from "lucide-react";
 import { analyzeData } from "@/app/(main)/actions";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { DataTable } from "./risk-issue-table/data-table";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 interface AIDataAnalystProps {
     analysisType: 'risks' | 'issues';
 }
 
+const COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+];
+
 export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
   const [question, setQuestion] = React.useState("");
-  const [analysis, setAnalysis] = React.useState("");
+  const [analysis, setAnalysis] = React.useState<string | null>(null);
+  const [tableData, setTableData] = React.useState<any[] | null>(null);
+  const [chartData, setChartData] = React.useState<any[] | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -24,7 +52,9 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
     if (!question.trim()) return;
 
     setIsLoading(true);
-    setAnalysis("");
+    setAnalysis(null);
+    setTableData(null);
+    setChartData(null);
     setError(null);
 
     try {
@@ -32,13 +62,18 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
       const result = await analyzeData({ question, type });
 
       if (result.success) {
-        setAnalysis(result.analysis!);
+        setAnalysis(result.analysis || "Here is the data you requested.");
+        setTableData(result.tableData || []);
+        setChartData(result.chartData || null);
+        if (!result.analysis && !result.tableData && !result.chartData) {
+            setError("NO_DATA_IN_SCOPE: The AI could not find any data matching your question.");
+        }
       } else {
         setError(result.message || "An unknown error occurred.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to fetch analysis. Please try again.");
+      setError(err.code || "Failed to fetch analysis. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -47,6 +82,17 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
   const placeholderText = `e.g., Which project has the most open ${analysisType}?`;
   const descriptionText = `Ask a question about your current ${analysisType} to get AI-powered insights.`;
 
+  // Dynamically generate columns for the data table
+  const columns = React.useMemo(() => {
+    if (!tableData || tableData.length === 0) return [];
+    return Object.keys(tableData[0]).map(key => ({
+        accessorKey: key,
+        header: key,
+    }));
+  }, [tableData]);
+
+  // Determine chart type based on data structure
+  const isPieChart = chartData && chartData.every(item => typeof item.name === 'string' && typeof item.value === 'number');
 
   return (
     <Card>
@@ -59,7 +105,7 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
           {descriptionText}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             placeholder={placeholderText}
@@ -76,14 +122,20 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
             Ask
           </Button>
         </form>
+        {isLoading && (
+            <div className="flex items-center justify-center p-8 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin mr-4" />
+                <p>Analyzing data...</p>
+            </div>
+        )}
         {error && (
             <Alert variant="destructive" className="mt-4">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>Analysis Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
         )}
-        {analysis && (
+        {analysis && !isLoading && (
             <Alert className="mt-4 border-accent">
                 <Bot className="h-4 w-4" />
                 <AlertTitle>Analysis</AlertTitle>
@@ -92,6 +144,54 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
                 </AlertDescription>
             </Alert>
         )}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {tableData && tableData.length > 0 && !isLoading && (
+                <div className={cn("col-span-full", chartData && "lg:col-span-3")}>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg"><Table2 className="h-5 w-5" /> Data Table</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                             <DataTable columns={columns} data={tableData} tableId="all" />
+                        </CardContent>
+                     </Card>
+                </div>
+            )}
+            {chartData && chartData.length > 0 && !isLoading && (
+                <div className="col-span-full lg:col-span-2">
+                     <Card>
+                        <CardHeader>
+                             <CardTitle className="text-lg">Chart</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer config={{}} className="min-h-[250px] w-full h-[300px]">
+                                <ResponsiveContainer>
+                                    {isPieChart ? (
+                                        <PieChart>
+                                            <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                                                {chartData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Legend />
+                                        </PieChart>
+                                    ) : (
+                                        <BarChart data={chartData}>
+                                            <CartesianGrid vertical={false} />
+                                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                                            <YAxis />
+                                            <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Bar dataKey="value" fill={COLORS[0]} radius={4} />
+                                        </BarChart>
+                                    )}
+                                </ResponsiveContainer>
+                            </ChartContainer>
+                        </CardContent>
+                     </Card>
+                </div>
+            )}
+        </div>
       </CardContent>
     </Card>
   );

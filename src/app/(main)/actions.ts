@@ -6,7 +6,6 @@ import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch } from "fire
 import { revalidatePath } from "next/cache";
 import { analyzeData as analyzeDataFlow } from "@/ai/flows/analyze-data-flow";
 import type { AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
-import { getProjectData } from "@/ai/tools/firestore-data-tool";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any; data: any } | null> {
     const collections = ['risks', 'issues'];
@@ -152,19 +151,11 @@ newData.Impact = 'Medium';
 
 export async function analyzeData(input: AnalyzeDataInput) {
     try {
-      // Step 1: Directly fetch the data using the provided type.
-      const data = await getProjectData({ type: input.type });
-      
-      // Step 2: Pass the fetched data as context to the AI flow.
-      const result = await analyzeDataFlow({ 
-        question: input.question,
-        contextData: JSON.stringify(data.risksAndIssues)
-      });
-      
-      return { success: true, analysis: result.analysis };
+      const result = await analyzeDataFlow(input);
+      return { success: true, ...result };
     } catch (error: any) {
       console.error("Error analyzing data:", error);
       const errorMessage = error.message || "An unexpected error occurred during analysis.";
       return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
     }
-  }
+}

@@ -1,67 +1,66 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow for analyzing risk and issue data provided as direct context.
+ * @fileOverview A Genkit flow for analyzing risk and issue data.
+ * This flow uses a tool to fetch data and then provides a structured analysis.
  *
- * - analyzeData - A function that takes a user's question and a data context and returns an analysis.
- * - AnalyzeDataInput - The input type for the analyzeData function.
- * - AnalyzeDataOutput - The return type for the analyzeData function.
+ * - analyzeData - The main function to call the flow.
+ * - AnalyzeDataInput - The input schema for the analyzeData function.
+ * - AnalyzeDataOutput - The output schema for the analyzeData function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
+import { getProjectData } from '../tools/get-project-data-tool';
 
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
-  type: z.enum(['Risk', 'Issue']).optional().describe('The type of data to analyze.'),
-  contextData: z.string().optional().describe('JSON string of the data to be analyzed.'),
+  type: z.enum(['Risk', 'Issue']).describe('The type of data to analyze.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
 export const AnalyzeDataOutputSchema = z.object({
   analysis: z.string().describe("The natural language analysis of the data based on the user's question."),
+  tableData: z.any().describe("The raw data used for the analysis, to be displayed in a table. Should be an array of objects."),
+  chartData: z.any().optional().describe("Data formatted for a chart (e.g., bar, pie). Should be an array of objects with keys like 'name' and 'value'."),
 });
 export type AnalyzeDataOutput = z.infer<typeof AnalyzeDataOutputSchema>;
 
-
 const prompt = ai.definePrompt({
-  name: 'analyzeDataPrompt',
+  name: 'dataAnalysisPrompt',
   input: { schema: AnalyzeDataInputSchema },
   output: { schema: AnalyzeDataOutputSchema },
-  system: `You are a helpful data analyst. Your task is to answer the user's question about project risks and issues based *only* on the data provided in the 'contextData' field.
+  tools: [getProjectData],
+  system: `You are an expert data analyst specializing in project management risks and issues.
+  Your primary task is to answer the user's question about their project data.
 
-  The contextData is a JSON string containing an array of risks or issues.
-  Analyze this data to answer the user's question.
-
-  When analyzing the data, be aware of the following field names:
-  - The 'type' field will be either 'Risk' or 'Issue'.
-  - The 'Status' field contains the status for both risks and issues (e.g., "Open", "Closed", "Mitigated").
-  - The 'DueDate' field contains the due date for both risks and issues.
-  - The 'ProjectName' field contains the project name for both.
-  - For financial impact on risks, use 'Impact Value ($)'.
-  - For financial impact on issues, use 'Impact ($)'.
-  - The 'Probability' and 'Imapct Rating (0.05-0.8)' fields are only available for risks.
+  You MUST follow these steps:
+  1. ALWAYS call the 'getProjectData' tool first to fetch the relevant data. Use the 'type' provided in the input to filter the data. You can also pass other filters to the tool based on the user's question (e.g., status, projectName).
+  2. Once you have the data from the tool, analyze it to answer the user's question.
+  3. Formulate a clear, natural language answer in the 'analysis' field.
+  4. Provide the raw data you received from the tool in the 'tableData' field.
+  5. If the user's question implies a need for a chart (e.g., "show me the breakdown by status", "compare projects"), create a simple chart data structure in the 'chartData' field. The chart data should be an array of objects, for example: [{ name: 'Category A', value: 10 }, { name: 'Category B', value: 20 }]. If no chart is relevant, leave this field null.
   
-  Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
+  Be concise and data-driven in your analysis.`,
   prompt: `User Question: {{{question}}}
-
-  Data to Analyze:
-  {{{contextData}}}
+  Data Type: {{{type}}}
   `,
   model: 'googleai/gemini-1.5-flash',
 });
 
-
 const analyzeDataFlow = ai.defineFlow(
-    {
-      name: 'analyzeDataFlow',
-      inputSchema: AnalyzeDataInputSchema,
-      outputSchema: AnalyzeDataOutputSchema,
-    },
-    async (input) => {
-        const { output } = await prompt(input);
-        return output!;
+  {
+    name: 'analyzeDataFlow',
+    inputSchema: AnalyzeDataInputSchema,
+    outputSchema: AnalyzeDataOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+      throw new Error("Flow execution timeout or no output from model.");
     }
+    return output;
+  }
 );
 
 export async function analyzeData(input: AnalyzeDataInput): Promise<AnalyzeDataOutput> {
