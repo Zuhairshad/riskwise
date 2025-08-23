@@ -95,8 +95,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      const statusValue = row.getValue(id) || 'Open';
-      return value.includes(statusValue);
+      return value.includes(row.getValue(id));
     },
   },
   {
@@ -145,8 +144,7 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
         return <div className="w-[120px] truncate">{row.original.ProjectName}</div>;
       },
     filterFn: (row, id, value) => {
-      const rowValue = row.original.ProjectName || row.original.ProjectCode;
-      return value.includes(rowValue);
+      return value.includes(row.getValue(id));
     },
   },
   {
@@ -161,11 +159,11 @@ export const issueColumns: ColumnDef<RiskIssue>[] = [
     ),
   },
   {
-    accessorKey: "Due Date",
+    accessorKey: "DueDate",
     header: "Due Date",
     cell: ({ row }) => (
         <EditableDateCell
-            initialValue={row.getValue("Due Date")}
+            initialValue={row.getValue("DueDate")}
             rowId={row.original.id}
             columnId="Due Date"
         />

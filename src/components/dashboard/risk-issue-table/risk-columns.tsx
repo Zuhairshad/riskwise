@@ -4,8 +4,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import type { RiskIssue, Status, Priority } from "@/lib/types";
-import { statuses, priorities } from "@/lib/data";
+import type { RiskIssue, Status } from "@/lib/types";
+import { statuses } from "@/lib/data";
 import { DataTableRowActions } from "./row-actions";
 import {
   Select,
@@ -55,11 +55,11 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
     ),
   },
   {
-    accessorKey: "Risk Status",
+    accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => {
       const { toast } = useToast();
-      const statusValue: Status = row.getValue("Risk Status");
+      const statusValue: Status = row.getValue("Status");
       const status = statuses.find((s) => s.value === statusValue);
 
       if (!status) return null;
@@ -104,8 +104,7 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
     },
     filterFn: (row, id, value) => {
-      const rowValue = row.original.ProjectName || row.original.ProjectCode;
-      return value.includes(rowValue);
+      return value.includes(row.getValue(id));
     },
   },
   {

@@ -19,9 +19,12 @@ interface EditableDateCellProps {
 
 const parseDate = (dateString: string | Date | undefined): Date | undefined => {
     if (!dateString) return undefined;
-    if (dateString instanceof Date) return dateString;
-    const date = parseISO(dateString);
-    return isValid(date) ? date : undefined;
+    if (dateString instanceof Date && isValid(dateString)) return dateString;
+    if (typeof dateString === 'string') {
+        const date = parseISO(dateString);
+        if (isValid(date)) return date;
+    }
+    return undefined;
 }
 
 
@@ -35,10 +38,8 @@ export function EditableDateCell({ initialValue, rowId, columnId }: EditableDate
   }, [initialValue]);
 
   const handleSave = async (newDate: Date | undefined) => {
-    const originalDate = parseDate(initialValue);
-    
-    // Only save if the date has actually changed
-    if (newDate?.getTime() === originalDate?.getTime()) {
+    // This check is important to prevent re-saving the same date
+    if (date?.getTime() === newDate?.getTime()) {
       return;
     }
     

@@ -4,6 +4,7 @@
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { RiskIssue, Product } from '@/lib/types';
+import { isValid, parseISO } from 'date-fns';
 
 // Helper function to safely convert Firestore Timestamps to ISO strings
 function toSafeISOString(date: any): string | undefined {
@@ -12,22 +13,20 @@ function toSafeISOString(date: any): string | undefined {
     }
     // If it's a Firestore Timestamp
     if (date && typeof date.toDate === 'function') {
-      return date.toDate().toISOString();
+      const jsDate = date.toDate();
+      if (isValid(jsDate)) {
+        return jsDate.toISOString();
+      }
     }
     // If it's already a JS Date
-    if (date instanceof Date) {
+    if (date instanceof Date && isValid(date)) {
       return date.toISOString();
     }
-    // If it's a string, assume it's an ISO string and return it
+    // If it's a string, try to parse it
     if (typeof date === 'string') {
-        try {
-            // Validate if it's a valid date string
-            if (!isNaN(new Date(date).getTime())) {
-              return new Date(date).toISOString();
-            }
-        } catch (e) {
-             // Not a valid date string, return undefined
-            return undefined;
+        const parsedDate = parseISO(date);
+        if (isValid(parsedDate)) {
+            return parsedDate.toISOString();
         }
     }
     return undefined;
@@ -77,8 +76,6 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
           ProjectName: data.ProjectName || 'Unknown',
           ProjectCode: product?.code || null,
           Status: data.Status || 'Open',
-          'Due Date': toSafeISOString(data["Due Date"]),
-          // Standardize date field for easier access
           DueDate: toSafeISOString(data["Due Date"]),
         } as unknown as RiskIssue;
     });
