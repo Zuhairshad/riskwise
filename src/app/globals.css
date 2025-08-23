@@ -84,6 +84,36 @@
   }
 }
 
+@layer utilities {
+    body::before, body::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        filter: blur(100px);
+        opacity: 0.15;
+    }
+    body::before {
+        height: 300px;
+        width: 480px;
+        border-radius: 50%;
+        left: -100px;
+        top: 0;
+        background: hsl(var(--primary));
+    }
+    body::after {
+        height: 300px;
+        width: 480px;
+        border-radius: 50%;
+        right: -100px;
+        bottom: 0;
+        background: hsl(var(--accent));
+    }
+    .dark body::before, .dark body::after {
+        opacity: 0.2;
+    }
+}
+
+
 @layer components {
     .card {
         @apply transition-all duration-200;
