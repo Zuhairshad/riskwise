@@ -111,7 +111,7 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
             newData.Discussion = data.Description || '';
             newData.Status = 'Open';
             newData.Priority = 'Medium';
-newData.Impact = 'Medium';
+            newData.Impact = 'Medium';
             const products = (await getDocs(collection(db, 'products'))).docs.map(p => p.data());
             newData.ProjectName = data['Project Code'] ? products.find(p => p.code === data['Project Code'])?.name || '' : '';
             newData.Title = data.Title || `Converted from Risk ${id}`;

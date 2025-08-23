@@ -13,6 +13,7 @@ import {
   Pie,
   Cell,
   Legend,
+  Tooltip,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 
 interface AIDataAnalystProps {
     analysisType: 'risks' | 'issues';
@@ -65,15 +67,15 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
         setAnalysis(result.analysis || "Here is the data you requested.");
         setTableData(result.tableData || []);
         setChartData(result.chartData || null);
-        if (!result.analysis && !result.tableData && !result.chartData) {
-            setError("NO_DATA_IN_SCOPE: The AI could not find any data matching your question.");
+        if (!result.analysis && (!result.tableData || result.tableData.length === 0)) {
+            setError("NO_DATA_IN_SCOPE: The AI could not find any data matching your question. Try asking something broader, like 'Show me all open risks.'");
         }
       } else {
         setError(result.message || "An unknown error occurred.");
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.code || "Failed to fetch analysis. Please try again.");
+      setError(err.message || "Failed to fetch analysis. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -82,17 +84,30 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
   const placeholderText = `e.g., Which project has the most open ${analysisType}?`;
   const descriptionText = `Ask a question about your current ${analysisType} to get AI-powered insights.`;
 
-  // Dynamically generate columns for the data table
+  // Dynamically generate columns for the data table from the first data object.
   const columns = React.useMemo(() => {
     if (!tableData || tableData.length === 0) return [];
+    
+    // Create columns from the keys of the first object in tableData
     return Object.keys(tableData[0]).map(key => ({
         accessorKey: key,
-        header: key,
+        header: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()), // Add spaces before uppercase letters
+        cell: ({ row }: any) => {
+            const value = row.getValue(key);
+            if (typeof value === 'boolean') {
+                return value ? 'Yes' : 'No';
+            }
+            if (typeof value === 'number') {
+                // Check for potential date-like numbers if needed, but for now format as number
+                return value.toLocaleString();
+            }
+            return <div className="truncate w-40">{String(value)}</div>;
+        },
     }));
   }, [tableData]);
 
   // Determine chart type based on data structure
-  const isPieChart = chartData && chartData.every(item => typeof item.name === 'string' && typeof item.value === 'number');
+  const isPieChart = chartData && chartData.length > 0 && chartData.every(item => typeof item.name === 'string' && typeof item.value === 'number');
 
   return (
     <Card>
@@ -146,7 +161,7 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
         )}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {tableData && tableData.length > 0 && !isLoading && (
-                <div className={cn("col-span-full", chartData && "lg:col-span-3")}>
+                <div className={cn("col-span-full", chartData && chartData.length > 0 && "lg:col-span-3")}>
                      <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg"><Table2 className="h-5 w-5" /> Data Table</CardTitle>
@@ -168,7 +183,7 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
                                 <ResponsiveContainer>
                                     {isPieChart ? (
                                         <PieChart>
-                                            <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Tooltip content={<ChartTooltipContent />} />
                                             <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                                                 {chartData.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -179,9 +194,9 @@ export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
                                     ) : (
                                         <BarChart data={chartData}>
                                             <CartesianGrid vertical={false} />
-                                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
-                                            <YAxis />
-                                            <ChartTooltip content={<ChartTooltipContent />} />
+                                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} angle={-45} textAnchor="end" height={60} />
+                                            <YAxis allowDecimals={false}/>
+                                            <Tooltip content={<ChartTooltipContent />} />
                                             <Bar dataKey="value" fill={COLORS[0]} radius={4} />
                                         </BarChart>
                                     )}

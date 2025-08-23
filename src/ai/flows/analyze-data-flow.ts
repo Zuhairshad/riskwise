@@ -57,7 +57,7 @@ const analyzeDataFlow = ai.defineFlow(
   async (input) => {
     const { output } = await prompt(input);
     if (!output) {
-      throw new Error("Flow execution timeout or no output from model.");
+      throw new Error("FLOW_EXECUTION_TIMEOUT: The AI model did not produce an output in time.");
     }
     return output;
   }
