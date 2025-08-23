@@ -12,14 +12,22 @@ import type { RiskIssue, Product } from '@/lib/types';
 
 // Helper function to safely convert Firestore Timestamps to ISO strings
 function toISOString(date: any): string | undefined {
+    if (!date) {
+        return undefined;
+    }
     if (date && typeof date.toDate === 'function') {
       return date.toDate().toISOString();
     }
     if (date instanceof Date) {
       return date.toISOString();
     }
-    if (typeof date === 'string' || typeof date === 'undefined') {
-        return date;
+    if (typeof date === 'string') {
+        // Try to parse it to ensure it's a valid date string before returning
+        try {
+            return new Date(date).toISOString();
+        } catch (e) {
+            return undefined;
+        }
     }
     return undefined;
 }
