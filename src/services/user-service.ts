@@ -1,19 +1,10 @@
 
-import { db, auth } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import type { UserProfile, Badge } from '@/lib/types';
 import { getBadgeById } from '@/lib/badges';
 import { collection, getDocs, doc, getDoc, query, orderBy, limit } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+// Removed all Firebase Auth imports
 
-// Helper function to get the current user from Firebase Auth
-const getCurrentUserAuth = (): Promise<import('firebase/auth').User | null> => {
-    return new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        unsubscribe();
-        resolve(user);
-      });
-    });
-  };
 
 // Fetch all users from Firestore and sort by score for the leaderboard
 export async function getUsers(): Promise<UserProfile[]> {
@@ -73,10 +64,8 @@ export async function getUser(userId: string): Promise<UserProfile | undefined> 
 }
 
 // Get the currently logged-in user's profile from Firestore.
+// THIS FUNCTION IS NOW MOCKED as auth is removed. It will return the first user.
 export async function getCurrentUser(): Promise<UserProfile | undefined> {
-    const authUser = await getCurrentUserAuth();
-    if (!authUser) {
-      return undefined;
-    }
-    return getUser(authUser.uid);
+    const allUsers = await getUsers();
+    return allUsers[0];
 }

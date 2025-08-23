@@ -97,18 +97,6 @@ export function AppSidebar() {
       </SidebarContent>
        <SidebarFooter>
         <SidebarMenu>
-            <SidebarMenuItem>
-                <SidebarMenuButton
-                    asChild
-                    isActive={pathname === "/profile"}
-                    tooltip="My Profile"
-                >
-                    <Link href="/profile">
-                        <User />
-                        <span>My Profile</span>
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
             <div className="px-2">
                 <ThemeToggle />
             </div>
