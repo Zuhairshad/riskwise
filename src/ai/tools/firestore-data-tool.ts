@@ -37,6 +37,7 @@ async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
 
     const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
         const data = doc.data();
+        const product = products.find(p => p.code === data['Project Code']);
         return {
           ...data,
           id: doc.id,
@@ -44,6 +45,7 @@ async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
           Title: data.Title || data.Description,
           Status: data["Risk Status"],
           DueDate: toISOString(data.DueDate),
+          ProjectName: product?.name || data['Project Code'],
         } as unknown as RiskIssue;
     });
 
@@ -58,6 +60,7 @@ async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
           ProjectCode: product?.code || data.ProjectName,
           DueDate: toISOString(data["Due Date"]),
           Status: data.Status,
+          ProjectName: data.ProjectName,
         } as unknown as RiskIssue;
     });
 
@@ -90,10 +93,7 @@ export const getProjectData = ai.defineTool(
     let risksAndIssues = await getRisksAndIssues(projects);
 
     if (projectName) {
-        risksAndIssues = risksAndIssues.filter(item => {
-            const itemProjectName = item.ProjectName || projects.find(p => p.code === item['Project Code'])?.name;
-            return itemProjectName === projectName;
-        });
+        risksAndIssues = risksAndIssues.filter(item => item.ProjectName === projectName);
     }
     if (type) {
         risksAndIssues = risksAndIssues.filter(item => item.type === type);
