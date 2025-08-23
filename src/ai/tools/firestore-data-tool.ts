@@ -2,7 +2,7 @@
 'use server';
 /**
  * @fileOverview A direct data access layer for retrieving project, risk, and issue data from Firestore.
- * This is NOT a Genkit tool, but a set of server-side functions to be called by flows.
+ * This is NOT a Genkit tool, but a set of server-side functions to be called directly.
  */
 
 import { z } from 'zod';
@@ -24,7 +24,10 @@ function toISOString(date: any): string | undefined {
     }
     if (typeof date === 'string') {
         try {
-            return new Date(date).toISOString();
+            // Check if the string is already a valid ISO string
+            if (!isNaN(new Date(date).getTime())) {
+              return new Date(date).toISOString();
+            }
         } catch (e) {
             return undefined;
         }
