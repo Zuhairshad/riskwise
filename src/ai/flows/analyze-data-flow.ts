@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow for analyzing risk and issue data by using a tool to query Firestore.
+ * @fileOverview A Genkit flow for analyzing risk and issue data by providing JSON data directly to the prompt.
  *
  * - analyzeData - A function that takes a user's question and returns an analysis.
  * - AnalyzeDataInput - The input type for the analyzeData function.
@@ -15,6 +15,7 @@ import { getProjectData } from '@/ai/tools/firestore-data-tool';
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
   type: z.enum(['Risk', 'Issue']).optional().describe('The type of data to analyze.'),
+  contextData: z.string().describe('JSON string of the data to be analyzed.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
@@ -23,20 +24,23 @@ export const AnalyzeDataOutputSchema = z.object({
 });
 export type AnalyzeDataOutput = z.infer<typeof AnalyzeDataOutputSchema>;
 
-export async function analyzeData(input: AnalyzeDataInput): Promise<AnalyzeDataOutput> {
-  return analyzeDataFlow(input);
+export async function analyzeData(input: Omit<AnalyzeDataInput, 'contextData'>): Promise<AnalyzeDataOutput> {
+  // Fetch data based on the type specified in the input.
+  const { risksAndIssues } = await getProjectData({ type: input.type });
+  const contextData = JSON.stringify(risksAndIssues, null, 2);
+  
+  // Call the flow with the fetched data.
+  return analyzeDataFlow({ ...input, contextData });
 }
 
 const prompt = ai.definePrompt({
   name: 'analyzeDataPrompt',
   input: { schema: AnalyzeDataInputSchema },
   output: { schema: AnalyzeDataOutputSchema },
-  system: `You are a helpful data analyst. Your task is to answer the user's question based on the data provided by the 'getProjectData' tool.
+  system: `You are a helpful data analyst. Your task is to answer the user's question based on the JSON data provided in the prompt context.
   
-  Use the 'getProjectData' tool to retrieve the necessary project, risk, and issue data from the database to answer the question. The tool returns a unified list of risks and issues.
-
-  - The user will specify a 'type' of data to analyze ('Risk' or 'Issue'). You should pass this type to the 'getProjectData' tool to filter the data source. Your entire analysis should be focused ONLY on the specified type.
-  - The 'type' field in the data will be either 'Risk' or 'Issue'.
+  The JSON data represents a list of risks or issues.
+  - The 'type' field will be either 'Risk' or 'Issue'.
   - The 'Status' field contains the status for both risks and issues (e.g., "Open", "Closed", "Mitigated").
   - The 'DueDate' field contains the due date for both risks and issues.
   - The 'ProjectName' field contains the project name for both.
@@ -44,9 +48,16 @@ const prompt = ai.definePrompt({
   - For financial impact on issues, use 'Impact ($)'.
   - The 'Probability' and 'Imapct Rating (0.05-0.8)' fields are only available for risks.
   
-  Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
-  tools: [getProjectData],
+  Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly. Analyze the data provided in the 'contextData' field.`,
   model: 'googleai/gemini-1.5-flash',
+  prompt: `
+    User Question: {{{question}}}
+
+    Data Context:
+    \`\`\`json
+    {{{contextData}}}
+    \`\`\`
+  `,
 });
 
 

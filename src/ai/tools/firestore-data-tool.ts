@@ -1,10 +1,10 @@
 
 'use server';
 /**
- * @fileOverview A Genkit tool for retrieving project, risk, and issue data from Firestore.
+ * @fileOverview A direct data access layer for retrieving project, risk, and issue data from Firestore.
+ * This is NOT a Genkit tool, but a set of server-side functions to be called by flows.
  */
 
-import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -23,7 +23,6 @@ function toISOString(date: any): string | undefined {
       return date.toISOString();
     }
     if (typeof date === 'string') {
-        // Try to parse it to ensure it's a valid date string before returning
         try {
             return new Date(date).toISOString();
         } catch (e) {
@@ -81,24 +80,17 @@ async function getProducts(): Promise<Product[]> {
     return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
 }
 
+const GetProjectDataSchema = z.object({
+    projectName: z.string().optional().describe('The name of the project to retrieve data for.'),
+    type: z.enum(['Risk', 'Issue']).optional().describe('Filter by entry type.'),
+    status: z.string().optional().describe('Filter by status (e.g., Open, Closed).'),
+});
 
-export const getProjectData = ai.defineTool(
-  {
-    name: 'getProjectData',
-    description: 'Returns projects, risks and issues from the database. Can be filtered by project name, risk/issue type, or status.',
-    inputSchema: z.object({
-        projectName: z.string().optional().describe('The name of the project to retrieve data for.'),
-        type: z.enum(['Risk', 'Issue']).optional().describe('Filter by entry type.'),
-        status: z.string().optional().describe('Filter by status (e.g., Open, Closed).'),
-    }),
-    outputSchema: z.object({
-        projects: z.array(z.any()).describe("An array of project objects."),
-        risksAndIssues: z.array(z.any()).describe('An array of risks and issues.'),
-    }),
-  },
-  async ({ projectName, type, status }) => {
-    const projects = await getProducts();
-    let risksAndIssues = await getRisksAndIssues(projects);
+type GetProjectDataInput = z.infer<typeof GetProjectDataSchema>;
+
+export async function getProjectData({ projectName, type, status }: GetProjectDataInput) {
+    const products = await getProducts();
+    let risksAndIssues = await getRisksAndIssues(products);
 
     if (projectName) {
         risksAndIssues = risksAndIssues.filter(item => item.ProjectName === projectName);
@@ -111,5 +103,4 @@ export const getProjectData = ai.defineTool(
     }
 
     return { projects, risksAndIssues };
-  }
-);
+}

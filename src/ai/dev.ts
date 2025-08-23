@@ -7,4 +7,3 @@ import '@/ai/flows/suggest-mitigation-strategies';
 import '@/ai/flows/suggest-similar-issues';
 import '@/ai/flows/suggest-similar-risks';
 import '@/ai/flows/suggest-title';
-import '@/ai/tools/firestore-data-tool';
