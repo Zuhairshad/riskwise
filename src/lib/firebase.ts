@@ -6,9 +6,10 @@ import { getAuth } from "firebase/auth";
 const firebaseConfig = {
   "projectId": "riskwise-l2td9",
   "appId": "1:954229157369:web:26d2fe18decfaaa5176128",
-  "storageBucket": "riskwise-l2td9.appspot.com",
+  "storageBucket": "riskwise-l2td9.firebasestorage.app",
   "apiKey": "AIzaSyBlh8BoBA3L4E4Uk6AKRCoHGxCb38cuPVQ",
   "authDomain": "riskwise-l2td9.firebaseapp.com",
+  "measurementId": "",
   "messagingSenderId": "954229157369"
 };
 
