@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for analyzing risk and issue data by using a tool to query Firestore.
@@ -13,6 +14,7 @@ import { getProjectData } from '@/ai/tools/firestore-data-tool';
 
 export const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
+  type: z.enum(['Risk', 'Issue']).optional().describe('The type of data to analyze.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
@@ -33,7 +35,8 @@ const prompt = ai.definePrompt({
   
   Use the 'getProjectData' tool to retrieve the necessary project, risk, and issue data from the database to answer the question. The tool returns a unified list of risks and issues.
 
-  - The 'type' field will be either 'Risk' or 'Issue'.
+  - The user will specify a 'type' of data to analyze ('Risk' or 'Issue'). You should pass this type to the 'getProjectData' tool to filter the data source. Your entire analysis should be focused ONLY on the specified type.
+  - The 'type' field in the data will be either 'Risk' or 'Issue'.
   - The 'Status' field contains the status for both risks and issues (e.g., "Open", "Closed", "Mitigated").
   - The 'DueDate' field contains the due date for both risks and issues.
   - The 'ProjectName' field contains the project name for both.

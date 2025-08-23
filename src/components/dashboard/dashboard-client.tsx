@@ -4,7 +4,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, XCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { DataTable } from "./risk-issue-table/data-table";
 import { riskColumns } from "./risk-issue-table/risk-columns";
 import { issueColumns } from "./risk-issue-table/issue-columns";
@@ -43,7 +43,7 @@ export function DashboardClient({ data, products }: DashboardClientProps) {
         </Button>
       </div>
 
-      <AIDataAnalyst />
+      <AIDataAnalyst analysisType={activeTab} />
 
       <StatsCards data={data} />
       

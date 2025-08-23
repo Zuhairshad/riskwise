@@ -9,7 +9,11 @@ import { Wand2, Bot, Loader2, AlertCircle } from "lucide-react";
 import { analyzeData } from "@/app/(main)/actions";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-export function AIDataAnalyst() {
+interface AIDataAnalystProps {
+    analysisType: 'risks' | 'issues';
+}
+
+export function AIDataAnalyst({ analysisType }: AIDataAnalystProps) {
   const [question, setQuestion] = React.useState("");
   const [analysis, setAnalysis] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -24,7 +28,8 @@ export function AIDataAnalyst() {
     setError(null);
 
     try {
-      const result = await analyzeData({ question });
+      const type = analysisType === 'risks' ? 'Risk' : 'Issue';
+      const result = await analyzeData({ question, type });
 
       if (result.success) {
         setAnalysis(result.analysis!);
@@ -39,6 +44,10 @@ export function AIDataAnalyst() {
     }
   };
 
+  const placeholderText = `e.g., Which project has the most open ${analysisType}?`;
+  const descriptionText = `Ask a question about your current ${analysisType} to get AI-powered insights.`;
+
+
   return (
     <Card>
       <CardHeader>
@@ -47,13 +56,13 @@ export function AIDataAnalyst() {
           <span>AI Data Analyst</span>
         </CardTitle>
         <CardDescription>
-          Ask a question about your current dataset to get AI-powered insights. Example: "Which project has the highest financial impact from open risks?"
+          {descriptionText}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
-            placeholder="e.g., Which project has the most open issues?"
+            placeholder={placeholderText}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             disabled={isLoading}
