@@ -87,7 +87,8 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
             newData.Probability = 0.2;
             newData['Imapct Rating (0.05-0.8)'] = 0.05;
             newData.Title = data.Title || `Converted from Issue ${id}`;
-            newData['Project Code'] = data.ProjectName ? (await getDocs(collection(db, 'products'))).docs.find(p => p.data().name === data.ProjectName)?.data().code || '' : '';
+            const products = (await getDocs(collection(db, 'products'))).docs.map(p => p.data());
+            newData['Project Code'] = data.ProjectName ? products.find(p => p.name === data.ProjectName)?.code || '' : '';
 
             // remove issue specific fields
             delete newData.Discussion;
@@ -98,7 +99,8 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
             delete newData.Priority;
             delete newData.ProjectName;
             delete newData.Status;
-            delete newData['Category New'];
+            delete newData.Category;
+            delete newData.SubCategory;
             delete newData['Due Date'];
 
         } else {
@@ -107,7 +109,8 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
             newData.Status = 'Open';
             newData.Priority = 'Medium';
             newData.Impact = 'Medium';
-            newData.ProjectName = data['Project Code'] ? (await getDocs(collection(db, 'products'))).docs.find(p => p.data().code === data['Project Code'])?.data().name || '' : '';
+            const products = (await getDocs(collection(db, 'products'))).docs.map(p => p.data());
+            newData.ProjectName = data['Project Code'] ? products.find(p => p.code === data['Project Code'])?.name || '' : '';
             newData.Title = data.Title || `Converted from Risk ${id}`;
 
             // remove risk specific fields
@@ -159,3 +162,4 @@ export async function analyzeData(input: AnalyzeDataInput) {
       return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
     }
   }
+

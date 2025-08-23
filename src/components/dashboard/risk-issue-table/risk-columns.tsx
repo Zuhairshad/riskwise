@@ -104,7 +104,8 @@ export const riskColumns: ColumnDef<RiskIssue>[] = [
       return <div className="w-[180px] truncate">{row.original.ProjectName}</div>;
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.original.ProjectName);
+      const rowValue = row.original.ProjectName || row.original.ProjectCode;
+      return value.includes(rowValue);
     },
   },
   {

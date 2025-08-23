@@ -49,34 +49,36 @@ export default function DashboardPage() {
       
           const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
               const data = doc.data();
+              const product = productList.find(p => p.code === data['Project Code']);
               return {
               id: doc.id,
               ...data,
               type: 'Risk',
               Title: data.Title || data.Description,
               Status: data["Risk Status"],
+              ProjectName: product?.name || data['Project Code'],
               DueDate: toISOString(data.DueDate),
           }}) as unknown as RiskIssue[];
       
           const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
               const data = doc.data();
+              const product = productList.find(p => p.name === data.ProjectName);
               return {
               id: doc.id,
               ...data,
               type: 'Issue',
               Title: data.Title,
+              ProjectName: product?.name || data.ProjectName,
+              ProjectCode: product?.code,
               "Due Date": toISOString(data["Due Date"]),
           }}) as unknown as RiskIssue[];
       
       
           const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
               const status = item["Risk Status"] || item.Status || 'Open';
-              const product = productList.find(p => p.code === item['Project Code'] || p.name === item.ProjectName);
               return {
-              ...item,
-              Status: status,
-              "Risk Status": status,
-              ProjectName: product?.name || item.ProjectName || item['Project Code'],
+                ...item,
+                Status: status,
               }
           });
           
