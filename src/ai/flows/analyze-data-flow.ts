@@ -31,15 +31,15 @@ const prompt = ai.definePrompt({
   output: { schema: AnalyzeDataOutputSchema },
   system: `You are a helpful data analyst. Your task is to answer the user's question based on the data provided by the 'getProjectData' tool.
   
-  Use the 'getProjectData' tool to retrieve the necessary project, risk, and issue data from the database to answer the question.
+  Use the 'getProjectData' tool to retrieve the necessary project, risk, and issue data from the database to answer the question. The tool returns a unified list of risks and issues.
 
-  When analyzing financial impact for risks, look for the field "Impact Value ($)".
-  When analyzing financial impact for issues, look for the field "Impact ($)".
-  When looking for due dates for risks, use the "DueDate" field.
-  When looking for due dates for issues, use the "Due Date" field.
-  When looking for status for risks, use the "Risk Status" field.
-  When looking for status for issues, use the "Status" field.
-  The 'Probability' and 'Imapct Rating (0.05-0.8)' fields are only available for risks.
+  - The 'type' field will be either 'Risk' or 'Issue'.
+  - The 'Status' field contains the status for both risks and issues (e.g., "Open", "Closed", "Mitigated").
+  - The 'DueDate' field contains the due date for both risks and issues.
+  - The 'ProjectName' field contains the project name for both.
+  - For financial impact on risks, use 'Impact Value ($)'.
+  - For financial impact on issues, use 'Impact ($)'.
+  - The 'Probability' and 'Imapct Rating (0.05-0.8)' fields are only available for risks.
   
   Provide a concise, clear, and data-driven response. If the question cannot be answered with the available data, state that clearly.`,
   tools: [getProjectData],

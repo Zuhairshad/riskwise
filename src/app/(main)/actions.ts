@@ -143,8 +143,9 @@ export async function analyzeData(input: AnalyzeDataInput) {
     try {
       const result = await analyzeDataFlow(input);
       return { success: true, analysis: result.analysis };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error analyzing data:", error);
-      return { success: false, message: "Failed to get analysis from AI. Please try again." };
+      const errorMessage = error.message || "An unexpected error occurred during analysis.";
+      return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
     }
   }
