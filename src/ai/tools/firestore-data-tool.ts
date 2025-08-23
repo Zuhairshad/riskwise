@@ -52,7 +52,7 @@ async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
           Title: data.Title || data.Description,
           Status: data["Risk Status"],
           DueDate: toISOString(data.DueDate),
-          ProjectName: product?.name || data['Project Code'],
+          ProjectName: product?.name || data['Project Code'] || 'Unknown',
         } as unknown as RiskIssue;
     });
 
@@ -67,7 +67,7 @@ async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
           ProjectCode: product?.code || data.ProjectName,
           DueDate: toISOString(data["Due Date"]),
           Status: data.Status,
-          ProjectName: data.ProjectName,
+          ProjectName: data.ProjectName || 'Unknown',
         } as unknown as RiskIssue;
     });
 
@@ -99,8 +99,8 @@ export async function getProjectData({ projectName, type, status }: GetProjectDa
         risksAndIssues = risksAndIssues.filter(item => item.type === type);
     }
     if (status) {
-        risksAndIssues = risksAndIssues.filter(item => (item.Status || item['Risk Status']) === status);
+        risksAndIssues = risksAndIssues.filter(item => (item.Status) === status);
     }
 
-    return { projects, risksAndIssues };
+    return { risksAndIssues };
 }
