@@ -35,8 +35,8 @@ export default function LoginPage() {
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Sign In Failed",
-            description: error.message,
+            title: `Sign In Failed: ${error.code}`,
+            description: `Firebase error: ${error.message}`,
         });
       console.error("Error signing in with password and email", error);
     } finally {
@@ -53,8 +53,8 @@ export default function LoginPage() {
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Sign In Failed",
-            description: error.message,
+            title: `Sign In Failed: ${error.code}`,
+            description: `Firebase error: ${error.message}`,
         });
         console.error("Error signing in with Microsoft", error);
     } finally {
