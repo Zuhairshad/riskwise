@@ -56,7 +56,8 @@ async function getRisksAndIssues(products: Product[]): Promise<RiskIssue[]> {
           type: 'Issue',
           Title: data.Title,
           ProjectCode: product?.code || data.ProjectName,
-          "Due Date": toISOString(data["Due Date"]),
+          DueDate: toISOString(data["Due Date"]),
+          Status: data.Status,
         } as unknown as RiskIssue;
     });
 
