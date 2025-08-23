@@ -93,6 +93,18 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+            <SidebarMenuItem>
+                <SidebarMenuButton
+                asChild
+                isActive={pathname === "/profile"}
+                tooltip="Profile"
+                >
+                <Link href="/profile">
+                    <User />
+                    <span>Profile</span>
+                </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
        <SidebarFooter>

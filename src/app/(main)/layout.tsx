@@ -6,12 +6,15 @@ import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import withAuth from "@/components/layout/with-auth";
+import { useAuth } from "@/hooks/use-auth";
 
-export default function MainLayout({
+function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useAuth();
   
   return (
     <SidebarProvider>
@@ -19,13 +22,12 @@ export default function MainLayout({
         <AppSidebar />
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-             {/* The profile page has been removed, so this link is commented out. */}
-             {/* <Link href="/profile" aria-label="View Profile">
+             <Link href="/profile" aria-label="View Profile">
                <Avatar>
-                 <AvatarImage src={"https://placehold.co/40x40.png"} alt="User" data-ai-hint="user avatar" />
-                 <AvatarFallback>U</AvatarFallback>
+                 <AvatarImage src={user?.photoURL ?? "https://placehold.co/40x40.png"} alt={user?.displayName ?? "User"} data-ai-hint="user avatar" />
+                 <AvatarFallback>{user?.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
                </Avatar>
-             </Link> */}
+             </Link>
           </header>
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </SidebarInset>
@@ -33,3 +35,6 @@ export default function MainLayout({
     </SidebarProvider>
   );
 }
+
+
+export default withAuth(MainLayout);

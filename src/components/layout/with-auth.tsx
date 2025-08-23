@@ -19,7 +19,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>): React.F
 
     if (loading || !user) {
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
                 <Skeleton className="h-8 w-48 mb-2" />
