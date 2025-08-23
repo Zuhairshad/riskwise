@@ -77,8 +77,12 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen p-4">
-            <Card className="w-full max-w-md">
+        <div className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-0 left-0 h-[300px] w-[480px] rounded-full bg-primary/30 blur-[100px] filter -translate-x-1/2 -translate-y-1/2" />
+                <div className="absolute bottom-0 right-0 h-[300px] w-[480px] rounded-full bg-accent/30 blur-[100px] filter translate-x-1/2 translate-y-1/2" />
+            </div>
+            <Card className="w-full max-w-md z-10">
                 <CardHeader className="text-center space-y-2">
                     <div className="flex justify-center items-center gap-2">
                         <CheckSquare className="h-8 w-8 text-primary" />
