@@ -4,27 +4,8 @@
 import { useEffect, useState } from "react";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import type { RiskIssue, Product } from "@/lib/types";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { getRisksAndIssues, getProducts } from "@/services/data-service";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Helper function to safely convert Firestore Timestamps to ISO strings
-function toISOString(date: any): string | undefined {
-    if (date && typeof date.toDate === 'function') {
-      return date.toDate().toISOString();
-    }
-    if (date instanceof Date) {
-      return date.toISOString();
-    }
-    // Return as is if it's already a string or undefined
-    if (typeof date === 'string' || typeof date === 'undefined') {
-        return date;
-    }
-    return undefined;
-}
-
 
 export default function DashboardPage() {
     const [data, setData] = useState<RiskIssue[] | null>(null);
@@ -34,54 +15,9 @@ export default function DashboardPage() {
     useEffect(() => {
       async function getDashboardData() {
         try {
-          const risksCollection = collection(db, "risks");
-          const issuesCollection = collection(db, "issues");
-          const productsCollection = collection(db, "products");
-      
-          const [riskSnapshot, issueSnapshot, productSnapshot] = await Promise.all([
-              getDocs(risksCollection),
-              getDocs(issuesCollection),
-              getDocs(productsCollection),
-          ]);
-      
-          const productList: Product[] = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+          const productList = await getProducts();
           setProducts(productList);
-      
-          const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
-              const data = doc.data();
-              const product = productList.find(p => p.code === data['Project Code']);
-              return {
-              id: doc.id,
-              ...data,
-              type: 'Risk',
-              Title: data.Title || data.Description,
-              Status: data["Risk Status"],
-              ProjectName: product?.name || data['Project Code'],
-              DueDate: toISOString(data.DueDate),
-          }}) as unknown as RiskIssue[];
-      
-          const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
-              const data = doc.data();
-              const product = productList.find(p => p.name === data.ProjectName);
-              return {
-              id: doc.id,
-              ...data,
-              type: 'Issue',
-              Title: data.Title,
-              ProjectName: product?.name || data.ProjectName,
-              ProjectCode: product?.code,
-              "Due Date": toISOString(data["Due Date"]),
-          }}) as unknown as RiskIssue[];
-      
-      
-          const combinedData: RiskIssue[] = [...risks, ...issues].map((item) => {
-              const status = item["Risk Status"] || item.Status || 'Open';
-              return {
-                ...item,
-                Status: status,
-              }
-          });
-          
+          const combinedData = await getRisksAndIssues(productList);
           setData(combinedData);
         } catch (error) {
           console.error("Error fetching dashboard data:", error);

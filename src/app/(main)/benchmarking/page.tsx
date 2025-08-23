@@ -1,69 +1,14 @@
 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import type { RiskIssue, Product } from "@/lib/types";
+import { getRisksAndIssues, getProducts } from "@/services/data-service";
 import { BenchmarkingClient } from "@/components/benchmarking/benchmarking-client";
 import { products as mockProducts } from "@/lib/mock-data";
 
-// Helper function to safely convert Firestore Timestamps to ISO strings
-function toISOString(date: any): string | undefined {
-    if (date && typeof date.toDate === 'function') {
-      return date.toDate().toISOString();
-    }
-    if (date instanceof Date) {
-      return date.toISOString();
-    }
-    if (typeof date === 'string' || typeof date === 'undefined') {
-        return date;
-    }
-    return undefined;
-}
 
 async function getBenchmarkingData() {
-  const risksCollection = collection(db, "risks");
-  const issuesCollection = collection(db, "issues");
-  const productsCollection = collection(db, 'products');
-
-  const [riskSnapshot, issueSnapshot, productSnapshot] = await Promise.all([
-    getDocs(risksCollection),
-    getDocs(issuesCollection),
-    getDocs(productsCollection)
-  ]);
-  
-  const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-
-  const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      ...data,
-      id: doc.id,
-      type: 'Risk',
-      Title: data.Title || data.Description,
-      ProjectCode: data['Project Code'],
-      Status: data["Risk Status"] || 'Open',
-      DueDate: toISOString(data.DueDate),
-    } as unknown as RiskIssue;
-  });
-
-  const issues: RiskIssue[] = issueSnapshot.docs.map(doc => {
-    const data = doc.data();
-    const product = products.find(p => p.name === data.ProjectName);
-    return {
-      ...data,
-      id: doc.id,
-      type: 'Issue',
-      Title: data.Title,
-      ProjectName: data.ProjectName,
-      ProjectCode: product?.code || data.ProjectName,
-      Status: data.Status || 'Open',
-      "Due Date": toISOString(data["Due Date"]),
-    } as unknown as RiskIssue;
-  });
-
-  const combinedData: RiskIssue[] = [...risks, ...issues];
-
-  // Use mockProducts if Firestore `products` is empty. This ensures the component always has project data to render.
+  const products = await getProducts();
   const finalProducts = products.length > 0 ? products : mockProducts;
+  const combinedData = await getRisksAndIssues(finalProducts);
 
   return {
     data: combinedData,

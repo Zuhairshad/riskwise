@@ -32,6 +32,8 @@ export async function updateRiskIssueField(id: string, field: string, value: any
 
     // Revalidate the dashboard path to show the updated data
     revalidatePath('/');
+    revalidatePath('/executive-dashboard');
+    revalidatePath('/benchmarking');
 
     return { success: true, message: "Field updated successfully." };
   } catch (error) {
@@ -51,6 +53,8 @@ export async function deleteRiskIssue(id: string) {
     
         // Revalidate the dashboard path to show the updated data
         revalidatePath('/');
+        revalidatePath('/executive-dashboard');
+        revalidatePath('/benchmarking');
     
         return { success: true, message: "Entry deleted successfully." };
       } catch (error) {
@@ -108,7 +112,7 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
             newData.Discussion = data.Description || '';
             newData.Status = 'Open';
             newData.Priority = 'Medium';
-            newData.Impact = 'Medium';
+newData.Impact = 'Medium';
             const products = (await getDocs(collection(db, 'products'))).docs.map(p => p.data());
             newData.ProjectName = data['Project Code'] ? products.find(p => p.code === data['Project Code'])?.name || '' : '';
             newData.Title = data.Title || `Converted from Risk ${id}`;
@@ -135,6 +139,8 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
         await batch.commit();
 
         revalidatePath('/');
+        revalidatePath('/executive-dashboard');
+        revalidatePath('/benchmarking');
         return { success: true, message: `Successfully changed type to ${newType}.` };
 
     } catch(error) {
@@ -162,4 +168,3 @@ export async function analyzeData(input: AnalyzeDataInput) {
       return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
     }
   }
-
