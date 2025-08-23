@@ -3,7 +3,6 @@ import { db } from '@/lib/firebase';
 import type { UserProfile, Badge } from '@/lib/types';
 import { getBadgeById } from '@/lib/badges';
 import { collection, getDocs, doc, getDoc, query, orderBy, limit } from 'firebase/firestore';
-// Removed all Firebase Auth imports
 
 
 // Fetch all users from Firestore and sort by score for the leaderboard

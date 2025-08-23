@@ -23,7 +23,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-2 font-headline text-lg font-semibold text-primary"
           >
             <CheckSquare className="h-7 w-7 text-primary" />
@@ -36,10 +36,10 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/"}
+              isActive={pathname === "/dashboard"}
               tooltip="Dashboard"
             >
-              <Link href="/">
+              <Link href="/dashboard">
                 <LayoutDashboard />
                 <span>Dashboard</span>
               </Link>
