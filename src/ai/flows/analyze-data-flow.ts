@@ -13,13 +13,13 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { getProjectData } from '../tools/get-project-data-tool';
 
-export const AnalyzeDataInputSchema = z.object({
+const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
   type: z.enum(['Risk', 'Issue']).describe('The type of data to analyze.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
-export const AnalyzeDataOutputSchema = z.object({
+const AnalyzeDataOutputSchema = z.object({
   analysis: z.string().describe("The natural language analysis of the data based on the user's question."),
   tableData: z.any().describe("The raw data used for the analysis, to be displayed in a table. Should be an array of objects."),
   chartData: z.any().optional().describe("Data formatted for a chart (e.g., bar, pie). Should be an array of objects with keys like 'name' and 'value'."),

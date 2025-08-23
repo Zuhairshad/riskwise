@@ -8,17 +8,15 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { getRisksAndIssues } from '@/services/data-service';
 
-const GetProjectDataSchema = z.object({
-  type: z.enum(['Risk', 'Issue']).optional().describe('Filter by entry type (Risk or Issue).'),
-  status: z.string().optional().describe('Filter by status (e.g., Open, Closed).'),
-  projectName: z.string().optional().describe('Filter by a specific project name.'),
-});
-
 export const getProjectData = ai.defineTool(
   {
     name: 'getProjectData',
     description: 'Retrieves project risks or issues from the database. Can be filtered by type, status, and project name.',
-    inputSchema: GetProjectDataSchema,
+    inputSchema: z.object({
+        type: z.enum(['Risk', 'Issue']).optional().describe('Filter by entry type (Risk or Issue).'),
+        status: z.string().optional().describe('Filter by status (e.g., Open, Closed).'),
+        projectName: z.string().optional().describe('Filter by a specific project name.'),
+      }),
     outputSchema: z.array(z.any()),
   },
   async ({ type, status, projectName }) => {
@@ -32,8 +30,7 @@ export const getProjectData = ai.defineTool(
         allData = allData.filter(item => item.type === type);
       }
       if (status) {
-        // Handle both 'Status' and 'Risk Status' for robustness, even though data-service standardizes it
-        allData = allData.filter(item => (item.Status || item['Risk Status']) === status);
+        allData = allData.filter(item => item.Status === status);
       }
       if (projectName) {
         allData = allData.filter(item => item.ProjectName?.toLowerCase().includes(projectName.toLowerCase()));
