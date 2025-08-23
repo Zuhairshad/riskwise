@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCyDlDFgpTAxkPibgdDs-vFuXA0Vy1ny5A",
+  apiKey: "AIzaSyA8Y57s-aUAIMU51D8oYOMmHGSa0K7Y1jY",
   authDomain: "riskwise-c9df3.firebaseapp.com",
   projectId: "riskwise-c9df3",
   storageBucket: "riskwise-c9df3.appspot.com",
