@@ -1,20 +1,36 @@
 
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from "react";
+import { DashboardClient } from "@/components/dashboard/dashboard-client";
+import type { RiskIssue, Product } from "@/lib/types";
+import { getRisksAndIssues, getProducts } from "@/services/data-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function HomePage() {
-  const router = useRouter();
+export default function DashboardPage() {
+    const [data, setData] = useState<RiskIssue[] | null>(null);
+    const [products, setProducts] = useState<Product[] | null>(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    router.replace('/dashboard');
-  }, [router]);
+    useEffect(() => {
+      async function getDashboardData() {
+        try {
+          const productList = await getProducts();
+          setProducts(productList);
+          const combinedData = await getRisksAndIssues(productList);
+          setData(combinedData);
+        } catch (error) {
+          console.error("Error fetching dashboard data:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      getDashboardData();
+    }, []);
 
-  return (
-    <div className="flex h-screen w-full items-center justify-center">
-       <div className="space-y-6">
+    if (loading || !data || !products) {
+        return (
+          <div className="space-y-6 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                   <Skeleton className="h-8 w-48 mb-2" />
@@ -30,6 +46,8 @@ export default function HomePage() {
             </div>
             <Skeleton className="h-[500px] w-full" />
           </div>
-    </div>
-  );
+        );
+    }
+  
+  return <DashboardClient data={data} products={products} />;
 }
