@@ -5,20 +5,15 @@ import { initializeApp, getApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
-
-function must(name: string, v?: string) {
-  if (!v) throw new Error(`[FIREBASE_CONFIG_MISSING] ${name} is undefined`);
-  return v;
-}
-
+// This configuration is now hardcoded to ensure the correct project is always used.
 const firebaseConfig = {
-  apiKey: must("NEXT_PUBLIC_FIREBASE_API_KEY", process.env.NEXT_PUBLIC_FIREBASE_API_KEY),
-  authDomain: must("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN", process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN),
-  projectId: must("NEXT_PUBLIC_FIREBASE_PROJECT_ID", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
-  storageBucket: must("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET", process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET),
-  messagingSenderId: must("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID", process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID),
-  appId: must("NEXT_PUBLIC_FIREBASE_APP_ID", process.env.NEXT_PUBLIC_FIREBASE_APP_ID),
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  apiKey: "API_KEY_REDACTED",
+  authDomain: "proactify-99042.firebaseapp.com",
+  projectId: "proactify-99042",
+  storageBucket: "proactify-99042.appspot.com",
+  messagingSenderId: "325492193792",
+  appId: "1:325492193792:web:72895204439c235774a353",
+  measurementId: "G-L0M2GV36E1"
 };
 
 // Masked log for quick sanity check
