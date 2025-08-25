@@ -7,7 +7,7 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 
 // This configuration is now hardcoded to ensure the correct project is always used.
 const firebaseConfig = {
-  apiKey: "API_KEY_REDACTED",
+  apiKey: "AIzaSyCyDlDFgpTAxkPibgdDs-vFuXA0Vy1ny5A",
   authDomain: "proactify-99042.firebaseapp.com",
   projectId: "proactify-99042",
   storageBucket: "proactify-99042.appspot.com",
