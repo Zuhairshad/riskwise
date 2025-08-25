@@ -37,7 +37,7 @@ export default function SignupPage() {
         password
       );
       await updateProfile(userCredential.user, { displayName });
-      router.push("/");
+      router.push("/dashboard");
     } catch (error: any) {
       toast({
         variant: "destructive",

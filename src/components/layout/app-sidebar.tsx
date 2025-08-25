@@ -36,10 +36,10 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={pathname === "/"}
+              isActive={pathname === "/dashboard"}
               tooltip="Dashboard"
             >
-              <Link href="/">
+              <Link href="/dashboard">
                 <LayoutDashboard />
                 <span>Dashboard</span>
               </Link>
