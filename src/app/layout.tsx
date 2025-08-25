@@ -5,6 +5,7 @@ import "./globals.css";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/hooks/use-auth";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,8 +40,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
             <AuthProvider>
+              <SidebarProvider>
                 {children}
                 <Toaster />
+              </SidebarProvider>
             </AuthProvider>
         </ThemeProvider>
       </body>
