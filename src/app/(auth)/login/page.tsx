@@ -31,11 +31,11 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
+      router.push("/");
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Sign In Failed",
+            title: `Sign In Failed: ${error.code}`,
             description: error.message,
         });
       console.error("Error signing in with password and email", error);
@@ -49,7 +49,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
         await signInWithPopup(auth, provider);
-        router.push("/dashboard");
+        router.push("/");
     } catch (error: any) {
         toast({
             variant: "destructive",
