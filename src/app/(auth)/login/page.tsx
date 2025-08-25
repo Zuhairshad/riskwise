@@ -35,8 +35,8 @@ export default function LoginPage() {
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: `Sign In Failed: ${error.code}`,
-            description: `Firebase error: ${error.message}`,
+            title: "Sign In Failed",
+            description: error.message,
         });
       console.error("Error signing in with password and email", error);
     } finally {
@@ -81,6 +81,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
             />
           </div>
           <div className="space-y-2">
@@ -91,6 +92,7 @@ export default function LoginPage() {
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
