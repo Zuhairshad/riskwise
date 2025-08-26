@@ -1,14 +1,10 @@
-'use server';
-
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
-import {initializeApp, getApps} from 'firebase-admin/app';
-
-// This AI configuration now uses the GEMINI_API_KEY from your .env file for all generative AI operations.
-export const ai = genkit({
-  plugins: [
-    googleAI({
-        apiKey: process.env.GEMINI_API_KEY,
-    }),
-  ],
-});
+// This file is a barrel for exporting your AI flows.
+// It is used by the dev server to discover your flows.
+import './flows/analyze-data-flow';
+import './flows/rephrase-description';
+import './flows/suggest-category';
+import './flows/suggest-mitigation-strategies';
+import './flows/suggest-similar-issues';
+import './flows/suggest-similar-risks';
+import './flows/suggest-title';
+import './tools/get-project-data-tool';

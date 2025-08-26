@@ -9,7 +9,7 @@
  * - AnalyzeDataOutput - The output schema for the analyzeData function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '@/ai/client';
 import { z } from 'zod';
 import { getProjectData } from '../tools/get-project-data-tool';
 import { googleAI } from '@genkit-ai/googleai';

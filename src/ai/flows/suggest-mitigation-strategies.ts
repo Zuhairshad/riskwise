@@ -8,7 +8,7 @@
  * - SuggestMitigationStrategiesOutput - The return type for the suggestMitigationStrategies function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
