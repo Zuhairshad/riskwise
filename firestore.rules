@@ -3,37 +3,38 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper: Returns true if the user is signed in.
     function isSignedIn() {
       return request.auth != null;
     }
 
-    match /risks/{docId} {
-      allow read, write: if isSignedIn();
+    // Helper: Returns true if the user is the owner of the resource.
+    function isOwner(userId) {
+        return request.auth.uid == userId;
     }
-    match /risks/{path=**} {
-      allow read, write: if isSignedIn();
-    }
-
-    match /issues/{docId} {
-      allow read, write: if isSignedIn();
-    }
-    match /issues/{path=**} {
-      allow read, write: if isSignedIn();
-    }
-
-    match /products/{docId} {
+    
+    // Products can be read by any signed-in user, but not written to.
+    match /products/{productId} {
       allow read: if isSignedIn();
-    }
-    match /products/{path=**} {
-      allow read: if isSignedIn();
+      allow write: if false;
     }
 
+    // Users can be read by any signed-in user (for leaderboards, etc.).
+    // A user can only update their own document.
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow create, delete: if false;
     }
-     match /users/{path=**} {
-      allow read: if isSignedIn();
+
+    // Risks can be read and written by any signed-in user.
+    match /risks/{riskId} {
+      allow read, write: if isSignedIn();
+    }
+    
+    // Issues can be read and written by any signed-in user.
+    match /issues/{issueId} {
+      allow read, write: if isSignedIn();
     }
   }
 }
