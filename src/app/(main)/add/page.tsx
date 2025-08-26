@@ -1,12 +1,20 @@
 
 'use client';
 
+import * as React from "react";
 import { RiskForm } from "./risk-form";
 import { IssueForm } from "./issue-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, AlertTriangle } from "lucide-react";
 
 export default function AddPage() {
+  const [activeTab, setActiveTab] = React.useState('risk');
+
+  React.useEffect(() => {
+    document.body.classList.remove('theme-risk', 'theme-issue');
+    document.body.classList.add(`theme-${activeTab}`);
+  }, [activeTab]);
+
   return (
     <div className="space-y-6">
        <div>
@@ -15,7 +23,7 @@ export default function AddPage() {
                 Fill out the form below to create a new risk or issue.
             </p>
         </div>
-        <Tabs defaultValue="risk" className="w-full">
+        <Tabs defaultValue="risk" className="w-full" onValueChange={(value) => setActiveTab(value)}>
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="risk">
                     <Shield className="mr-2 h-4 w-4" />

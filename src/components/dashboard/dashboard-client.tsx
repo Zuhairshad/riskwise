@@ -21,10 +21,15 @@ type DashboardClientProps = {
 };
 
 export function DashboardClient({ data, products }: DashboardClientProps) {
-  const [activeTab, setActiveTab] = React.useState<'risks' | 'issues'>('risks');
+  const [activeTab, setActiveTab] = React.useState<'risk' | 'issue'>('risk');
 
   const risks = React.useMemo(() => data.filter((d) => d.type === 'Risk'), [data]);
   const issues = React.useMemo(() => data.filter((d) => d.type === 'Issue'), [data]);
+
+  React.useEffect(() => {
+    document.body.classList.remove('theme-risk', 'theme-issue');
+    document.body.classList.add(`theme-${activeTab}`);
+  }, [activeTab]);
 
   return (
     <div className="space-y-6">
@@ -43,17 +48,17 @@ export function DashboardClient({ data, products }: DashboardClientProps) {
         </Button>
       </div>
 
-      <AIDataAnalyst analysisType={activeTab} />
+      <AIDataAnalyst analysisType={activeTab === 'risk' ? 'risks' : 'issues'} />
 
       <StatsCards data={data} />
       
-      <Tabs defaultValue="risks" value={activeTab} onValueChange={(value) => setActiveTab(value as 'risks' | 'issues')}>
+      <Tabs defaultValue="risk" value={activeTab} onValueChange={(value) => setActiveTab(value as 'risk' | 'issue')}>
         <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
-          <TabsTrigger value="risks">
+          <TabsTrigger value="risk">
             <Shield className="mr-2 h-4 w-4" />
             Risks
           </TabsTrigger>
-          <TabsTrigger value="issues">
+          <TabsTrigger value="issue">
             <AlertTriangle className="mr-2 h-4 w-4" />
             Issues
           </TabsTrigger>
@@ -67,10 +72,10 @@ export function DashboardClient({ data, products }: DashboardClientProps) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <TabsContent value="risks" className="mt-4">
+                <TabsContent value="risk" className="mt-4">
                     <DataTable columns={riskColumns} data={risks} tableId="risks" />
                 </TabsContent>
-                <TabsContent value="issues" className="mt-4">
+                <TabsContent value="issue" className="mt-4">
                     <DataTable columns={issueColumns} data={issues} tableId="issues" />
                 </TabsContent>
             </CardContent>

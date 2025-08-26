@@ -4,7 +4,6 @@
 import React from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import withAuth from "@/components/layout/with-auth";
@@ -19,7 +18,10 @@ function MainLayout({
   return (
       <div className="flex min-h-screen">
         <AppSidebar />
-        <div className="flex-1">
+        <div className="flex-1 bg-background/95">
+          <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(var(--grid-color)_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <div className="glow-1 absolute -z-10" />
+          <div className="glow-2 absolute -z-10" />
           <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
              <Link href="/profile" aria-label="View Profile">
                <Avatar>
