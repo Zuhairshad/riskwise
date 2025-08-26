@@ -12,6 +12,9 @@ export default function AuthLayout({
              <div className="w-full max-w-md">
                 {children}
             </div>
+            <footer className="mt-4 text-center text-xs text-muted-foreground">
+                <p>Design by Uzair Ahmad</p>
+            </footer>
         </main>
     );
 }

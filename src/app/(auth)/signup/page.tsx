@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckSquare } from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -51,17 +51,20 @@ export default function SignupPage() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+    <Card className="shadow-2xl">
+      <CardHeader className="space-y-4 text-center">
+        <div className="flex justify-center">
+            <CheckSquare className="h-12 w-12 text-primary" />
+        </div>
+        <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
         <CardDescription>
-          Enter your information to get started
+          Get started with Proactify+ in just a few clicks.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignUp} className="space-y-4">
         <div className="space-y-2">
-            <Label htmlFor="displayName">Name</Label>
+            <Label htmlFor="displayName">Full Name</Label>
             <Input
               id="displayName"
               type="text"
@@ -69,17 +72,19 @@ export default function SignupPage() {
               required
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+              className="h-11"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
               type="email"
-              placeholder="m@example.com"
+              placeholder="name@company.com"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="h-11"
             />
           </div>
           <div className="space-y-2">
@@ -88,18 +93,20 @@ export default function SignupPage() {
                 id="password" 
                 type="password" 
                 required 
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="h-11"
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-11" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign Up
+            Create Account
           </Button>
         </form>
-        <div className="mt-4 text-center text-sm">
+        <div className="mt-6 text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="underline">
+          <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
             Sign in
           </Link>
         </div>
