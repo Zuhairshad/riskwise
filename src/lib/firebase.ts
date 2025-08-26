@@ -4,7 +4,7 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyCyDlDFgpTAxkPibgdDs-vFuXA0Vy1ny5A",
   authDomain: "riskwise-c9df3.firebaseapp.com",
   projectId: "riskwise-c9df3",
@@ -21,4 +21,4 @@ const auth: Auth = getAuth(app);
 const db: Firestore = getFirestore(app);
 const storage = getStorage(app);
 
-export { db, auth, app, storage, firebaseConfig };
+export { db, auth, app, storage };
