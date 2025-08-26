@@ -3,42 +3,37 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper: only signed-in users
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // ---- Risks collection ----
     match /risks/{docId} {
-      allow list, read: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow read, write: if isSignedIn();
+    }
+    match /risks/{path=**} {
+      allow read, write: if isSignedIn();
     }
 
-    // ---- Issues collection ----
     match /issues/{docId} {
-      allow list, read: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow read, write: if isSignedIn();
+    }
+    match /issues/{path=**} {
+      allow read, write: if isSignedIn();
     }
 
-    // ---- Products collection ----
     match /products/{docId} {
-      // Allow read-only access for any authenticated user
-      allow list, read: if isSignedIn();
-      // Lock down writes
-      allow write: if false;
+      allow read: if isSignedIn();
+    }
+    match /products/{path=**} {
+      allow read: if isSignedIn();
     }
 
-    // ---- Users collection ----
     match /users/{userId} {
-       // Allow authenticated users to read any profile for leaderboards/etc.
-      allow list, read: if isSignedIn();
-       // Allow a user to update their own profile information.
-      allow update: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
-
-    // Default: lock everything else down
-    match /{document=**} {
-      allow read, write: if false;
+     match /users/{path=**} {
+      allow read: if isSignedIn();
     }
   }
 }
