@@ -37,7 +37,15 @@ export default async function LeaderboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Top Performers</CardTitle>
-                            <CardDescription>Ranked by total points earned from timely updates and closures.</CardDescription>
+                            <CardDescription>
+                                Points are awarded for proactive engagement. The breakdown is as follows:
+                                <ul className="list-disc pl-5 mt-2 text-xs">
+                                    <li><b>+10 points</b> for creating a new risk or issue.</li>
+                                    <li><b>+25 points</b> for closing an entry on or before its due date.</li>
+                                    <li><b>+15 points</b> for adding a helpful mitigation or resolution plan.</li>
+                                    <li><b>+5 points</b> for each status update on an open item.</li>
+                                </ul>
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
