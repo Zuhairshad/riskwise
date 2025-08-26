@@ -2,10 +2,11 @@
 'use server';
 
 import { db } from "@/lib/firebase";
-import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch, addDoc, setDoc } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 import { analyzeData as analyzeDataFlow } from "@/ai/flows/analyze-data-flow";
 import type { AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
+import { z } from "zod";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any; data: any } | null> {
     const collections = ['risks', 'issues'];
@@ -157,5 +158,63 @@ export async function analyzeData(input: AnalyzeDataInput) {
       console.error("Error analyzing data:", error);
       const errorMessage = error.message || "An unexpected error occurred during analysis.";
       return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
+    }
+}
+
+const BaseSchema = z.object({
+    id: z.string().optional(),
+    type: z.enum(['Risk', 'Issue']),
+    Title: z.string().min(1, "Title is required"),
+}).catchall(z.any());
+
+export async function importData(data: any[]) {
+    const validatedData = z.array(BaseSchema).safeParse(data);
+
+    if (!validatedData.success) {
+        console.error("Data validation failed:", validatedData.error);
+        return { success: false, message: "Invalid data structure provided." };
+    }
+    
+    let updatedCount = 0;
+    let createdCount = 0;
+    const errors: string[] = [];
+
+    const batch = writeBatch(db);
+
+    for (const item of validatedData.data) {
+        try {
+            const { id, type, ...itemData } = item;
+            const collectionName = type === 'Risk' ? 'risks' : 'issues';
+
+            if (id) {
+                // Update existing document
+                const docRef = doc(db, collectionName, id);
+                batch.update(docRef, itemData);
+                updatedCount++;
+            } else {
+                // Create new document
+                const newDocRef = doc(collection(db, collectionName));
+                batch.set(newDocRef, itemData);
+                createdCount++;
+            }
+        } catch (error: any) {
+            errors.push(`Failed to process item: ${item.Title || 'Unknown'}. Error: ${error.message}`);
+        }
+    }
+    
+    if (errors.length > 0) {
+        return { success: false, message: `Import failed with ${errors.length} errors.`, errors };
+    }
+
+    try {
+        await batch.commit();
+        revalidatePath('/');
+        return { 
+            success: true, 
+            message: `Import successful. ${createdCount} records created, ${updatedCount} records updated.` 
+        };
+    } catch (error: any) {
+        console.error("Error committing batch:", error);
+        return { success: false, message: `Failed to commit changes to database: ${error.message}` };
     }
 }
