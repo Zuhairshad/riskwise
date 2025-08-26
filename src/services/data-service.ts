@@ -35,8 +35,18 @@ function toSafeISOString(date: any): string | undefined {
 
 export async function getProducts(): Promise<Product[]> {
     const productsCollection = collection(db, 'products');
-    const productSnapshot = await getDocs(productsCollection);
-    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    console.log("[DIAGNOSTIC] Attempting to fetch 'products' collection...");
+    try {
+        const productSnapshot = await getDocs(productsCollection);
+        console.log(`[DIAGNOSTIC] Successfully fetched ${productSnapshot.docs.length} documents from 'products'.`);
+        if (productSnapshot.docs.length > 0) {
+            console.log("[DIAGNOSTIC] Sample product data:", productSnapshot.docs[0].data());
+        }
+        return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    } catch (error) {
+        console.error("[DIAGNOSTIC] ERROR fetching 'products' collection:", error);
+        throw new Error("Failed to fetch products due to permissions.");
+    }
 }
 
 export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue[]> {
@@ -47,6 +57,7 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
     const issuesCollection = collection(db, "issues");
 
     try {
+        console.log("[DIAGNOSTIC] Attempting to fetch 'risks' and 'issues' collections in parallel...");
         const [riskSnapshot, issueSnapshot] = await Promise.all([
             getDocs(risksCollection),
             getDocs(issuesCollection)
