@@ -35,11 +35,14 @@ const prompt = ai.definePrompt({
   Your primary task is to answer the user's question about their project data.
 
   You MUST follow these steps:
-  1. ALWAYS call the 'getProjectData' tool first to fetch the relevant data. Use the 'type' provided in the input to filter the data. You can also pass other filters to the tool based on the user's question (e.g., status, projectName).
-  2. Once you have the data from the tool, analyze it to answer the user's question.
-  3. Formulate a clear, natural language answer in the 'analysis' field.
-  4. Provide the raw data you received from the tool in the 'tableData' field.
-  5. If the user's question implies a need for a chart (e.g., "show me the breakdown by status", "compare projects"), create a simple chart data structure in the 'chartData' field. The chart data should be an array of objects, for example: [{ name: 'Category A', value: 10 }, { name: 'Category B', value: 20 }]. If no chart is relevant, leave this field null.
+  1. ALWAYS call the 'getProjectData' tool first to fetch the relevant data. You only need to pass the 'type' to the tool.
+  2. The tool will return ALL data of that type (e.g., all risks). YOU are responsible for filtering this data based on the user's specific question (e.g., by status, by project, by date).
+  3. Once you have filtered the data, analyze it to answer the user's question.
+  4. Formulate a clear, natural language answer in the 'analysis' field. This should directly address the user's question.
+  5. Provide the filtered data that you used for your analysis in the 'tableData' field.
+  6. If the user's question implies a need for a chart (e.g., "show me the breakdown by status", "compare projects by risk count"), create a simple chart data structure in the 'chartData' field. The chart data should be an array of objects, for example: [{ name: 'Category A', value: 10 }, { name: 'Category B', value: 20 }]. If no chart is relevant, leave this field null.
+  
+  IMPORTANT: If the tool returns no data or the filtered data is empty, your analysis should state that no relevant data was found. DO NOT make up data.
   
   Be concise and data-driven in your analysis.`,
   prompt: `User Question: {{{question}}}
@@ -57,7 +60,7 @@ const analyzeDataFlow = ai.defineFlow(
   async (input) => {
     const { output } = await prompt(input);
     if (!output) {
-      throw new Error("FLOW_EXECUTION_TIMEOUT: The AI model did not produce an output in time.");
+      throw new Error("FLOW_EXECUTION_TIMEOUT: The AI model did not produce an output in time. Please try a simpler question or check the server logs.");
     }
     return output;
   }
