@@ -36,8 +36,8 @@
     --sidebar-border: 240 5% 25%;
     --sidebar-ring: 210 90% 60%;
     
-    --glow-1: hsl(var(--primary) / 0.3);
-    --glow-2: hsl(var(--accent) / 0.3);
+    --glow-1: radial-gradient(circle at top left, hsl(var(--primary) / 0.5), transparent 40%);
+    --glow-2: radial-gradient(circle at bottom right, hsl(var(--accent) / 0.5), transparent 40%);
   }
 
   .dark {
@@ -72,8 +72,8 @@
     --sidebar-border: 220 15% 20%;
     --sidebar-ring: 210 90% 60%;
 
-    --glow-1: hsl(var(--primary) / 0.4);
-    --glow-2: hsl(var(--accent) / 0.4);
+    --glow-1: radial-gradient(circle at top left, hsl(var(--primary) / 0.4), transparent 50%);
+    --glow-2: radial-gradient(circle at bottom right, hsl(var(--accent) / 0.4), transparent 50%);
   }
   
   /* === Risk Theme === */
@@ -105,35 +105,33 @@
       content: "";
       position: fixed;
       z-index: -1;
-      filter: blur(100px);
+      filter: blur(120px);
       transition: background 0.5s ease-in-out;
   }
   .glow-1 {
-      height: 300px;
-      width: 480px;
-      border-radius: 50%;
-      left: -100px;
-      top: 0;
+      height: 400px;
+      width: 500px;
+      left: -150px;
+      top: -50px;
       background: var(--glow-1);
-      animation: pulse-1 15s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation: pulse-1 20s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   .glow-2 {
-      height: 300px;
-      width: 480px;
-      border-radius: 50%;
-      right: -100px;
-      bottom: 0;
+      height: 400px;
+      width: 500px;
+      right: -150px;
+      bottom: -50px;
       background: var(--glow-2);
-      animation: pulse-2 15s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation: pulse-2 20s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   @keyframes pulse-1 {
-      0%, 100% { opacity: 0.2; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(1.1) translateX(-50px); }
+      0%, 100% { opacity: 0.2; transform: scale(1) rotate(0deg); }
+      50% { opacity: 0.35; transform: scale(1.2) translateX(-50px) rotate(10deg); }
   }
   @keyframes pulse-2 {
-      0%, 100% { opacity: 0.2; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(1.1) translateY(-50px); }
+      0%, 100% { opacity: 0.2; transform: scale(1) rotate(0deg); }
+      50% { opacity: 0.35; transform: scale(1.2) translateY(-50px) rotate(-10deg); }
   }
 }
 
