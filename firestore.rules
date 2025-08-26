@@ -3,36 +3,42 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is signed in
+    // Helper: only signed-in users
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // Rules for the 'risks' collection
+    // ---- Risks collection ----
     match /risks/{docId} {
       allow list, read: if isSignedIn();
       allow create, update, delete: if isSignedIn();
     }
 
-    // Rules for the 'issues' collection
+    // ---- Issues collection ----
     match /issues/{docId} {
       allow list, read: if isSignedIn();
       allow create, update, delete: if isSignedIn();
     }
 
-    // Rules for the 'products' collection
+    // ---- Products collection ----
     match /products/{docId} {
+      // Allow read-only access for any authenticated user
       allow list, read: if isSignedIn();
-      // Products are managed in-app or via console, so writes can be restricted
-      allow create, update, delete: if isSignedIn(); 
+      // Lock down writes
+      allow write: if false;
     }
 
-    // Rules for the 'users' collection
-    match /users/{uid} {
-       // Users can read all profiles for leaderboard/display names
+    // ---- Users collection ----
+    match /users/{userId} {
+       // Allow authenticated users to read any profile for leaderboards/etc.
       allow list, read: if isSignedIn();
-      // A user can only write to their own document
-      allow create, update, delete: if isSignedIn() && request.auth.uid == uid;
+       // Allow a user to update their own profile information.
+      allow update: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Default: lock everything else down
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
