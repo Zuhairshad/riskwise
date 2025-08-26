@@ -15,13 +15,6 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
 });
 
-// One-time diagnostic log to verify client-side environment variables
-if (typeof window !== 'undefined') {
-  console.log(
-    `[DIAGNOSTIC] Firebase config loaded. Project ID: ${firebaseConfig.projectId}. Masked API Key: ${firebaseConfig.apiKey?.slice(0, 6)}...`
-  );
-}
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
