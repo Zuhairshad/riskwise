@@ -4,7 +4,7 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDjpBvQ6ixJjyZbXFJ4er9Ow8Du4dSb7Cs",
+  apiKey: "AIzaSyCyDlDFgpTAxkPibgdDs-vFuXA0Vy1ny5A",
   authDomain: "proactify-99042.firebaseapp.com",
   projectId: "proactify-99042",
   storageBucket: "proactify-99042.appspot.com",
