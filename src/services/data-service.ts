@@ -52,21 +52,20 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
             getDocs(issuesCollection)
         ]);
 
-        console.log(`Fetched ${riskSnapshot.docs.length} risks. Sample:`, riskSnapshot.docs.length > 0 ? riskSnapshot.docs[0].data() : "No documents");
-        console.log(`Fetched ${issueSnapshot.docs.length} issues. Sample:`, issueSnapshot.docs.length > 0 ? issueSnapshot.docs[0].data() : "No documents");
+        console.log(`[DATA-SERVICE] Fetched ${riskSnapshot.docs.length} risks. Sample:`, riskSnapshot.docs.length > 0 ? riskSnapshot.docs[0].data() : "No documents");
+        console.log(`[DATA-SERVICE] Fetched ${issueSnapshot.docs.length} issues. Sample:`, issueSnapshot.docs.length > 0 ? issueSnapshot.docs[0].data() : "No documents");
 
 
         const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
             const data = doc.data();
-            // Find project using the project code. This is the point of failure.
             const project = productList.find(p => p.code === data['Project Code']);
             return {
               ...data,
               id: doc.id,
               type: 'Risk',
               Title: data.Title || data.Description || 'Untitled Risk',
-              Status: data["Risk Status"] || 'Open', // Correctly map Risk Status
-              ProjectName: project?.name || data['Project Code'] || 'Unknown', // Assign the found project name
+              Status: data["Risk Status"] || 'Open',
+              ProjectName: project?.name || data['Project Code'] || 'Unknown',
               ProjectCode: data['Project Code'],
               DueDate: toSafeISOString(data.DueDate),
             } as unknown as RiskIssue;
@@ -93,13 +92,11 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
             return dateB - dateA;
         });
 
-        console.log(`Returning ${combinedData.length} combined items.`);
+        console.log(`[DATA-SERVICE] Returning ${combinedData.length} combined items.`);
         return combinedData;
 
     } catch (error) {
-        console.error("Error fetching risks and issues from Firestore:", error);
-        // In case of a permissions error or other issue, return an empty array
-        // to prevent the app from crashing. The error will be logged server-side.
+        console.error("[DATA-SERVICE] Error fetching risks and issues from Firestore:", error);
         return [];
     }
 }
