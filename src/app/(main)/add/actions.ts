@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from "zod";
@@ -51,6 +52,7 @@ export async function createRisk(values: z.infer<typeof riskFormSchema>) {
     try {
       await addDoc(collection(db, "risks"), parsed.data);
       revalidatePath('/');
+      revalidatePath('/dashboard');
       return { success: true, message: "Risk created successfully." };
     } catch (error) {
       console.error("Error creating risk:", error);
@@ -69,6 +71,7 @@ export async function createIssue(values: z.infer<typeof issueFormSchema>) {
     try {
         await addDoc(collection(db, "issues"), parsed.data);
         revalidatePath('/');
+        revalidatePath('/dashboard');
         return { success: true, message: "Issue created successfully." };
       } catch (error) {
         console.error("Error creating issue:", error);
