@@ -32,7 +32,7 @@ const DetailedSummarySchema = z.object({
     })).describe("A list of key metrics from the matched issue."),
     recommendation: z.string().describe("An AI-powered recommendation based on the historical data."),
 });
-export const SuggestSimilarIssuesOutputSchema = z.object({
+const SuggestSimilarIssuesOutputSchema = z.object({
   matchedIssue: MatchedIssueSchema.optional().describe('The existing issue that matches the description.'),
   rephrasedDescription: z.string().optional().describe('A rephrased version of the description for clarity if no match is found.'),
   detailedSummary: DetailedSummarySchema.optional().describe('A detailed, structured summary and analysis of the matched issue.'),

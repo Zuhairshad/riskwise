@@ -35,7 +35,7 @@ const DetailedSummarySchema = z.object({
     })).describe("A list of key metrics from the matched risk."),
     recommendation: z.string().describe("An AI-powered recommendation based on the historical data."),
 });
-export const SuggestSimilarRisksOutputSchema = z.object({
+const SuggestSimilarRisksOutputSchema = z.object({
   matchedRisk: MatchedRiskSchema.optional().describe('The existing risk that matches the description.'),
   rephrasedDescription: z.string().optional().describe('A rephrased version of the description for clarity if no match is found.'),
   detailedSummary: DetailedSummarySchema.optional().describe('A detailed, structured summary and analysis of the matched risk.'),
