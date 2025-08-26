@@ -52,14 +52,14 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
 
     const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
         const data = doc.data();
-        const product = productList.find(p => p.code === data['Project Code']);
+        const project = productList.find(p => p.code === data['Project Code']);
         return {
           ...data,
           id: doc.id,
           type: 'Risk',
           Title: data.Title || data.Description || 'Untitled Risk',
           Status: data["Risk Status"] || 'Open',
-          ProjectName: product?.name || data['Project Code'] || 'Unknown',
+          ProjectName: project?.name || data['Project Code'] || 'Unknown',
           ProjectCode: data['Project Code'],
           DueDate: toSafeISOString(data.DueDate),
         } as unknown as RiskIssue;
