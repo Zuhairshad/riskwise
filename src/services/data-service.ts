@@ -73,9 +73,9 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
           id: doc.id,
           type: 'Issue',
           Title: data.Title || 'Untitled Issue',
+          Status: data.Status || 'Open',
           ProjectName: data.ProjectName || 'Unknown',
           ProjectCode: product?.code || null,
-          Status: data.Status || 'Open',
           DueDate: toSafeISOString(data["Due Date"]),
         } as unknown as RiskIssue;
     });
