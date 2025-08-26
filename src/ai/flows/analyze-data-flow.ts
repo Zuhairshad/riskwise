@@ -32,6 +32,7 @@ const prompt = ai.definePrompt({
   input: { schema: AnalyzeDataInputSchema },
   output: { schema: AnalyzeDataOutputSchema },
   tools: [getProjectData],
+  model: googleAI.model('gemini-1.5-flash'),
   system: `You are an expert data analyst specializing in project management risks and issues.
   Your primary task is to answer the user's question about their project data.
 
@@ -49,7 +50,6 @@ const prompt = ai.definePrompt({
   prompt: `User Question: {{{question}}}
   Data Type: {{{type}}}
   `,
-  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const analyzeDataFlow = ai.defineFlow(

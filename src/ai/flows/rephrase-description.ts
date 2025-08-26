@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 const RephraseDescriptionInputSchema = z.object({
@@ -24,6 +25,7 @@ const rephraseDescriptionPrompt = ai.definePrompt({
   name: 'rephraseDescriptionPrompt',
   input: { schema: RephraseDescriptionInputSchema },
   output: { schema: RephraseDescriptionOutputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert technical writer.
   
     A user has entered the following description. Rephrase it to be clearer, more concise, and professionally worded.

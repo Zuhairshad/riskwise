@@ -27,13 +27,13 @@ const suggestCategoryPrompt = ai.definePrompt({
   name: 'suggestCategoryPrompt',
   input: { schema: SuggestCategoryInputSchema },
   output: { schema: SuggestCategoryOutputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert at categorizing project management issues.
   
   Based on the following issue description, suggest a relevant Category and Sub-category.
   The categories should be concise and professional.
   
   Description: {{{description}}}`,
-  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestCategoryFlow = ai.defineFlow(

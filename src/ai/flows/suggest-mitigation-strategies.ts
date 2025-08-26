@@ -30,11 +30,11 @@ const suggestMitigationStrategiesPrompt = ai.definePrompt({
   name: 'suggestMitigationStrategiesPrompt',
   input: { schema: SuggestMitigationStrategiesInputSchema },
   output: { schema: SuggestMitigationStrategiesOutputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an AI assistant specializing in suggesting mitigation strategies for risks and issues.
   Based on the description of the risk or issue, suggest 3 to 5 potential mitigation strategies.
   Description: {{{riskOrIssueDescription}}}
   Suggest mitigation strategies that are relevant and effective in addressing the described risk or issue.`,
-  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestMitigationStrategiesFlow = ai.defineFlow(

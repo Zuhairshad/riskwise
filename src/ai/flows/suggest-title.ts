@@ -26,6 +26,7 @@ const suggestTitlePrompt = ai.definePrompt({
     name: 'suggestTitlePrompt',
     input: {schema: SuggestTitleInputSchema},
     output: {schema: SuggestTitleOutputSchema},
+    model: googleAI.model('gemini-1.5-flash'),
     prompt: `You are an expert project manager. You are great at writing concise, clear, and descriptive titles.
 
     A user has entered the following description for a risk or issue. Based on this text, suggest a short, clear title. 
@@ -34,7 +35,6 @@ const suggestTitlePrompt = ai.definePrompt({
     Only return the suggested title in the 'title' field.
 
     Description: {{{description}}}`,
-    model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestTitleFlow = ai.defineFlow(

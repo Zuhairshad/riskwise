@@ -46,6 +46,7 @@ const suggestOrRephraseRiskPrompt = ai.definePrompt({
   name: 'suggestOrRephraseRiskPrompt',
   input: {schema: SuggestSimilarRisksInputSchema},
   output: {schema: SuggestSimilarRisksOutputSchema},
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert risk management analyst. A user is entering a new risk and you need to help them avoid duplicates by providing insightful analysis of past data.
   
   Current risk description:
@@ -63,7 +64,6 @@ const suggestOrRephraseRiskPrompt = ai.definePrompt({
         - In 'keyMetrics', extract the most important metrics from the matched risk, like 'Probability' and 'Impact Rating'. Format them clearly.
         - In 'recommendation', provide a clear, actionable recommendation for the user. For example, if a contingency plan was missing before, suggest adding one now.
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' and 'detailedSummary' empty.`,
-  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestSimilarRisksFlow = ai.defineFlow(

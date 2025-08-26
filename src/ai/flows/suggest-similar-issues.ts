@@ -44,6 +44,7 @@ const suggestOrRephraseIssuePrompt = ai.definePrompt({
   name: 'suggestOrRephraseIssuePrompt',
   input: {schema: SuggestSimilarIssuesInputSchema},
   output: {schema: SuggestSimilarIssuesOutputSchema},
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert project manager. A user is entering a new issue and you need to help them avoid duplicates by providing insightful analysis of past data.
 
   Current issue description:
@@ -61,7 +62,6 @@ const suggestOrRephraseIssuePrompt = ai.definePrompt({
         - In 'keyMetrics', extract the most important metrics from the matched issue, like 'Priority' and 'Impact'. Format them clearly.
         - In 'recommendation', provide a clear, actionable recommendation for the user. For example, if a resolution was particularly effective, highlight it.
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' and 'detailedSummary' empty.`,
-  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestSimilarIssuesFlow = ai.defineFlow(
