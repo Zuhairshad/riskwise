@@ -80,5 +80,9 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
         } as unknown as RiskIssue;
     });
 
-    return [...risks, ...issues];
+    return [...risks, ...issues].sort((a,b) => {
+        const dateA = a.DueDate ? new Date(a.DueDate).getTime() : 0;
+        const dateB = b.DueDate ? new Date(b.DueDate).getTime() : 0;
+        return dateB - dateA;
+    });
 }
