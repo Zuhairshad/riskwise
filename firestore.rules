@@ -8,40 +8,31 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // ---- Risks Collection ----
-    match /risks/{riskId} {
-      // Allow individual document read/write for any signed-in user.
-      allow read, write: if isSignedIn();
+    // Rules for the 'risks' collection
+    match /risks/{docId} {
+      allow list, read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
-    // **Crucially, also allow LISTING the entire collection for signed-in users.**
-    allow list on /risks: if isSignedIn();
 
-    // ---- Issues Collection ----
-    match /issues/{issueId} {
-      // Allow individual document read/write for any signed-in user.
-      allow read, write: if isSignedIn();
+    // Rules for the 'issues' collection
+    match /issues/{docId} {
+      allow list, read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
-    // **Crucially, also allow LISTING the entire collection for signed-in users.**
-    allow list on /issues: if isSignedIn();
 
-    // ---- Products Collection ----
-    match /products/{productId} {
-      // Allow individual document reads for any signed-in user.
-      allow read: if isSignedIn();
-      // Products are managed elsewhere, so client writes are disabled.
-      allow write: if false;
+    // Rules for the 'products' collection
+    match /products/{docId} {
+      allow list, read: if isSignedIn();
+      // Products are managed in-app or via console, so writes can be restricted
+      allow create, update, delete: if isSignedIn(); 
     }
-    // **Crucially, also allow LISTING the entire collection for signed-in users.**
-    allow list on /products: if isSignedIn();
 
-    // ---- Users Collection ----
-    match /users/{userId} {
-      // Allow reading any user's profile.
-      allow read: if isSignedIn();
-      // Only allow a user to write to their own profile.
-      allow write: if isSignedIn() && request.auth.uid == userId;
+    // Rules for the 'users' collection
+    match /users/{uid} {
+       // Users can read all profiles for leaderboard/display names
+      allow list, read: if isSignedIn();
+      // A user can only write to their own document
+      allow create, update, delete: if isSignedIn() && request.auth.uid == uid;
     }
-    // **Crucially, also allow LISTING the entire collection for signed-in users.**
-    allow list on /users: if isSignedIn();
   }
 }
