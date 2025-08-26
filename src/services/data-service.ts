@@ -52,7 +52,9 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
             getDocs(issuesCollection)
         ]);
 
-        console.log(`Fetched ${riskSnapshot.docs.length} risks and ${issueSnapshot.docs.length} issues.`);
+        console.log(`Fetched ${riskSnapshot.docs.length} risks. Sample:`, riskSnapshot.docs.length > 0 ? riskSnapshot.docs[0].data() : "No documents");
+        console.log(`Fetched ${issueSnapshot.docs.length} issues. Sample:`, issueSnapshot.docs.length > 0 ? issueSnapshot.docs[0].data() : "No documents");
+
 
         const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
             const data = doc.data();
