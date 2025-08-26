@@ -1,5 +1,4 @@
 
-'use server';
 /**
  * @fileOverview A Genkit tool for fetching project risk and issue data from Firestore.
  */
