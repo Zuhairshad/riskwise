@@ -3,29 +3,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper: only signed-in users
+    // Helper function to check if a user is signed in
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // Allow read/write for authenticated users on risks and issues
-    match /risks/{docId} {
-      allow read, create, update, delete: if isSignedIn();
+    // ---- Risks Collection ----
+    match /risks/{riskId} {
+      // Allow individual document read/write for any signed-in user.
+      allow read, write: if isSignedIn();
     }
+    // **Crucially, also allow LISTING the entire collection for signed-in users.**
+    allow list on /risks: if isSignedIn();
 
-    match /issues/{docId} {
-      allow read, create, update, delete: if isSignedIn();
+    // ---- Issues Collection ----
+    match /issues/{issueId} {
+      // Allow individual document read/write for any signed-in user.
+      allow read, write: if isSignedIn();
     }
-    
-    // Allow read access for products and users by any signed-in user
-    match /products/{docId} {
-        allow read: if isSignedIn();
-    }
+    // **Crucially, also allow LISTING the entire collection for signed-in users.**
+    allow list on /issues: if isSignedIn();
 
+    // ---- Products Collection ----
+    match /products/{productId} {
+      // Allow individual document reads for any signed-in user.
+      allow read: if isSignedIn();
+      // Products are managed elsewhere, so client writes are disabled.
+      allow write: if false;
+    }
+    // **Crucially, also allow LISTING the entire collection for signed-in users.**
+    allow list on /products: if isSignedIn();
+
+    // ---- Users Collection ----
     match /users/{userId} {
-        allow read: if isSignedIn();
-        // Allow users to update their own profile
-        allow update: if isSignedIn() && request.auth.uid == userId;
+      // Allow reading any user's profile.
+      allow read: if isSignedIn();
+      // Only allow a user to write to their own profile.
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
+    // **Crucially, also allow LISTING the entire collection for signed-in users.**
+    allow list on /users: if isSignedIn();
   }
 }
