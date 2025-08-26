@@ -3,7 +3,7 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, firebaseConfig } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +14,13 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
 });
+
+// One-time diagnostic log to verify client-side environment variables
+if (typeof window !== 'undefined') {
+  console.log(
+    `[DIAGNOSTIC] Firebase config loaded. Project ID: ${firebaseConfig.projectId}. Masked API Key: ${firebaseConfig.apiKey?.slice(0, 6)}...`
+  );
+}
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

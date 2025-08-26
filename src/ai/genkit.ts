@@ -1,8 +1,12 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 
-// This AI configuration will now use your specified key for all generative AI operations.
-// It is recommended to move this key to a secure environment variable in a production setup.
+// This AI configuration now uses the GEMINI_API_KEY from your .env file for all generative AI operations.
 export const ai = genkit({
-  plugins: [googleAI({apiKey: "AIzaSyCyDlDFgpTAxkPibgdDs-vFuXA0Vy1ny5A", apiVersion: "v1beta"})],
+  plugins: [
+    googleAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        apiVersion: "v1beta",
+    }),
+  ],
 });
