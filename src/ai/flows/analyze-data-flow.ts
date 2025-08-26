@@ -48,7 +48,7 @@ const prompt = ai.definePrompt({
   prompt: `User Question: {{{question}}}
   Data Type: {{{type}}}
   `,
-  model: 'googleai/gemini-1.5-flash-preview',
+  model: 'googleai/gemini-1.5-flash',
 });
 
 const analyzeDataFlow = ai.defineFlow(

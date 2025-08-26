@@ -32,7 +32,7 @@ const suggestCategoryPrompt = ai.definePrompt({
   The categories should be concise and professional.
   
   Description: {{{description}}}`,
-  model: 'googleai/gemini-1.5-flash-preview',
+  model: 'googleai/gemini-1.5-flash',
 });
 
 const suggestCategoryFlow = ai.defineFlow(
