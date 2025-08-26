@@ -35,43 +35,26 @@ function toSafeISOString(date: any): string | undefined {
 
 export async function getProducts(): Promise<Product[]> {
     const productsCollection = collection(db, 'products');
-    console.log("[DIAGNOSTIC] Attempting to fetch 'products' collection...");
     try {
         const productSnapshot = await getDocs(productsCollection);
-        console.log(`[DIAGNOSTIC] Successfully fetched ${productSnapshot.docs.length} documents from 'products'.`);
-        if (productSnapshot.docs.length > 0) {
-            console.log("[DIAGNOSTIC] Sample product data:", productSnapshot.docs[0].data());
-        }
         return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
     } catch (error) {
-        console.error("[DIAGNOSTIC] ERROR fetching 'products' collection:", error);
-        throw new Error("Failed to fetch products due to permissions.");
+        console.error("Error fetching 'products' collection:", error);
+        return [];
     }
 }
 
 export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue[]> {
-    console.log("--- Starting Diagnostic Data Fetch ---");
     const productList = products || await getProducts();
     
     const risksCollection = collection(db, "risks");
     const issuesCollection = collection(db, "issues");
 
     try {
-        console.log("[DIAGNOSTIC] Attempting to fetch 'risks' and 'issues' collections in parallel...");
         const [riskSnapshot, issueSnapshot] = await Promise.all([
             getDocs(risksCollection),
             getDocs(issuesCollection)
         ]);
-
-        console.log(`[DIAGNOSTIC] Fetched ${riskSnapshot.docs.length} documents from 'risks' collection.`);
-        if (riskSnapshot.docs.length > 0) {
-            console.log("[DIAGNOSTIC] Sample risk document data:", riskSnapshot.docs[0].data());
-        }
-
-        console.log(`[DIAGNOSTIC] Fetched ${issueSnapshot.docs.length} documents from 'issues' collection.`);
-        if (issueSnapshot.docs.length > 0) {
-            console.log("[DIAGNOSTIC] Sample issue document data:", issueSnapshot.docs[0].data());
-        }
 
         const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
             const data = doc.data();
@@ -109,12 +92,10 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
             return dateB - dateA;
         });
 
-        console.log(`[DIAGNOSTIC] Returning ${combinedData.length} combined items after processing.`);
-        console.log("--- Ending Diagnostic Data Fetch ---");
         return combinedData;
 
     } catch (error) {
-        console.error("[DIAGNOSTIC] Error fetching data from Firestore:", error);
+        console.error("Error fetching data from Firestore:", error);
         // In case of an error (e.g., permissions), return an empty array to prevent app crash
         return [];
     }
