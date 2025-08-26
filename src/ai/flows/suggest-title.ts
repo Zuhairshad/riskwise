@@ -33,7 +33,7 @@ const suggestTitlePrompt = ai.definePrompt({
     Only return the suggested title in the 'title' field.
 
     Description: {{{description}}}`,
-    model: 'googleai/gemini-1.5-pro-preview',
+    model: 'googleai/gemini-1.5-flash-preview',
 });
 
 const suggestTitleFlow = ai.defineFlow(
