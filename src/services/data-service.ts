@@ -40,7 +40,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue[]> {
-    console.log("Fetching risks and issues...");
+    console.log("--- Starting Diagnostic Data Fetch ---");
     const productList = products || await getProducts();
     
     const risksCollection = collection(db, "risks");
@@ -52,9 +52,15 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
             getDocs(issuesCollection)
         ]);
 
-        console.log(`[DATA-SERVICE] Fetched ${riskSnapshot.docs.length} risks. Sample:`, riskSnapshot.docs.length > 0 ? riskSnapshot.docs[0].data() : "No documents");
-        console.log(`[DATA-SERVICE] Fetched ${issueSnapshot.docs.length} issues. Sample:`, issueSnapshot.docs.length > 0 ? issueSnapshot.docs[0].data() : "No documents");
+        console.log(`[DIAGNOSTIC] Fetched ${riskSnapshot.docs.length} documents from 'risks' collection.`);
+        if (riskSnapshot.docs.length > 0) {
+            console.log("[DIAGNOSTIC] Sample risk document data:", riskSnapshot.docs[0].data());
+        }
 
+        console.log(`[DIAGNOSTIC] Fetched ${issueSnapshot.docs.length} documents from 'issues' collection.`);
+        if (issueSnapshot.docs.length > 0) {
+            console.log("[DIAGNOSTIC] Sample issue document data:", issueSnapshot.docs[0].data());
+        }
 
         const risks: RiskIssue[] = riskSnapshot.docs.map(doc => {
             const data = doc.data();
@@ -92,11 +98,13 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
             return dateB - dateA;
         });
 
-        console.log(`[DATA-SERVICE] Returning ${combinedData.length} combined items.`);
+        console.log(`[DIAGNOSTIC] Returning ${combinedData.length} combined items after processing.`);
+        console.log("--- Ending Diagnostic Data Fetch ---");
         return combinedData;
 
     } catch (error) {
-        console.error("[DATA-SERVICE] Error fetching risks and issues from Firestore:", error);
+        console.error("[DIAGNOSTIC] Error fetching data from Firestore:", error);
+        // In case of an error (e.g., permissions), return an empty array to prevent app crash
         return [];
     }
 }
