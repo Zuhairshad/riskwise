@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 const SuggestMitigationStrategiesInputSchema = z.object({
@@ -33,7 +34,7 @@ const suggestMitigationStrategiesPrompt = ai.definePrompt({
   Based on the description of the risk or issue, suggest 3 to 5 potential mitigation strategies.
   Description: {{{riskOrIssueDescription}}}
   Suggest mitigation strategies that are relevant and effective in addressing the described risk or issue.`,
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestMitigationStrategiesFlow = ai.defineFlow(

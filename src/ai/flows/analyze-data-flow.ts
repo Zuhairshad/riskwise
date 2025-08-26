@@ -12,6 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { getProjectData } from '../tools/get-project-data-tool';
+import { googleAI } from '@genkit-ai/googleai';
 
 const AnalyzeDataInputSchema = z.object({
   question: z.string().describe("The user's question about the data."),
@@ -48,7 +49,7 @@ const prompt = ai.definePrompt({
   prompt: `User Question: {{{question}}}
   Data Type: {{{type}}}
   `,
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const analyzeDataFlow = ai.defineFlow(

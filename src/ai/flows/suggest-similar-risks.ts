@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 const SuggestSimilarRisksInputSchema = z.object({
@@ -62,7 +63,7 @@ const suggestOrRephraseRiskPrompt = ai.definePrompt({
         - In 'keyMetrics', extract the most important metrics from the matched risk, like 'Probability' and 'Impact Rating'. Format them clearly.
         - In 'recommendation', provide a clear, actionable recommendation for the user. For example, if a contingency plan was missing before, suggest adding one now.
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' and 'detailedSummary' empty.`,
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestSimilarRisksFlow = ai.defineFlow(

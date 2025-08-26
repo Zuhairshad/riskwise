@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 const SuggestTitleInputSchema = z.object({
@@ -33,7 +34,7 @@ const suggestTitlePrompt = ai.definePrompt({
     Only return the suggested title in the 'title' field.
 
     Description: {{{description}}}`,
-    model: 'googleai/gemini-1.5-flash',
+    model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestTitleFlow = ai.defineFlow(

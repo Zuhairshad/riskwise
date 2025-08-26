@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 const SuggestCategoryInputSchema = z.object({
@@ -32,7 +33,7 @@ const suggestCategoryPrompt = ai.definePrompt({
   The categories should be concise and professional.
   
   Description: {{{description}}}`,
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
 });
 
 const suggestCategoryFlow = ai.defineFlow(
