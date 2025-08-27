@@ -32,7 +32,7 @@ const suggestTitlePrompt = ai.definePrompt({
     Description: {{{description}}}`,
 });
 
-const suggestTitleFlow = ai.defineFlow(
+export const suggestTitleFlow = ai.defineFlow(
   {
     name: 'suggestTitleFlow',
     inputSchema: SuggestTitleInputSchema,
@@ -43,7 +43,3 @@ const suggestTitleFlow = ai.defineFlow(
     return output!;
   }
 );
-
-export async function suggestTitle(input: SuggestTitleInput): Promise<SuggestTitleOutput> {
-    return await suggestTitleFlow(input);
-}

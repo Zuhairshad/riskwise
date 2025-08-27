@@ -32,7 +32,7 @@ const suggestMitigationStrategiesPrompt = ai.definePrompt({
   Suggest mitigation strategies that are relevant and effective in addressing the described risk or issue.`,
 });
 
-const suggestMitigationStrategiesFlow = ai.defineFlow(
+export const suggestMitigationStrategiesFlow = ai.defineFlow(
   {
     name: 'suggestMitigationStrategiesFlow',
     inputSchema: SuggestMitigationStrategiesInputSchema,
@@ -43,7 +43,3 @@ const suggestMitigationStrategiesFlow = ai.defineFlow(
     return output!;
   }
 );
-
-export async function suggestMitigationStrategies(input: SuggestMitigationStrategiesInput): Promise<SuggestMitigationStrategiesOutput> {
-    return await suggestMitigationStrategiesFlow(input);
-}

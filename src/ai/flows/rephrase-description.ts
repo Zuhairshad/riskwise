@@ -31,7 +31,7 @@ const rephraseDescriptionPrompt = ai.definePrompt({
     Original Description: {{{description}}}`,
 });
 
-const rephraseDescriptionFlow = ai.defineFlow(
+export const rephraseDescriptionFlow = ai.defineFlow(
   {
     name: 'rephraseDescriptionFlow',
     inputSchema: RephraseDescriptionInputSchema,
@@ -42,7 +42,3 @@ const rephraseDescriptionFlow = ai.defineFlow(
     return output!;
   }
 );
-
-export async function rephraseDescription(input: RephraseDescriptionInput): Promise<RephraseDescriptionOutput> {
-    return await rephraseDescriptionFlow(input);
-}

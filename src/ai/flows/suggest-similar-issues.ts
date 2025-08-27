@@ -59,7 +59,7 @@ const suggestOrRephraseIssuePrompt = ai.definePrompt({
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' and 'detailedSummary' empty.`,
 });
 
-const suggestSimilarIssuesFlow = ai.defineFlow(
+export const suggestSimilarIssuesFlow = ai.defineFlow(
   {
     name: 'suggestSimilarIssuesFlow',
     inputSchema: SuggestSimilarIssuesInputSchema,
@@ -70,7 +70,3 @@ const suggestSimilarIssuesFlow = ai.defineFlow(
     return output!;
   }
 );
-
-export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
-    return await suggestSimilarIssuesFlow(input);
-}

@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-const analyzeDataFlow = ai.defineFlow(
+export const analyzeDataFlow = ai.defineFlow(
   {
     name: 'analyzeDataFlow',
     inputSchema: AnalyzeDataInputSchema,
@@ -61,7 +61,3 @@ const analyzeDataFlow = ai.defineFlow(
     return output;
   }
 );
-
-export async function analyzeData(input: AnalyzeDataInput): Promise<AnalyzeDataOutput> {
-  return analyzeDataFlow(input);
-}

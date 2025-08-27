@@ -61,7 +61,7 @@ const suggestOrRephraseRiskPrompt = ai.definePrompt({
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' and 'detailedSummary' empty.`,
 });
 
-const suggestSimilarRisksFlow = ai.defineFlow(
+export const suggestSimilarRisksFlow = ai.defineFlow(
   {
     name: 'suggestSimilarRisksFlow',
     inputSchema: SuggestSimilarRisksInputSchema,
@@ -72,7 +72,3 @@ const suggestSimilarRisksFlow = ai.defineFlow(
     return output!;
   }
 );
-
-export async function suggestSimilarRisks(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
-    return await suggestSimilarRisksFlow(input);
-}

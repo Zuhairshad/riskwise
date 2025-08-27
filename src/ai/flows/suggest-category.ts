@@ -31,7 +31,7 @@ const suggestCategoryPrompt = ai.definePrompt({
   Description: {{{description}}}`,
 });
 
-const suggestCategoryFlow = ai.defineFlow(
+export const suggestCategoryFlow = ai.defineFlow(
   {
     name: 'suggestCategoryFlow',
     inputSchema: SuggestCategoryInputSchema,
@@ -42,7 +42,3 @@ const suggestCategoryFlow = ai.defineFlow(
     return output!;
   }
 );
-
-export async function suggestCategory(input: SuggestCategoryInput): Promise<SuggestCategoryOutput> {
-    return await suggestCategoryFlow(input);
-}

@@ -4,21 +4,18 @@
 import { db } from "@/lib/firebase";
 import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch, addDoc, setDoc } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
-import { analyzeData as analyzeDataFlow } from "@/ai/flows/analyze-data-flow";
-import type { AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
-import { rephraseDescription as rephraseDescriptionFlow } from "@/ai/flows/rephrase-description";
-import type { RephraseDescriptionInput } from "@/ai/flows/rephrase-description";
-import { suggestCategory as suggestCategoryFlow } from "@/ai/flows/suggest-category";
-import type { SuggestCategoryInput } from "@/ai/flows/suggest-category";
-import { suggestMitigationStrategies as suggestMitigationStrategiesFlow } from "@/ai/flows/suggest-mitigation-strategies";
-import type { SuggestMitigationStrategiesInput } from "@/ai/flows/suggest-mitigation-strategies";
-import { suggestSimilarIssues as suggestSimilarIssuesFlow } from "@/ai/flows/suggest-similar-issues";
-import type { SuggestSimilarIssuesInput } from "@/ai/flows/suggest-similar-issues";
-import { suggestSimilarRisks as suggestSimilarRisksFlow } from "@/ai/flows/suggest-similar-risks";
-import type { SuggestSimilarRisksInput } from "@/ai/flows/suggest-similar-risks";
-import { suggestTitle as suggestTitleFlow } from "@/ai/flows/suggest-title";
-import type { SuggestTitleInput } from "@/ai/flows/suggest-title";
 import { z } from "zod";
+import type { 
+    AnalyzeDataInput,
+    RephraseDescriptionInput,
+    SuggestCategoryInput,
+    SuggestMitigationStrategiesInput,
+    SuggestSimilarIssuesInput,
+    SuggestSimilarRisksInput,
+    SuggestTitleInput
+} from "@/ai/flows";
+import { getFlows } from "@/ai/genkit-factory";
+
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any; data: any } | null> {
     const collections = ['risks', 'issues'];
@@ -161,18 +158,6 @@ export async function changeRiskIssueType(id: string, newType: 'Risk' | 'Issue')
     }
 }
 
-
-export async function analyzeData(input: AnalyzeDataInput) {
-    try {
-      const result = await analyzeDataFlow(input);
-      return { success: true, ...result };
-    } catch (error: any) {
-      console.error("Error analyzing data:", error);
-      const errorMessage = error.message || "An unexpected error occurred during analysis.";
-      return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
-    }
-}
-
 const BaseSchema = z.object({
     id: z.string().optional(),
     type: z.enum(['Risk', 'Issue']),
@@ -233,21 +218,46 @@ export async function importData(data: any[]) {
 
 
 // AI Server Actions
+export async function analyzeData(input: AnalyzeDataInput) {
+    'use server';
+    try {
+      const { analyzeDataFlow } = await getFlows();
+      const result = await analyzeDataFlow(input);
+      return { success: true, ...result };
+    } catch (error: any) {
+      console.error("Error analyzing data:", error);
+      const errorMessage = error.message || "An unexpected error occurred during analysis.";
+      return { success: false, message: `Failed to get analysis from AI: ${errorMessage}` };
+    }
+}
+
 export async function rephraseDescription(input: RephraseDescriptionInput) {
+    'use server';
+    const { rephraseDescriptionFlow } = await getFlows();
     return rephraseDescriptionFlow(input);
 }
 export async function suggestCategory(input: SuggestCategoryInput) {
+    'use server';
+    const { suggestCategoryFlow } = await getFlows();
     return suggestCategoryFlow(input);
 }
 export async function suggestMitigationStrategies(input: SuggestMitigationStrategiesInput) {
+    'use server';
+    const { suggestMitigationStrategiesFlow } = await getFlows();
     return suggestMitigationStrategiesFlow(input);
 }
 export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput) {
+    'use server';
+    const { suggestSimilarIssuesFlow } = await getFlows();
     return suggestSimilarIssuesFlow(input);
 }
 export async function suggestSimilarRisks(input: SuggestSimilarRisksInput) {
+    'use server';
+    const { suggestSimilarRisksFlow } = await getFlows();
     return suggestSimilarRisksFlow(input);
 }
 export async function suggestTitle(input: SuggestTitleInput) {
+    'use server';
+    const { suggestTitleFlow } = await getFlows();
     return suggestTitleFlow(input);
 }
