@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit tool for fetching project risk and issue data from Firestore.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { z } from 'zod';
 import { getRisksAndIssues } from '@/services/data-service';

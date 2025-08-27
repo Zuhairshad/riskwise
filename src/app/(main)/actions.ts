@@ -7,12 +7,19 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { 
     AnalyzeDataInput,
+    AnalyzeDataOutput,
     RephraseDescriptionInput,
+    RephraseDescriptionOutput,
     SuggestCategoryInput,
+    SuggestCategoryOutput,
     SuggestMitigationStrategiesInput,
+    SuggestMitigationStrategiesOutput,
     SuggestSimilarIssuesInput,
+    SuggestSimilarIssuesOutput,
     SuggestSimilarRisksInput,
-    SuggestTitleInput
+    SuggestSimilarRisksOutput,
+    SuggestTitleInput,
+    SuggestTitleOutput
 } from "@/ai/flows";
 import { getFlows } from "@/ai/genkit-factory";
 
@@ -218,8 +225,7 @@ export async function importData(data: any[]) {
 
 
 // AI Server Actions
-export async function analyzeData(input: AnalyzeDataInput) {
-    'use server';
+export async function analyzeData(input: AnalyzeDataInput): Promise<{ success: boolean; message?: string } & Partial<AnalyzeDataOutput>> {
     try {
       const { analyzeDataFlow } = await getFlows();
       const result = await analyzeDataFlow(input);
@@ -231,33 +237,27 @@ export async function analyzeData(input: AnalyzeDataInput) {
     }
 }
 
-export async function rephraseDescription(input: RephraseDescriptionInput) {
-    'use server';
+export async function rephraseDescription(input: RephraseDescriptionInput): Promise<RephraseDescriptionOutput> {
     const { rephraseDescriptionFlow } = await getFlows();
     return rephraseDescriptionFlow(input);
 }
-export async function suggestCategory(input: SuggestCategoryInput) {
-    'use server';
+export async function suggestCategory(input: SuggestCategoryInput): Promise<SuggestCategoryOutput> {
     const { suggestCategoryFlow } = await getFlows();
     return suggestCategoryFlow(input);
 }
-export async function suggestMitigationStrategies(input: SuggestMitigationStrategiesInput) {
-    'use server';
+export async function suggestMitigationStrategies(input: SuggestMitigationStrategiesInput): Promise<SuggestMitigationStrategiesOutput> {
     const { suggestMitigationStrategiesFlow } = await getFlows();
     return suggestMitigationStrategiesFlow(input);
 }
-export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput) {
-    'use server';
+export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
     const { suggestSimilarIssuesFlow } = await getFlows();
     return suggestSimilarIssuesFlow(input);
 }
-export async function suggestSimilarRisks(input: SuggestSimilarRisksInput) {
-    'use server';
+export async function suggestSimilarRisks(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
     const { suggestSimilarRisksFlow } = await getFlows();
     return suggestSimilarRisksFlow(input);
 }
-export async function suggestTitle(input: SuggestTitleInput) {
-    'use server';
+export async function suggestTitle(input: SuggestTitleInput): Promise<SuggestTitleOutput> {
     const { suggestTitleFlow } = await getFlows();
     return suggestTitleFlow(input);
 }

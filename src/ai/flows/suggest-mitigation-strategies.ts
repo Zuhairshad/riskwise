@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for suggesting mitigation strategies for a risk or issue.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
@@ -32,7 +32,7 @@ const suggestMitigationStrategiesPrompt = ai.definePrompt({
   Suggest mitigation strategies that are relevant and effective in addressing the described risk or issue.`,
 });
 
-export const suggestMitigationStrategiesFlow = ai.defineFlow(
+const suggestMitigationStrategiesFlowDefinition = ai.defineFlow(
   {
     name: 'suggestMitigationStrategiesFlow',
     inputSchema: SuggestMitigationStrategiesInputSchema,
@@ -43,3 +43,7 @@ export const suggestMitigationStrategiesFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function suggestMitigationStrategiesFlow(input: SuggestMitigationStrategiesInput): Promise<SuggestMitigationStrategiesOutput> {
+    return suggestMitigationStrategiesFlowDefinition(input);
+}

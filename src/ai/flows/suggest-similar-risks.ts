@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for suggesting similar risks to avoid duplicates.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
@@ -61,7 +61,7 @@ const suggestOrRephraseRiskPrompt = ai.definePrompt({
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original description to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedRisk' and 'detailedSummary' empty.`,
 });
 
-export const suggestSimilarRisksFlow = ai.defineFlow(
+const suggestSimilarRisksFlowDefinition = ai.defineFlow(
   {
     name: 'suggestSimilarRisksFlow',
     inputSchema: SuggestSimilarRisksInputSchema,
@@ -72,3 +72,7 @@ export const suggestSimilarRisksFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function suggestSimilarRisksFlow(input: SuggestSimilarRisksInput): Promise<SuggestSimilarRisksOutput> {
+  return suggestSimilarRisksFlowDefinition(input);
+}

@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for suggesting a title based on a description.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
@@ -32,7 +32,7 @@ const suggestTitlePrompt = ai.definePrompt({
     Description: {{{description}}}`,
 });
 
-export const suggestTitleFlow = ai.defineFlow(
+const suggestTitleFlowDefinition = ai.defineFlow(
   {
     name: 'suggestTitleFlow',
     inputSchema: SuggestTitleInputSchema,
@@ -43,3 +43,7 @@ export const suggestTitleFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function suggestTitleFlow(input: SuggestTitleInput): Promise<SuggestTitleOutput> {
+  return suggestTitleFlowDefinition(input);
+}

@@ -3,7 +3,7 @@
  * @fileOverview A Genkit flow for analyzing risk and issue data.
  * This flow uses a tool to fetch data and then provides a structured analysis.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { z } from 'zod';
 import { getProjectData } from '../tools/get-project-data-tool';
@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-export const analyzeDataFlow = ai.defineFlow(
+const analyzeDataFlowDefinition = ai.defineFlow(
   {
     name: 'analyzeDataFlow',
     inputSchema: AnalyzeDataInputSchema,
@@ -61,3 +61,7 @@ export const analyzeDataFlow = ai.defineFlow(
     return output;
   }
 );
+
+export async function analyzeDataFlow(input: AnalyzeDataInput): Promise<AnalyzeDataOutput> {
+  return analyzeDataFlowDefinition(input);
+}

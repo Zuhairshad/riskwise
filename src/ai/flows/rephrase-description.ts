@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for rephrasing a description to be clearer and more professional.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ const rephraseDescriptionPrompt = ai.definePrompt({
     Original Description: {{{description}}}`,
 });
 
-export const rephraseDescriptionFlow = ai.defineFlow(
+const rephraseDescriptionFlowDefinition = ai.defineFlow(
   {
     name: 'rephraseDescriptionFlow',
     inputSchema: RephraseDescriptionInputSchema,
@@ -42,3 +42,7 @@ export const rephraseDescriptionFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function rephraseDescriptionFlow(input: RephraseDescriptionInput): Promise<RephraseDescriptionOutput> {
+  return rephraseDescriptionFlowDefinition(input);
+}

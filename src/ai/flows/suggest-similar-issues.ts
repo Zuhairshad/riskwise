@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for suggesting similar issues to avoid duplicates.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
@@ -59,7 +59,7 @@ const suggestOrRephraseIssuePrompt = ai.definePrompt({
   - If you do not find a strong match, your secondary task is to help the user improve their entry. Rephrase the user's original discussion to be clearer, more concise, and professionally worded. Return this improved text in the 'rephrasedDescription' field and leave 'matchedIssue' and 'detailedSummary' empty.`,
 });
 
-export const suggestSimilarIssuesFlow = ai.defineFlow(
+const suggestSimilarIssuesFlowDefinition = ai.defineFlow(
   {
     name: 'suggestSimilarIssuesFlow',
     inputSchema: SuggestSimilarIssuesInputSchema,
@@ -70,3 +70,7 @@ export const suggestSimilarIssuesFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function suggestSimilarIssuesFlow(input: SuggestSimilarIssuesInput): Promise<SuggestSimilarIssuesOutput> {
+  return suggestSimilarIssuesFlowDefinition(input);
+}

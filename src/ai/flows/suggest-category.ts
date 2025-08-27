@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for suggesting a category and sub-category for an issue.
  */
-
+'use server';
 import { ai } from '@/ai/client';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ const suggestCategoryPrompt = ai.definePrompt({
   Description: {{{description}}}`,
 });
 
-export const suggestCategoryFlow = ai.defineFlow(
+const suggestCategoryFlowDefinition = ai.defineFlow(
   {
     name: 'suggestCategoryFlow',
     inputSchema: SuggestCategoryInputSchema,
@@ -42,3 +42,7 @@ export const suggestCategoryFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function suggestCategoryFlow(input: SuggestCategoryInput): Promise<SuggestCategoryOutput> {
+  return suggestCategoryFlowDefinition(input);
+}
