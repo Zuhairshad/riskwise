@@ -108,11 +108,11 @@ export default function LoginPage() {
       <CardContent>
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" onClick={() => handleSocialSignIn('google')} disabled={!!loading}>
+                <Button variant="outline" onClick={() => handleSocialSignIn('google')} disabled={!!loading} className="w-full">
                     {loading === 'google' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
                     Google
                 </Button>
-                <Button variant="outline" onClick={() => handleSocialSignIn('microsoft')} disabled={!!loading}>
+                <Button variant="outline" onClick={() => handleSocialSignIn('microsoft')} disabled={!!loading} className="w-full">
                     {loading === 'microsoft' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MicrosoftIcon />}
                     Microsoft
                 </Button>
