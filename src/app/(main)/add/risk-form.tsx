@@ -185,7 +185,7 @@ export function RiskForm() {
             mitigationPlan: r.MitigationPlan,
             contingencyPlan: r.ContingencyPlan,
             probability: r.Probability,
-            impactRating: r['Imapct Rating (0.05-0.8)'],
+            impactRating: r['Impact Rating (0.05-0.8)'],
         }))
 
       suggestSimilarRisks({ description: debouncedDescription, existingRisks: JSON.stringify(existingRisks) })
