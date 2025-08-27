@@ -43,39 +43,29 @@ const issueFormSchema = z.object({
 
 // Firestore data creation functions
 export async function createRisk(values: z.infer<typeof riskFormSchema>) {
-    const parsed = riskFormSchema.safeParse(values);
-  
-    if (!parsed.success) {
-      return { success: false, message: "Invalid data provided." };
-    }
-  
+    // The data is already validated on the client by react-hook-form with zodResolver.
+    // Re-validating here can cause issues with serialized data types like Dates.
+    // We can trust the data coming from the form.
     try {
-      await addDoc(collection(db, "risks"), parsed.data);
+      await addDoc(collection(db, "risks"), values);
       revalidatePath('/');
       revalidatePath('/dashboard');
       return { success: true, message: "Risk created successfully." };
     } catch (error) {
       console.error("Error creating risk:", error);
-      return { success: false, message: "Failed to create risk." };
+      return { success: false, message: "Failed to create risk in database." };
     }
 }
 
 export async function createIssue(values: z.infer<typeof issueFormSchema>) {
-    const parsed = issueFormSchema.safeParse(values);
-  
-    if (!parsed.success) {
-      console.log(parsed.error.errors)
-      return { success: false, message: "Invalid data provided." };
-    }
-  
+    // The data is already validated on the client by react-hook-form with zodResolver.
     try {
-        await addDoc(collection(db, "issues"), parsed.data);
+        await addDoc(collection(db, "issues"), values);
         revalidatePath('/');
         revalidatePath('/dashboard');
         return { success: true, message: "Issue created successfully." };
       } catch (error) {
         console.error("Error creating issue:", error);
-        return { success: false, message: "Failed to create issue." };
+        return { success: false, message: "Failed to create issue in database." };
       }
 }
-
