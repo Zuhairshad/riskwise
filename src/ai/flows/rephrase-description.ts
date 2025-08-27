@@ -1,11 +1,6 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for rephrasing a description to be clearer and more professional.
- *
- * - rephraseDescription - A function that takes a description and returns a rephrased version.
- * - RephraseDescriptionInput - The input type for the rephraseDescription function.
- * - RephraseDescriptionOutput - The return type for the rephraseDescription function.
  */
 
 import { ai } from '@/ai/client';

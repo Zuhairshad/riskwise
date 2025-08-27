@@ -6,6 +6,18 @@ import { doc, updateDoc, collection, getDocs, deleteDoc, writeBatch, addDoc, set
 import { revalidatePath } from "next/cache";
 import { analyzeData as analyzeDataFlow } from "@/ai/flows/analyze-data-flow";
 import type { AnalyzeDataInput } from "@/ai/flows/analyze-data-flow";
+import { rephraseDescription as rephraseDescriptionFlow } from "@/ai/flows/rephrase-description";
+import type { RephraseDescriptionInput } from "@/ai/flows/rephrase-description";
+import { suggestCategory as suggestCategoryFlow } from "@/ai/flows/suggest-category";
+import type { SuggestCategoryInput } from "@/ai/flows/suggest-category";
+import { suggestMitigationStrategies as suggestMitigationStrategiesFlow } from "@/ai/flows/suggest-mitigation-strategies";
+import type { SuggestMitigationStrategiesInput } from "@/ai/flows/suggest-mitigation-strategies";
+import { suggestSimilarIssues as suggestSimilarIssuesFlow } from "@/ai/flows/suggest-similar-issues";
+import type { SuggestSimilarIssuesInput } from "@/ai/flows/suggest-similar-issues";
+import { suggestSimilarRisks as suggestSimilarRisksFlow } from "@/ai/flows/suggest-similar-risks";
+import type { SuggestSimilarRisksInput } from "@/ai/flows/suggest-similar-risks";
+import { suggestTitle as suggestTitleFlow } from "@/ai/flows/suggest-title";
+import type { SuggestTitleInput } from "@/ai/flows/suggest-title";
 import { z } from "zod";
 
 async function findDocument(id: string): Promise<{ collectionName: string; docRef: any; data: any } | null> {
@@ -217,4 +229,25 @@ export async function importData(data: any[]) {
         console.error("Error committing batch:", error);
         return { success: false, message: `Failed to commit changes to database: ${error.message}` };
     }
+}
+
+
+// AI Server Actions
+export async function rephraseDescription(input: RephraseDescriptionInput) {
+    return rephraseDescriptionFlow(input);
+}
+export async function suggestCategory(input: SuggestCategoryInput) {
+    return suggestCategoryFlow(input);
+}
+export async function suggestMitigationStrategies(input: SuggestMitigationStrategiesInput) {
+    return suggestMitigationStrategiesFlow(input);
+}
+export async function suggestSimilarIssues(input: SuggestSimilarIssuesInput) {
+    return suggestSimilarIssuesFlow(input);
+}
+export async function suggestSimilarRisks(input: SuggestSimilarRisksInput) {
+    return suggestSimilarRisksFlow(input);
+}
+export async function suggestTitle(input: SuggestTitleInput) {
+    return suggestTitleFlow(input);
 }

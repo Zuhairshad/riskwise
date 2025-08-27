@@ -1,11 +1,6 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for suggesting similar risks to avoid duplicates.
- *
- * - suggestSimilarRisks - A function that takes a description and returns a detailed analysis of potential duplicates.
- * - SuggestSimilarRisksInput - The input type for the suggestSimilarRisks function.
- * - SuggestSimilarRisksOutput - The return type for the suggestSimilarRisks function.
  */
 
 import { ai } from '@/ai/client';

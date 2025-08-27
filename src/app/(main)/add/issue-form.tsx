@@ -51,11 +51,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { createIssue } from "./actions";
-import { suggestSimilarIssues } from "@/ai/flows/suggest-similar-issues";
-import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
-import { rephraseDescription } from "@/ai/flows/rephrase-description";
-import { suggestTitle } from "@/ai/flows/suggest-title";
-import { suggestCategory } from "@/ai/flows/suggest-category";
+import { rephraseDescription, suggestCategory, suggestMitigationStrategies, suggestSimilarIssues, suggestTitle } from "@/app/(main)/actions";
+import type { SuggestSimilarIssuesOutput, SuggestMitigationStrategiesOutput } from "@/ai/flows";
 
 
 const issueFormSchema = z.object({
@@ -76,26 +73,11 @@ const issueFormSchema = z.object({
     Status: z.enum(["Open", "Resolved", "Escalated", "Closed"], { required_error: "Status is required." }),
 });
 
-type Suggestion = {
-    matchedIssue?: {
-        id: string;
-        title: string;
-        discussion: string;
-        resolution?: string | undefined;
-    };
-    rephrasedDescription?: string;
-    detailedSummary?: {
-        analysis: string;
-        keyMetrics: { name: string; value: string }[];
-        recommendation: string;
-    };
-}
-
 export function IssueForm() {
   const { toast } = useToast();
   const [products, setProducts] = React.useState<Product[]>([]);
   const [issues, setIssues] = React.useState<RiskIssue[]>([]);
-  const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
+  const [suggestion, setSuggestion] = React.useState<SuggestSimilarIssuesOutput | null>(null);
   const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
   const [resolutionSuggestions, setResolutionSuggestions] = React.useState<string[]>([]);
   const [isFetchingResolution, setIsFetchingResolution] = React.useState(false);
@@ -179,7 +161,7 @@ export function IssueForm() {
     setResolutionSuggestions([]);
     try {
       const res = await suggestMitigationStrategies({ riskOrIssueDescription: discussionValue });
-      setResolutionSuggestions(res.suggestedMitigationStrategies);
+      setResolutionSuggestions((res as SuggestMitigationStrategiesOutput).suggestedMitigationStrategies);
     } catch (error) {
       toast({ variant: "destructive", title: "Failed to suggest resolutions." });
     } finally {
@@ -228,7 +210,7 @@ export function IssueForm() {
     }
   }
 
-  const handleUseMatchedIssue = (matchedIssue: NonNullable<Suggestion['matchedIssue']>) => {
+  const handleUseMatchedIssue = (matchedIssue: NonNullable<SuggestSimilarIssuesOutput['matchedIssue']>) => {
     form.setValue("Discussion", matchedIssue.discussion);
     form.setValue("Title", matchedIssue.title);
     if (matchedIssue.resolution) form.setValue("Resolution", matchedIssue.resolution);

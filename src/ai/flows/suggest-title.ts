@@ -1,11 +1,6 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for suggesting a title based on a description.
- *
- * - suggestTitle - A function that takes a description and returns a suggested title.
- * - SuggestTitleInput - The input type for the suggestTitle function.
- * - SuggestTitleOutput - The return type for the suggestTitle function.
  */
 
 import { ai } from '@/ai/client';

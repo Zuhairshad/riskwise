@@ -1,12 +1,7 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for analyzing risk and issue data.
  * This flow uses a tool to fetch data and then provides a structured analysis.
- *
- * - analyzeData - The main function to call the flow.
- * - AnalyzeDataInput - The input schema for the analyzeData function.
- * - AnalyzeDataOutput - The output schema for the analyzeData function.
  */
 
 import { ai } from '@/ai/client';

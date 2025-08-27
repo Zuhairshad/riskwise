@@ -59,10 +59,9 @@ import { Badge } from "@/components/ui/badge";
 import { RiskHeatMap } from "@/components/risk-heat-map";
 import { Progress } from "@/components/ui/progress";
 import { createRisk } from "./actions";
-import { suggestSimilarRisks } from "@/ai/flows/suggest-similar-risks";
-import { suggestMitigationStrategies } from "@/ai/flows/suggest-mitigation-strategies";
-import { rephraseDescription } from "@/ai/flows/rephrase-description";
-import { suggestTitle } from "@/ai/flows/suggest-title";
+import { rephraseDescription, suggestMitigationStrategies, suggestSimilarRisks, suggestTitle } from "@/app/(main)/actions";
+import type { SuggestSimilarRisksOutput, SuggestMitigationStrategiesOutput } from "@/ai/flows";
+
 
 const riskFormSchema = z.object({
   Month: z.string().min(1, "Month is required"),
@@ -82,25 +81,6 @@ const riskFormSchema = z.object({
   Title: z.string().min(5, "Title must be at least 5 characters."),
 });
 
-
-type Suggestion = {
-    matchedRisk?: {
-        id: string;
-        title: string;
-        description: string;
-        mitigationPlan?: string | undefined;
-        contingencyPlan?: string | undefined;
-        probability?: number | undefined;
-        impactRating?: number | undefined;
-    };
-    rephrasedDescription?: string;
-    detailedSummary?: {
-        analysis: string;
-        keyMetrics: { name: string; value: string }[];
-        recommendation: string;
-    };
-}
-
 export function RiskForm() {
   const { toast } = useToast();
   const [products, setProducts] = React.useState<Product[]>([]);
@@ -109,7 +89,7 @@ export function RiskForm() {
     null
   );
   
-  const [suggestion, setSuggestion] = React.useState<Suggestion | null>(null);
+  const [suggestion, setSuggestion] = React.useState<SuggestSimilarRisksOutput | null>(null);
   const [isFetchingSuggestion, setIsFetchingSuggestion] = React.useState(false);
 
   const [mitigationSuggestions, setMitigationSuggestions] = React.useState<string[]>([]);
@@ -222,7 +202,7 @@ export function RiskForm() {
     setMitigationSuggestions([]);
     try {
       const res = await suggestMitigationStrategies({ riskOrIssueDescription: descriptionValue });
-      setMitigationSuggestions(res.suggestedMitigationStrategies);
+      setMitigationSuggestions((res as SuggestMitigationStrategiesOutput).suggestedMitigationStrategies);
     } catch (error) {
       toast({ variant: "destructive", title: "Failed to suggest mitigations." });
     } finally {
@@ -248,7 +228,7 @@ export function RiskForm() {
     setContingencySuggestions([]);
     try {
       const res = await suggestMitigationStrategies({ riskOrIssueDescription: descriptionValue });
-      setContingencySuggestions(res.suggestedMitigationStrategies);
+      setContingencySuggestions((res as SuggestMitigationStrategiesOutput).suggestedMitigationStrategies);
     } catch (error) {
       toast({ variant: "destructive", title: "Failed to suggest contingency plans." });
     } finally {
@@ -326,7 +306,7 @@ export function RiskForm() {
     }
   };
 
-  const handleUseMatchedRisk = (matchedRisk: NonNullable<Suggestion['matchedRisk']>) => {
+  const handleUseMatchedRisk = (matchedRisk: NonNullable<SuggestSimilarRisksOutput['matchedRisk']>) => {
     form.setValue("Title", matchedRisk.title);
     form.setValue("Description", matchedRisk.description);
     if (matchedRisk.mitigationPlan) form.setValue("MitigationPlan", matchedRisk.mitigationPlan);

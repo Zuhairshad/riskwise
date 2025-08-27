@@ -1,11 +1,6 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for suggesting a category and sub-category for an issue.
- *
- * - suggestCategory - A function that takes a description and returns a suggested category.
- * - SuggestCategoryInput - The input type for the suggestCategory function.
- * - SuggestCategoryOutput - The return type for the suggestCategory function.
  */
 
 import { ai } from '@/ai/client';

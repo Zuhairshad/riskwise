@@ -1,11 +1,6 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for suggesting mitigation strategies for a risk or issue.
- *
- * - suggestMitigationStrategies - A function that takes a description and returns suggested strategies.
- * - SuggestMitigationStrategiesInput - The input type for the suggestMitigationStrategies function.
- * - SuggestMitigationStrategiesOutput - The return type for the suggestMitigationStrategies function.
  */
 
 import { ai } from '@/ai/client';

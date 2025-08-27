@@ -1,11 +1,6 @@
 
-'use server';
 /**
  * @fileOverview A Genkit flow for suggesting similar issues to avoid duplicates.
- *
- * - suggestSimilarIssues - A function that takes a description and returns a detailed analysis of potential duplicates.
- * - SuggestSimilarIssuesInput - The input type for the suggestSimilarIssues function.
- * - SuggestSimilarIssuesOutput - The return type for the suggestSimilarIssues function.
  */
 
 import { ai } from '@/ai/client';
