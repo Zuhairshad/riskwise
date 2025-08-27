@@ -1,2 +1,2 @@
 
-import '@/ai/genkit';
+import '@/ai/init';
