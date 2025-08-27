@@ -45,7 +45,7 @@ export function RiskScoreBreakdownChart({ data, onBarClick, activeFilter }: Risk
 
         data.forEach(item => {
             if (item.type !== 'Risk') return;
-            const score = (item.Probability ?? 0) * (item["Imapct Rating (0.05-0.8)"] ?? 0);
+            const score = (item.Probability ?? 0) * (item["Impact Rating (0.05-0.8)"] ?? 0);
             
             for (const level of riskLevels) {
                 if (score >= level.range[0] && score <= level.range[1]) {

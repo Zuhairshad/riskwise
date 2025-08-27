@@ -52,7 +52,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
     data.forEach((risk) => {
         if (risk.type !== 'Risk') return;
         const prob = risk.Probability ?? 0;
-        const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
+        const impact = risk["Impact Rating (0.05-0.8)"] ?? 0;
 
         const probIndex = probabilityLevels.findIndex(p => prob >= p.range[0] && prob < p.range[1]);
         const impactIndex = impactLevels.findIndex(i => impact >= i.range[0] && impact < i.range[1]);
@@ -96,7 +96,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
     data.forEach(risk => {
         if (risk.type !== 'Risk') return;
         const p = risk.Probability ?? 0;
-        const i = risk['Imapct Rating (0.05-0.8)'] ?? 0;
+        const i = risk['Impact Rating (0.05-0.8)'] ?? 0;
         
         const probIndex = probabilityLevels.findIndex(level => p <= level.value);
         const impIndex = impactLevels.findIndex(level => i <= level.value);
@@ -112,7 +112,7 @@ export function RiskDistributionHeatMap({ data, onCellClick, activeFilter }: Ris
             return data.filter(risk => {
                  if (risk.type !== 'Risk') return false;
                  const p = risk.Probability ?? 0;
-                 const i = risk['Imapct Rating (0.05-0.8)'] ?? 0;
+                 const i = risk['Impact Rating (0.05-0.8)'] ?? 0;
                  return p >= probLevel.range[0] && p < probLevel.range[1] &&
                         i >= impactLevel.range[0] && i < impactLevel.range[1];
             }).length;

@@ -77,7 +77,7 @@ export function TopRisksList({ risks }: TopRisksListProps) {
                 </Badge>
                 <div className="flex gap-2 text-xs text-muted-foreground">
                     <span>P: {(risk.Probability! * 100).toFixed(0)}%</span>
-                    <span>I: {risk["Imapct Rating (0.05-0.8)"]!.toFixed(2)}</span>
+                    <span>I: {risk["Impact Rating (0.05-0.8)"]!.toFixed(2)}</span>
                 </div>
               </div>
             </div>

@@ -22,7 +22,7 @@ async function getExecutiveData() {
   const scoredRisks = openRisks
     .map((risk) => {
       const probability = risk.Probability ?? 0;
-      const impact = risk["Imapct Rating (0.05-0.8)"] ?? 0;
+      const impact = risk["Impact Rating (0.05-0.8)"] ?? 0;
       const score = probability * impact;
       return {
         ...risk,

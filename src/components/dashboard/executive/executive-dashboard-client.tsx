@@ -28,7 +28,7 @@ export function ExecutiveDashboardClient({ top10Risks, allOpenRisks, allRisks, a
     }, 0);
 
     const highSeverityRisks = allOpenRisks.filter(risk => {
-        const score = (risk.Probability ?? 0) * (risk["Imapct Rating (0.05-0.8)"] ?? 0);
+        const score = (risk.Probability ?? 0) * (risk["Impact Rating (0.05-0.8)"] ?? 0);
         return score >= 0.15; // High or Critical
     }).length;
 

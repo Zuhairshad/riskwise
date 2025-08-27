@@ -32,7 +32,7 @@ export type RiskIssue = {
   
   // Risk-specific fields
   Probability?: number;
-  "Imapct Rating (0.05-0.8)"?: number;
+  "Impact Rating (0.05-0.8)"?: number;
   MitigationPlan?: string;
   ContingencyPlan?: string;
   "Impact Value ($)"?: number;

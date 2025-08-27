@@ -68,6 +68,8 @@ export async function getRisksAndIssues(products?: Product[]): Promise<RiskIssue
               ProjectName: project?.name || data['Project Code'] || 'Unknown',
               ProjectCode: data['Project Code'],
               DueDate: toSafeISOString(data.DueDate),
+              // Ensure the correct field name is used here
+              "Impact Rating (0.05-0.8)": data["Impact Rating (0.05-0.8)"] || data["Imapct Rating (0.05-0.8)"] || 0
             } as unknown as RiskIssue;
         });
 
