@@ -13,7 +13,7 @@ const riskFormSchema = z.object({
   "Risk Status": z.enum(["Open", "Closed", "Mitigated", "Transferred"]),
   Description: z.string().min(10, "Description must be at least 10 characters."),
   Probability: z.coerce.number().min(0).max(1),
-  "Imapct Rating (0.05-0.8)": z.coerce.number().min(0.05).max(0.8),
+  "Impact Rating (0.05-0.8)": z.coerce.number().min(0.05).max(0.8),
   MitigationPlan: z.string().optional(),
   ContingencyPlan: z.string().optional(),
   "Impact Value ($)": z.coerce.number().min(0),

@@ -71,7 +71,7 @@ const riskFormSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters."),
   Probability: z.coerce.number().min(0).max(1),
-  "Imapct Rating (0.05-0.8)": z.coerce.number().min(0.05).max(0.8),
+  "Impact Rating (0.05-0.8)": z.coerce.number().min(0.05).max(0.8),
   MitigationPlan: z.string().optional(),
   ContingencyPlan: z.string().optional(),
   "Impact Value ($)": z.coerce.number().min(0),
@@ -112,7 +112,7 @@ export function RiskForm() {
       "Risk Status": "Open",
       Description: "",
       Probability: 0.5,
-      "Imapct Rating (0.05-0.8)": 0.20,
+      "Impact Rating (0.05-0.8)": 0.20,
       MitigationPlan: "",
       ContingencyPlan: "",
       "Impact Value ($)": 0,
@@ -151,7 +151,7 @@ export function RiskForm() {
   const projectCode = form.watch("Project Code");
   
   const probability = form.watch("Probability");
-  const impactRating = form.watch("Imapct Rating (0.05-0.8)");
+  const impactRating = form.watch("Impact Rating (0.05-0.8)");
   const impactValue = form.watch("Impact Value ($)");
   const budgetContingency = form.watch("Budget Contingency");
   const descriptionValue = form.watch("Description");
@@ -312,7 +312,7 @@ export function RiskForm() {
     if (matchedRisk.mitigationPlan) form.setValue("MitigationPlan", matchedRisk.mitigationPlan);
     if (matchedRisk.contingencyPlan) form.setValue("ContingencyPlan", matchedRisk.contingencyPlan);
     if (matchedRisk.probability) form.setValue("Probability", matchedRisk.probability);
-    if (matchedRisk.impactRating) form.setValue("Imapct Rating (0.05-0.8)", matchedRisk.impactRating);
+    if (matchedRisk.impactRating) form.setValue("Impact Rating (0.05-0.8)", matchedRisk.impactRating);
     setSuggestion(null);
     setRephrasedDescription(null);
     toast({ title: "Form Filled", description: "Form has been pre-filled with the matched risk data." });
@@ -746,7 +746,7 @@ export function RiskForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="Imapct Rating (0.05-0.8)"
+                  name="Impact Rating (0.05-0.8)"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Impact Rating</FormLabel>
