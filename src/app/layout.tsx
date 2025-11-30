@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/hooks/use-auth";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 const inter = Inter({
@@ -39,12 +38,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-            <AuthProvider>
               <SidebarProvider>
                 {children}
                 <Toaster />
               </SidebarProvider>
-            </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

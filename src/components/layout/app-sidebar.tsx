@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, PlusCircle, BarChart, CheckSquare, ClipboardList, Trophy, User } from "lucide-react";
+import { LayoutDashboard, PlusCircle, BarChart, CheckSquare, ClipboardList, Trophy } from "lucide-react";
 import { ThemeToggle } from "../theme-toggle";
 
 export function AppSidebar() {
@@ -93,18 +93,6 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton
-                asChild
-                isActive={pathname === "/profile"}
-                tooltip="Profile"
-                >
-                <Link href="/profile">
-                    <User />
-                    <span>Profile</span>
-                </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
        <SidebarFooter>

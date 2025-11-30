@@ -5,15 +5,13 @@ import React from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/hooks/use-auth";
-import withAuth from "@/components/layout/with-auth";
+import { User } from "lucide-react";
 
 function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useAuth();
   
   return (
       <div className="flex min-h-screen">
@@ -23,12 +21,9 @@ function MainLayout({
           <div className="glow-1 absolute -z-10" />
           <div className="glow-2 absolute -z-10" />
           <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-             <Link href="/profile" aria-label="View Profile">
-               <Avatar>
-                 <AvatarImage src={user?.photoURL ?? "https://placehold.co/40x40.png"} alt={user?.displayName ?? "User"} data-ai-hint="user avatar" />
-                 <AvatarFallback>{user?.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
-               </Avatar>
-             </Link>
+             <Avatar>
+               <AvatarFallback><User /></AvatarFallback>
+             </Avatar>
           </header>
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </div>
@@ -37,4 +32,4 @@ function MainLayout({
 }
 
 
-export default withAuth(MainLayout);
+export default MainLayout;
