@@ -4,8 +4,6 @@
 import React from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
 
 function MainLayout({
   children,
@@ -21,9 +19,7 @@ function MainLayout({
           <div className="glow-1 absolute -z-10" />
           <div className="glow-2 absolute -z-10" />
           <header className="sticky top-0 z-10 flex h-16 items-center justify-end gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-             <Avatar>
-               <AvatarFallback><User /></AvatarFallback>
-             </Avatar>
+             {/* User avatar removed as there is no auth */}
           </header>
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </div>
