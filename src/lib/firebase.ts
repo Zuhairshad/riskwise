@@ -5,7 +5,7 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyAQUuVdVhO_kHO3obrbsnGHRGpM0ObA-oM",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "riskwise-c9df3.firebaseapp.com",
   projectId: "riskwise-c9df3",
   storageBucket: "riskwise-c9df3.appspot.com",
